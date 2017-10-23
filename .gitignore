@@ -1,0 +1,8 @@
+*.bundle.*
+dist/
+jupyterlab_latex.egg-info/
+jupyterlab_latex/__pycache__/
+lib/
+test/build/*
+node_modules/
+npm-debug.log
