@@ -50,16 +50,19 @@ function activateLatexPlugin(
       if (!widget) {
         return;
       }
-      let pdfFileName = () => {
-        return PathExt.basename(widget.context.path, '.tex') + '.pdf';
-      };
+      const pdfFileName = PathExt.basename(widget.context.path, '.tex') + '.pdf';
+
       widget.context.fileChanged.connect((sender, args) => {
-        console.log('caught the update ' + pdfFileName());
-        manager
-          .findWidget(pdfFileName())
-          .ready.then(() => manager.openOrReveal(pdfFileName()));
+        console.log('caught the update ' + pdfFileName);
+        // Read the pdf file contents from disk.
+        if (pdfContext) {
+          pdfContext.revert();
+        }
       });
-      manager.openOrReveal(pdfFileName());
+
+      // Open the pdf and get a handle on its document context.
+      const pdfWidget = manager.openOrReveal(pdfFileName);
+      const pdfContext = manager.contextForWidget(pdfWidget);
       console.log('executed preview');
     },
     isEnabled: hasWidget,
