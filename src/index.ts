@@ -2,28 +2,31 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ILayoutRestorer, JupyterLab, JupyterLabPlugin
-} from '@jupyterlab/application';
+  ILayoutRestorer,
+  JupyterLab,
+  JupyterLabPlugin
+} from "@jupyterlab/application";
 
-import {
-  IStateDB
-} from '@jupyterlab/coreutils';
+import { IStateDB, PathExt } from "@jupyterlab/coreutils";
 
-import {
-  IDocumentManager
-} from '@jupyterlab/docmanager';
+import { IDocumentManager } from "@jupyterlab/docmanager";
 
-import '../style/index.css';
+import { IEditorTracker } from "@jupyterlab/fileeditor";
 
+import "../style/index.css";
+
+namespace CommandIDs {
+  export const openLatexPreview = "latex:open-preview";
+}
 /**
  * The JupyterLab plugin for the GitHub Filebrowser.
  */
 const latexPlugin: JupyterLabPlugin<void> = {
-  id: 'jupyterlab-latex:drive',
+  id: "jupyterlab-latex:open",
   // IDocumentManager: manages files (opening, closing, &c..)
   // ILayoutRestorer: manages layout on refresh
   // IStateDB: restores state on refresh
-  requires: [IDocumentManager, ILayoutRestorer, IStateDB],
+  requires: [IDocumentManager, IEditorTracker, ILayoutRestorer, IStateDB],
   activate: activateLatexPlugin,
   autoStart: true
 };
@@ -31,8 +34,41 @@ const latexPlugin: JupyterLabPlugin<void> = {
 /**
  * Activate the file browser.
  */
-function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, restorer: ILayoutRestorer, state: IStateDB): void {
-  console.log('Activated!')
+function activateLatexPlugin(
+  app: JupyterLab,
+  manager: IDocumentManager,
+  editorTracker: IEditorTracker,
+  restorer: ILayoutRestorer,
+  state: IStateDB
+): void {
+  const { commands } = app;
+
+  const hasWidget = () => !!editorTracker.currentWidget;
+  commands.addCommand(CommandIDs.openLatexPreview, {
+    execute: () => {
+      let widget = editorTracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+      widget.context.fileChanged.connect((sender, args) => {
+        console.log("caught the update" + widget.context.path);
+      });
+      console.log("executed preview");
+    },
+    isEnabled: hasWidget,
+    isVisible: () => {
+      let widget = editorTracker.currentWidget;
+      return (
+        (widget && PathExt.extname(widget.context.path) === ".tex") || false
+      );
+    },
+    label: "Show LaTeX Preview"
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.openLatexPreview,
+    selector: ".jp-FileEditor"
+  });
+  console.log("Activated!");
   return;
 }
 
