@@ -55,7 +55,9 @@ function activateLatexPlugin(
       };
       widget.context.fileChanged.connect((sender, args) => {
         console.log('caught the update ' + pdfFileName());
-        manager.openOrReveal(pdfFileName());
+        manager
+          .findWidget(pdfFileName())
+          .ready.then(() => manager.openOrReveal(pdfFileName()));
       });
       manager.openOrReveal(pdfFileName());
       console.log('executed preview');
