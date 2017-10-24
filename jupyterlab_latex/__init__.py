@@ -2,7 +2,6 @@ import re, json
 import subprocess
 
 from subprocess import PIPE
-from pprint import pprint
 
 import tornado.gen as gen
 from tornado.httputil import url_concat
@@ -35,8 +34,13 @@ class LatexHandler(APIHandler):
 
         result = subprocess.run([
                 "xelatex",
+                "-interaction=nonstopmode",
+                "-halt-on-error",
+                "-file-line-error",
                 f"{path.strip('/')}",
             ], stdout=PIPE, stderr=PIPE)
+        if result.returncode:
+            self.log.error(str(result.stdout, 'utf-8'))
         # self.set_status(200)
         self.finish("done")
 
