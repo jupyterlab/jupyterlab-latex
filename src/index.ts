@@ -50,9 +50,14 @@ function activateLatexPlugin(
       if (!widget) {
         return;
       }
+      let pdfFileName = () => {
+        return PathExt.basename(widget.context.path, ".tex") + ".pdf";
+      };
       widget.context.fileChanged.connect((sender, args) => {
-        console.log("caught the update" + widget.context.path);
+        console.log("caught the update " + pdfFileName());
+        manager.openOrReveal(pdfFileName());
       });
+      manager.openOrReveal(pdfFileName());
       console.log("executed preview");
     },
     isEnabled: hasWidget,
