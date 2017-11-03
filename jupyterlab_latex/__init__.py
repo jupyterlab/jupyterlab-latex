@@ -1,7 +1,10 @@
-import re, json
+import re
+import json
+import os
 import subprocess
+import glob
 
-from contextlib import ContextDecorator
+from contextlib import contextmanager
 from subprocess import PIPE
 
 import tornado.gen as gen
@@ -21,6 +24,17 @@ path_regex = r'(?P<path>(?:(?:/[^/]+)+|/?))'
 # run function
 # print out new files
 
+@contextmanager
+def latex_cleanup(whitelist=None):
+    if whitelist is None:
+        before = set(glob.glob("*"))
+    else:
+        before = set(glob.glob("*")).union(set(whitelist))
+    yield
+    after = set(glob.glob("*"))
+    for fn in set(after-before):
+        os.remove(fn)
+
 
 class LatexHandler(APIHandler):
     """
@@ -37,16 +51,17 @@ class LatexHandler(APIHandler):
         Proxy API requests to GitHub, adding 'client_id' and 'client_secret'
         if they have been set.
         """
-
-        result = subprocess.run([
-                "xelatex",
-                "-interaction=nonstopmode",
-                "-halt-on-error",
-                "-file-line-error",
-                f"{path.strip('/')}",
-            ], stdout=PIPE, stderr=PIPE)
-        if result.returncode:
-            self.log.error(str(result.stdout, 'utf-8'))
+        output_filename = os.path.splitext(path.strip('/'))[0]+".pdf"
+        with latex_cleanup(whitelist=[output_filename]):
+            result = subprocess.run([
+                    "xelatex",
+                    "-interaction=nonstopmode",
+                    "-halt-on-error",
+                    "-file-line-error",
+                    f"{path.strip('/')}",
+                ], stdout=PIPE, stderr=PIPE)
+            if result.returncode:
+                self.log.error(str(result.stdout, 'utf-8'))
         # self.set_status(200)
         self.finish("done")
 
