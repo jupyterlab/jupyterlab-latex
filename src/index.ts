@@ -82,17 +82,17 @@ function activateLatexPlugin(
   const hasWidget = () => !!editorTracker.currentWidget;
   commands.addCommand(CommandIDs.openLatexPreview, {
     execute: () => {
+      // get the current widget that had its contextMenu activated
       let widget = editorTracker.currentWidget;
       if (!widget) {
         return;
       }
+      // build pdfFileName so that we know what to watch for
       const pdfFileName =
         PathExt.basename(widget.context.path, '.tex') + '.pdf';
 
       widget.context.fileChanged.connect((sender, args) => {
-        console.log('we arrived inside here');
         latexRequest(widget.context.path, serverSettings).then(() => {
-          console.log('caught the update ' + pdfFileName);
           // Read the pdf file contents from disk.
           if (pdfContext) {
             pdfContext.revert();
@@ -100,11 +100,11 @@ function activateLatexPlugin(
         });
       });
 
-      // Open the pdf and get a handle on its document context.
+      // save document before opening pdf view to trigger build
       widget.context.save();
+      // Open the pdf and get a handle on its document context.
       const pdfWidget = manager.openOrReveal(pdfFileName);
       const pdfContext = manager.contextForWidget(pdfWidget);
-      console.log('executed preview');
     },
     isEnabled: hasWidget,
     isVisible: () => {

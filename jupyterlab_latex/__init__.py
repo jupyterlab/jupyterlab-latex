@@ -1,6 +1,7 @@
 import re, json
 import subprocess
 
+from contextlib import ContextDecorator
 from subprocess import PIPE
 
 import tornado.gen as gen
@@ -14,6 +15,11 @@ from notebook.utils import url_path_join
 from notebook.base.handlers import APIHandler
 
 path_regex = r'(?P<path>(?:(?:/[^/]+)+|/?))'
+
+
+# get file directory
+# run function
+# print out new files
 
 
 class LatexHandler(APIHandler):
