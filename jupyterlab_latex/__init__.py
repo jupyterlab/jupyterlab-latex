@@ -78,14 +78,13 @@ class LatexHandler(APIHandler):
                 ], stdout=Subprocess.STREAM, stderr=Subprocess.STREAM)
             try:
                 yield process.wait_for_exit()
+                self.finish("LaTeX compiled")
             except CalledProcessError as err:
                 self.set_status(500)
                 self.log.error('LaTeX command errored with code: '
                                + str(err.returncode))
                 out = yield process.stdout.read_until_close()
                 self.finish(out)
-
-        self.finish("LaTeX compiled")
 
 def _jupyter_server_extension_paths():
     return [{
