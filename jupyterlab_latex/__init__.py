@@ -20,13 +20,11 @@ from notebook.base.handlers import APIHandler
 
 path_regex = r'(?P<path>(?:(?:/[^/]+)+|/?))'
 
-
-# get file directory
-# run function
-# print out new files
-
 @contextmanager
-def latex_cleanup(whitelist=None):
+def latex_cleanup(workdir='.', whitelist=None):
+    orig_work_dir = os.getcwd()
+    os.chdir(os.path.abspath(workdir))
+
     if whitelist is None:
         before = set(glob.glob("*"))
     else:
@@ -35,6 +33,7 @@ def latex_cleanup(whitelist=None):
     after = set(glob.glob("*"))
     for fn in set(after-before):
         os.remove(fn)
+    os.chdir(orig_work_dir)
 
 
 class LatexConfig(Configurable):
@@ -58,16 +57,25 @@ class LatexHandler(APIHandler):
         # Get access to the notebook config object
         c = LatexConfig(config=self.config)
 
-        output_filename = os.path.splitext(path.strip('/'))[0]+".pdf"
-        log_filename = os.path.splitext(path.strip('/'))[0]+".log"
-        with latex_cleanup(whitelist=[output_filename, log_filename]):
+        tex_file_path = os.path.abspath(path.strip('/'))
+        tex_dir = os.path.dirname(tex_file_path)
+
+        tex_file_name = os.path.basename(tex_file_path)
+        output_filename = os.path.splitext(tex_file_name)[0]+".pdf"
+        log_filename = os.path.splitext(tex_file_name)[0]+".log"
+        with latex_cleanup(
+            workdir=tex_dir,
+            whitelist=[output_filename,
+                       log_filename
+                       ]
+            ):
             process = Subprocess([
                     c.latex_command,
                     "-interaction=nonstopmode",
                     "-halt-on-error",
                     "-file-line-error",
-                    f"{path.strip('/')}",
                 ], stdout=PIPE, stderr=PIPE)
+                    f"{tex_file_name}",
             try:
                 yield process.wait_for_exit()
             except CalledProcessError as err:
