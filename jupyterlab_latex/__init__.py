@@ -74,14 +74,16 @@ class LatexHandler(APIHandler):
                     "-interaction=nonstopmode",
                     "-halt-on-error",
                     "-file-line-error",
-                ], stdout=PIPE, stderr=PIPE)
                     f"{tex_file_name}",
+                ], stdout=Subprocess.STREAM, stderr=Subprocess.STREAM)
             try:
                 yield process.wait_for_exit()
             except CalledProcessError as err:
                 self.set_status(500)
                 self.log.error('LaTeX command errored with code: '
                                + str(err.returncode))
+                out = yield process.stdout.read_until_close()
+                self.finish(out)
 
         self.finish("LaTeX compiled")
 
