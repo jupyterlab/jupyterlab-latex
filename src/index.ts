@@ -152,7 +152,7 @@ function activateLatexPlugin(
         errorPanel.id = `latex-error-${++Private.id}`;
         errorPanel.title.label = 'LaTeX Error';
         errorPanel.title.closable = true;
-        app.shell.addToMainArea(errorPanel);
+        app.shell.addToMainArea(errorPanel, { ref: widget.id });
       });
     },
     isEnabled: hasWidget,
