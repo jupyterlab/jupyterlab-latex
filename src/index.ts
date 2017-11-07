@@ -107,7 +107,7 @@ function activateLatexPlugin(
       const pdfFilePath = PathExt.join(dirName, baseName + '.pdf');
 
       let pdfContext: DocumentRegistry.IContext<DocumentRegistry.IModel>;
-      let errorPanel: ErrorPanel;
+      let errorPanel: ErrorPanel | null = null;
 
       // Hook up an event listener for when the '.tex' file is saved.
       widget.context.fileChanged.connect((sender, args) => {
@@ -118,6 +118,11 @@ function activateLatexPlugin(
           } else {
             const pdfWidget = manager.openOrReveal(pdfFilePath);
             pdfContext = manager.contextForWidget(pdfWidget);
+          }
+          if (errorPanel) {
+            errorPanel.close();
+            errorPanel.dispose();
+            errorPanel = null;
           }
         }).catch((err) => {
           // If there was an error, read the log
