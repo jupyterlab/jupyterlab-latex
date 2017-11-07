@@ -10,6 +10,7 @@ from subprocess import PIPE
 import tornado.gen as gen
 from tornado.httputil import url_concat
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest, HTTPError
+from tornado.process import Subprocess, CalledProcessError
 
 from traitlets import Unicode
 from traitlets.config import Configurable
@@ -53,17 +54,19 @@ class LatexHandler(APIHandler):
         """
         output_filename = os.path.splitext(path.strip('/'))[0]+".pdf"
         with latex_cleanup(whitelist=[output_filename]):
-            result = subprocess.run([
+            process = Subprocess([
                     "xelatex",
                     "-interaction=nonstopmode",
                     "-halt-on-error",
                     "-file-line-error",
                     f"{path.strip('/')}",
                 ], stdout=PIPE, stderr=PIPE)
-            if result.returncode:
-                self.log.error(str(result.stdout, 'utf-8'))
-        # self.set_status(200)
-        self.finish("done")
+            try:
+                yield process.wait_for_exit()
+            except CalledProcessError as err:
+                self.log.error('LaTeX command errored with code: '
+                               + str(err.returncode))
+        self.finish("LaTeX compiled")
 
         # Get access to the notebook config object
 
