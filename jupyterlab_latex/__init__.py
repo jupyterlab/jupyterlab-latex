@@ -62,12 +62,9 @@ class LatexHandler(APIHandler):
 
         tex_file_name = os.path.basename(tex_file_path)
         output_filename = os.path.splitext(tex_file_name)[0]+".pdf"
-        log_filename = os.path.splitext(tex_file_name)[0]+".log"
         with latex_cleanup(
             workdir=tex_dir,
-            whitelist=[output_filename,
-                       log_filename
-                       ]
+            whitelist=[output_filename]
             ):
             process = Subprocess([
                     c.latex_command,
