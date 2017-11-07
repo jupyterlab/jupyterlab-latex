@@ -144,9 +144,6 @@ function activateLatexPlugin(
         logContext = manager.contextForWidget(logWidget);
         logContext.revert();
       });
-
-      // Trigger an initial save.
-      widget.context.save();
     },
     isEnabled: hasWidget,
     isVisible: () => {

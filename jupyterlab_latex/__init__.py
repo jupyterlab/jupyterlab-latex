@@ -60,7 +60,7 @@ class LatexHandler(APIHandler):
 
         output_filename = os.path.splitext(path.strip('/'))[0]+".pdf"
         log_filename = os.path.splitext(path.strip('/'))[0]+".log"
-        with latex_cleanup(whitelist=[output_filename]):
+        with latex_cleanup(whitelist=[output_filename, log_filename]):
             process = Subprocess([
                     c.latex_command,
                     "-interaction=nonstopmode",
