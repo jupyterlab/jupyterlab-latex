@@ -124,6 +124,9 @@ function activateLatexPlugin(
           // file from disk and show it.
           if (!errorPanel) {
             errorPanel = new ErrorPanel();
+            errorPanel.id = `latex-error-${++Private.id}`;
+            errorPanel.title.label = 'LaTeX Error';
+            errorPanel.title.closable = true;
             app.shell.addToMainArea(errorPanel);
           }
           errorPanel.text = err.xhr.response;
@@ -141,6 +144,9 @@ function activateLatexPlugin(
         // file from disk and show it.
         errorPanel = new ErrorPanel();
         errorPanel.text = err.xhr.response;
+        errorPanel.id = `latex-error-${++Private.id}`;
+        errorPanel.title.label = 'LaTeX Error';
+        errorPanel.title.closable = true;
         app.shell.addToMainArea(errorPanel);
       });
     },
@@ -162,3 +168,14 @@ function activateLatexPlugin(
 }
 
 export default latexPlugin;
+
+/**
+ * A namespace for private module data.
+ */
+namespace Private {
+  /**
+   * A counter for unique IDs.
+   */
+  export
+  let id = 0;
+}
