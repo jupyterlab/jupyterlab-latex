@@ -25,6 +25,10 @@ import {
   ServerConnection
 } from '@jupyterlab/services';
 
+import {
+  ErrorPanel
+} from './error';
+
 import '../style/index.css';
 
 namespace CommandIDs {
@@ -101,10 +105,9 @@ function activateLatexPlugin(
       const dirName = PathExt.dirname(widget.context.path);
       const baseName = PathExt.basename(widget.context.path, '.tex');
       const pdfFilePath = PathExt.join(dirName, baseName + '.pdf');
-      const logFilePath = PathExt.join(dirName, baseName + '.log');
 
       let pdfContext: DocumentRegistry.IContext<DocumentRegistry.IModel>;
-      let logContext: DocumentRegistry.IContext<DocumentRegistry.IModel>;
+      let errorPanel: ErrorPanel;
 
       // Hook up an event listener for when the '.tex' file is saved.
       widget.context.fileChanged.connect((sender, args) => {
@@ -116,16 +119,14 @@ function activateLatexPlugin(
             const pdfWidget = manager.openOrReveal(pdfFilePath);
             pdfContext = manager.contextForWidget(pdfWidget);
           }
-          // Read the log file contents from disk
-          if (logContext) {
-            logContext.revert();
-          }
-        }).catch(() => {
+        }).catch((err) => {
           // If there was an error, read the log
           // file from disk and show it.
-          const logWidget = manager.openOrReveal(logFilePath);
-          logContext = manager.contextForWidget(logWidget);
-          logContext.revert();
+          if (!errorPanel) {
+            errorPanel = new ErrorPanel();
+            app.shell.addToMainArea(errorPanel);
+          }
+          errorPanel.text = err.xhr.response;
         });
       });
 
@@ -133,16 +134,14 @@ function activateLatexPlugin(
       // then open them.
       latexRequest(widget.context.path, serverSettings).then(() => {
         // Open the pdf and get a handle on its document context.
-        const logWidget = manager.openOrReveal(logFilePath);
-        logContext = manager.contextForWidget(logWidget);
         const pdfWidget = manager.openOrReveal(pdfFilePath);
         pdfContext = manager.contextForWidget(pdfWidget);
-      }).catch(() => {
+      }).catch((err) => {
         // If there was an error, read the log
         // file from disk and show it.
-        const logWidget = manager.openOrReveal(logFilePath);
-        logContext = manager.contextForWidget(logWidget);
-        logContext.revert();
+        errorPanel = new ErrorPanel();
+        errorPanel.text = err.xhr.response;
+        app.shell.addToMainArea(errorPanel);
       });
     },
     isEnabled: hasWidget,
