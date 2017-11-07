@@ -48,23 +48,18 @@ class LatexConfig(Configurable):
 
 class LatexHandler(APIHandler):
     """
-    A proxy for the GitHub API v3.
-
-    The purpose of this proxy is to add the 'client_id' and 'client_secret'
-    tokens to the API request, which allows for a higher rate limit.
-    Without this, the rate limit on unauthenticated calls is so limited as
-    to be practically useless.
+    A handler that runs LaTeX on the server.
     """
     @gen.coroutine
     def get(self, path = ''):
         """
-        Proxy API requests to GitHub, adding 'client_id' and 'client_secret'
-        if they have been set.
+        Given a path, run LaTeX, responding when done.
         """
         # Get access to the notebook config object
         c = LatexConfig(config=self.config)
 
         output_filename = os.path.splitext(path.strip('/'))[0]+".pdf"
+        log_filename = os.path.splitext(path.strip('/'))[0]+".log"
         with latex_cleanup(whitelist=[output_filename]):
             process = Subprocess([
                     c.latex_command,
@@ -76,11 +71,11 @@ class LatexHandler(APIHandler):
             try:
                 yield process.wait_for_exit()
             except CalledProcessError as err:
+                self.set_status(500)
                 self.log.error('LaTeX command errored with code: '
                                + str(err.returncode))
-        self.finish("LaTeX compiled")
 
-        # Get access to the notebook config object
+        self.finish("LaTeX compiled")
 
 def _jupyter_server_extension_paths():
     return [{

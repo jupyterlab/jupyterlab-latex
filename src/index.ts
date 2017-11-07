@@ -2,18 +2,28 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ILayoutRestorer,
-  JupyterLab,
-  JupyterLabPlugin
+  ILayoutRestorer, JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
-import { IStateDB, PathExt } from '@jupyterlab/coreutils';
+import {
+  IStateDB, PathExt
+} from '@jupyterlab/coreutils';
 
-import { IDocumentManager } from '@jupyterlab/docmanager';
+import {
+  IDocumentManager
+} from '@jupyterlab/docmanager';
 
-import { IEditorTracker } from '@jupyterlab/fileeditor';
+import {
+  DocumentRegistry
+} from '@jupyterlab/docregistry';
 
-import { ServerConnection } from '@jupyterlab/services';
+import {
+  IEditorTracker
+} from '@jupyterlab/fileeditor';
+
+import {
+  ServerConnection
+} from '@jupyterlab/services';
 
 import '../style/index.css';
 
@@ -88,23 +98,55 @@ function activateLatexPlugin(
         return;
       }
       // build pdfFileName so that we know what to watch for
-      const pdfFileName =
-        PathExt.basename(widget.context.path, '.tex') + '.pdf';
+      const dirName = PathExt.dirname(widget.context.path);
+      const baseName = PathExt.basename(widget.context.path, '.tex');
+      const pdfFilePath = PathExt.join(dirName, baseName + '.pdf');
+      const logFilePath = PathExt.join(dirName, baseName + '.log');
 
+      let pdfContext: DocumentRegistry.IContext<DocumentRegistry.IModel>;
+      let logContext: DocumentRegistry.IContext<DocumentRegistry.IModel>;
+
+      // Hook up an event listener for when the '.tex' file is saved.
       widget.context.fileChanged.connect((sender, args) => {
         latexRequest(widget.context.path, serverSettings).then(() => {
           // Read the pdf file contents from disk.
           if (pdfContext) {
             pdfContext.revert();
+          } else {
+            const pdfWidget = manager.openOrReveal(pdfFilePath);
+            pdfContext = manager.contextForWidget(pdfWidget);
           }
+          // Read the log file contents from disk
+          if (logContext) {
+            logContext.revert();
+          }
+        }).catch(() => {
+          // If there was an error, read the log
+          // file from disk and show it.
+          const logWidget = manager.openOrReveal(logFilePath);
+          logContext = manager.contextForWidget(logWidget);
+          logContext.revert();
         });
       });
 
-      // save document before opening pdf view to trigger build
+      // Run an initial latexRequest so that the appropriate files exist,
+      // then open them.
+      latexRequest(widget.context.path, serverSettings).then(() => {
+        // Open the pdf and get a handle on its document context.
+        const logWidget = manager.openOrReveal(logFilePath);
+        logContext = manager.contextForWidget(logWidget);
+        const pdfWidget = manager.openOrReveal(pdfFilePath);
+        pdfContext = manager.contextForWidget(pdfWidget);
+      }).catch(() => {
+        // If there was an error, read the log
+        // file from disk and show it.
+        const logWidget = manager.openOrReveal(logFilePath);
+        logContext = manager.contextForWidget(logWidget);
+        logContext.revert();
+      });
+
+      // Trigger an initial save.
       widget.context.save();
-      // Open the pdf and get a handle on its document context.
-      const pdfWidget = manager.openOrReveal(pdfFileName);
-      const pdfContext = manager.contextForWidget(pdfWidget);
     },
     isEnabled: hasWidget,
     isVisible: () => {
