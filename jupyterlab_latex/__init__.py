@@ -37,6 +37,15 @@ def latex_cleanup(whitelist=None):
         os.remove(fn)
 
 
+class LatexConfig(Configurable):
+    """
+    A Configurable that declares the configuration options
+    for the LatexHandler.
+    """
+    latex_command = Unicode('xelatex', config=True,
+        help='The LaTeX command to use when compiling ".tex" files.')
+
+
 class LatexHandler(APIHandler):
     """
     A proxy for the GitHub API v3.
@@ -52,10 +61,13 @@ class LatexHandler(APIHandler):
         Proxy API requests to GitHub, adding 'client_id' and 'client_secret'
         if they have been set.
         """
+        # Get access to the notebook config object
+        c = LatexConfig(config=self.config)
+
         output_filename = os.path.splitext(path.strip('/'))[0]+".pdf"
         with latex_cleanup(whitelist=[output_filename]):
             process = Subprocess([
-                    "xelatex",
+                    c.latex_command,
                     "-interaction=nonstopmode",
                     "-halt-on-error",
                     "-file-line-error",
