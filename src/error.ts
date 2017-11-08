@@ -6,17 +6,28 @@ import {
 } from '@phosphor/widgets';
 
 
+/**
+ * A widget which hosts the error logs from LaTeX
+ * when document compilation fails.
+ */
 export
 class ErrorPanel extends Widget {
+  /**
+   * Construct the error panel.
+   */
   constructor() {
     super();
-    this._errorText = document.createElement('code');
-    const blah = document.createElement('pre');
-    blah.style.cssText = 'height:100%;overflow:auto;margin:2em';
-    this.node.appendChild(blah);
-    blah.appendChild(this._errorText);
+    this.addClass('jp-LatexErrorPanel');
+    this._errorText = document.createElement('pre');
+    let container = document.createElement('div');
+    container.className = 'jp-LatexErrorContainer';
+    container.appendChild(this._errorText);
+    this.node.appendChild(container);
   }
 
+  /**
+   * Set the inner text content of the panel.
+   */
   set text(value: string) {
     this._errorText.textContent = value;
   }
