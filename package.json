@@ -21,7 +21,7 @@
     "latex"
   ],
   "jupyterlab": {
-    "extension": true
+    "extension": "lib/latex"
   },
   "scripts": {
     "build": "tsc",
