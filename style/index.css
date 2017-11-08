@@ -2,3 +2,18 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+
+.jp-LatexErrorPanel {
+  min-height: 120px;
+  min-width: 120px;
+}
+
+.jp-LatexErrorContainer {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.jp-LatexErrorContainer pre {
+  margin: 1em;
+  white-space: pre-wrap;
+}
