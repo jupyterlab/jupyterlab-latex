@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Message
+} from '@phosphor/messaging';
+
+import {
   Widget
 } from '@phosphor/widgets';
 
@@ -84,6 +88,52 @@ class RenderedPDF extends Widget implements IRenderMime.IRenderer {
       URL.revokeObjectURL(this._objectUrl);
     } catch (error) { /* no-op */ }
     super.dispose();
+  }
+
+  /**
+   * Handle DOM events for the widget.
+   */
+  handleEvent(event: Event): void {
+    if (!this._pdfViewer) {
+      return;
+    }
+    switch (event.type) {
+      case 'pagesinit':
+        this._resize();
+        break;
+      default:
+        break;
+    }
+  }
+
+  /**
+   * Handle `after-attach` messages for the widget.
+   */
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+    this.node.addEventListener('pagesinit', this);
+  }
+
+  /**
+   * Handle `before-detach` messages for the widget.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    let node = this.node;
+    node.removeEventListener('pagesinit', this, true);
+  }
+
+  /**
+   * On resize, use the computed row and column sizes to resize the terminal.
+   */
+  protected onResize(msg: Widget.ResizeMessage): void {
+    this._resize();
+  }
+
+  /**
+   * Fit the PDF to the widget width.
+   */
+  private _resize(): void {
+    this._pdfViewer.currentScaleValue = 'page-width';
   }
 
   private _objectUrl = '';
