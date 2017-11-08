@@ -14,3 +14,11 @@
   margin: 1em;
   white-space: pre-wrap;
 }
+
+.jp-PDFJSContainer {
+  background-color: #808080;
+  overflow: auto;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
