@@ -10,8 +10,11 @@ export
 class ErrorPanel extends Widget {
   constructor() {
     super();
-    this._errorText = document.createElement('pre');
-    this.node.appendChild(this._errorText);
+    this._errorText = document.createElement('code');
+    const blah = document.createElement('pre');
+    blah.style.cssText = 'height:100%;overflow:auto;margin:2em';
+    this.node.appendChild(blah);
+    blah.appendChild(this._errorText);
   }
 
   set text(value: string) {
