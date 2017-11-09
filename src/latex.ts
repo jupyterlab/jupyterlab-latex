@@ -202,7 +202,6 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
     command: CommandIDs.openLatexPreview,
     selector: '.jp-FileEditor'
   });
-  console.log('Activated!');
   return;
 }
 

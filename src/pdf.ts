@@ -13,12 +13,12 @@ import {
   IRenderMime
 } from '@jupyterlab/rendermime-interfaces';
 
-declare var require: any;
-let PDF = require('pdfjs-dist');
-PDF = require('pdfjs-dist/web/pdf_viewer');
+import 'pdfjs-dist';
+import 'pdfjs-dist/web/pdf_viewer';
 
 import '../style/index.css';
 import 'pdfjs-dist/web/pdf_viewer.css';
+
 
 /**
  * The MIME type for PDF.
@@ -26,11 +26,23 @@ import 'pdfjs-dist/web/pdf_viewer.css';
 export
 const MIME_TYPE = 'application/pdf';
 
+/**
+ * The CSS class for the viewer defined by PDFJS.
+ */
 export
 const PDF_CLASS = 'pdfViewer';
 
+/**
+ * The CSS class for our PDF container.
+ */
 export
 const PDF_CONTAINER_CLASS = 'jp-PDFJSContainer';
+
+/**
+ * PDFJS adds a global object to the page called `PDFJS`.
+ * Declare a reference to that.
+ */
+declare const PDFJS: any;
 
 /**
  * A class for rendering a PDF document.
@@ -39,8 +51,8 @@ export
 class RenderedPDF extends Widget implements IRenderMime.IRenderer {
   constructor() {
     super({ node: Private.createNode() });
-    PDF.PDFJS.disableWorker = true;
-    this._pdfViewer = new PDF.PDFJS.PDFViewer({
+    PDFJS.disableWorker = true;
+    this._pdfViewer = new (PDFJS as any).PDFViewer({
         container: this.node,
     });
   }
@@ -63,7 +75,7 @@ class RenderedPDF extends Widget implements IRenderMime.IRenderer {
       //Try to keep the scroll position.
       const scrollTop = this.node.scrollTop;
 
-      PDF.PDFJS.getDocument(this._objectUrl).then((pdfDocument: any) => {
+      PDFJS.getDocument(this._objectUrl).then((pdfDocument: any) => {
         this._pdfViewer.setDocument(pdfDocument);
         this._pdfViewer.pagesPromise.then(() => {
           this.node.scrollTop = scrollTop;
