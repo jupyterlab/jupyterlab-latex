@@ -121,17 +121,17 @@ function activateLatexPlugin(
           }
           if (errorPanel) {
             errorPanel.close();
-            errorPanel.dispose();
-            errorPanel = null;
           }
         }).catch((err) => {
           // If there was an error, read the log
           // file from disk and show it.
           if (!errorPanel) {
-            errorPanel = new ErrorPanel();
-            errorPanel.id = `latex-error-${++Private.id}`;
-            errorPanel.title.label = 'LaTeX Error';
-            errorPanel.title.closable = true;
+            errorPanel = Private.createErrorPanel();
+            // On disposal, set the reference to null
+            errorPanel.disposed.connect( () => {
+              errorPanel = null;
+            });
+            //Add the error panel to the main area.
             app.shell.addToMainArea(errorPanel, { ref: widget.id });
           }
           errorPanel.text = err.xhr.response;
@@ -147,11 +147,12 @@ function activateLatexPlugin(
       }).catch((err) => {
         // If there was an error, read the log
         // file from disk and show it.
-        errorPanel = new ErrorPanel();
-        errorPanel.text = err.xhr.response;
-        errorPanel.id = `latex-error-${++Private.id}`;
-        errorPanel.title.label = 'LaTeX Error';
-        errorPanel.title.closable = true;
+        errorPanel = Private.createErrorPanel(err.xhr.response);
+        // On disposal, set the reference to null
+        errorPanel.disposed.connect( () => {
+          errorPanel = null;
+        });
+        //Add the error panel to the main area.
         app.shell.addToMainArea(errorPanel, { ref: widget.id });
       });
     },
@@ -181,6 +182,18 @@ namespace Private {
   /**
    * A counter for unique IDs.
    */
-  export
   let id = 0;
+
+  /**
+   * Create an error panel widget.
+   */
+  export
+  function createErrorPanel(initialText: string = ''): ErrorPanel {
+    const errorPanel = new ErrorPanel();
+    errorPanel.text = initialText;
+    errorPanel.id = `latex-error-${++id}`;
+    errorPanel.title.label = 'LaTeX Error';
+    errorPanel.title.closable = true;
+    return errorPanel;
+  }
 }

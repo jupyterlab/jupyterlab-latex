@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Message
+} from '@phosphor/messaging';
+
+import {
   Widget
 } from '@phosphor/widgets';
 
@@ -27,6 +31,13 @@ class ErrorPanel extends Widget {
 
   set text(value: string) {
     ReactDOM.render(<LatexError text={value}/>, this.node);
+  }
+
+  /**
+   * Handle a close request.
+   */
+  protected onCloseRequest(msg: Message): void {
+    this.dispose();
   }
 }
 
