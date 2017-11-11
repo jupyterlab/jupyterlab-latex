@@ -11,9 +11,6 @@
 .jp-LatexErrorContainer {
   height: 100%;
   overflow-y: auto;
-}
-
-.jp-LatexErrorContainer pre {
   margin: 1em;
   white-space: pre-wrap;
 }
