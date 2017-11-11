@@ -40,9 +40,9 @@ class LatexError extends React.Component<ILatexProps, {}> {
 
   render() {
     return(
-      <div className={LATEX_ERROR_CONTAINER}>
-        <pre>{this.props.text}</pre>
-      </div>
+      <pre className={LATEX_ERROR_CONTAINER}>
+        <code>{this.props.text}</code>
+      </pre>
     );
   }
 }
