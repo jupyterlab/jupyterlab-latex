@@ -35,33 +35,25 @@ namespace CommandIDs {
   export const openLatexPreview = 'latex:open-preview';
 }
 /**
- * The JupyterLab plugin for the GitHub Filebrowser.
+ * The JupyterLab plugin for the LaTeX extension.
  */
 const latexPlugin: JupyterLabPlugin<void> = {
   id: 'jupyterlab-latex:open',
-  // IDocumentManager: manages files (opening, closing, &c..)
-  // ILayoutRestorer: manages layout on refresh
-  // IStateDB: restores state on refresh
   requires: [IDocumentManager, IEditorTracker, ILayoutRestorer, IStateDB],
   activate: activateLatexPlugin,
   autoStart: true
 };
 
 /**
- * Make a request to the notebook server proxy for the
- * GitHub API.
+ * Make a request to the notebook server LaTeX endpoint.
  *
- * @param url - the api path for the GitHub API v3
- *   (not including the base url)
+ * @param url - the path to the .tex file to watch.
  *
  * @param settings - the settings for the current notebook server.
  *
  * @returns a Promise resolved with the JSON response.
  */
-export function latexRequest<T>(
-  url: string,
-  settings: ServerConnection.ISettings
-): Promise<T> {
+export function latexRequest(url: string, settings: ServerConnection.ISettings): Promise<any> {
   let request = {
     url: '/latex/' + url,
     method: 'GET',
@@ -83,13 +75,7 @@ export function latexRequest<T>(
 /**
  * Activate the file browser.
  */
-function activateLatexPlugin(
-  app: JupyterLab,
-  manager: IDocumentManager,
-  editorTracker: IEditorTracker,
-  restorer: ILayoutRestorer,
-  state: IStateDB
-): void {
+function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorTracker: IEditorTracker, restorer: ILayoutRestorer, state: IStateDB): void {
   const { commands } = app;
 
   const serverSettings = ServerConnection.makeSettings();
@@ -121,17 +107,17 @@ function activateLatexPlugin(
           }
           if (errorPanel) {
             errorPanel.close();
-            errorPanel.dispose();
-            errorPanel = null;
           }
         }).catch((err) => {
           // If there was an error, read the log
           // file from disk and show it.
           if (!errorPanel) {
-            errorPanel = new ErrorPanel();
-            errorPanel.id = `latex-error-${++Private.id}`;
-            errorPanel.title.label = 'LaTeX Error';
-            errorPanel.title.closable = true;
+            errorPanel = Private.createErrorPanel();
+            // On disposal, set the reference to null
+            errorPanel.disposed.connect( () => {
+              errorPanel = null;
+            });
+            //Add the error panel to the main area.
             app.shell.addToMainArea(errorPanel, { ref: widget.id });
           }
           errorPanel.text = err.xhr.response;
@@ -147,11 +133,12 @@ function activateLatexPlugin(
       }).catch((err) => {
         // If there was an error, read the log
         // file from disk and show it.
-        errorPanel = new ErrorPanel();
-        errorPanel.text = err.xhr.response;
-        errorPanel.id = `latex-error-${++Private.id}`;
-        errorPanel.title.label = 'LaTeX Error';
-        errorPanel.title.closable = true;
+        errorPanel = Private.createErrorPanel(err.xhr.response);
+        // On disposal, set the reference to null
+        errorPanel.disposed.connect( () => {
+          errorPanel = null;
+        });
+        //Add the error panel to the main area.
         app.shell.addToMainArea(errorPanel, { ref: widget.id });
       });
     },
@@ -181,6 +168,18 @@ namespace Private {
   /**
    * A counter for unique IDs.
    */
-  export
   let id = 0;
+
+  /**
+   * Create an error panel widget.
+   */
+  export
+  function createErrorPanel(initialText: string = ''): ErrorPanel {
+    const errorPanel = new ErrorPanel();
+    errorPanel.text = initialText;
+    errorPanel.id = `latex-error-${++id}`;
+    errorPanel.title.label = 'LaTeX Error';
+    errorPanel.title.closable = true;
+    return errorPanel;
+  }
 }
