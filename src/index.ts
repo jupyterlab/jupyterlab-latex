@@ -35,33 +35,25 @@ namespace CommandIDs {
   export const openLatexPreview = 'latex:open-preview';
 }
 /**
- * The JupyterLab plugin for the GitHub Filebrowser.
+ * The JupyterLab plugin for the LaTeX extension.
  */
 const latexPlugin: JupyterLabPlugin<void> = {
   id: 'jupyterlab-latex:open',
-  // IDocumentManager: manages files (opening, closing, &c..)
-  // ILayoutRestorer: manages layout on refresh
-  // IStateDB: restores state on refresh
   requires: [IDocumentManager, IEditorTracker, ILayoutRestorer, IStateDB],
   activate: activateLatexPlugin,
   autoStart: true
 };
 
 /**
- * Make a request to the notebook server proxy for the
- * GitHub API.
+ * Make a request to the notebook server LaTeX endpoint.
  *
- * @param url - the api path for the GitHub API v3
- *   (not including the base url)
+ * @param url - the path to the .tex file to watch.
  *
  * @param settings - the settings for the current notebook server.
  *
  * @returns a Promise resolved with the JSON response.
  */
-export function latexRequest<T>(
-  url: string,
-  settings: ServerConnection.ISettings
-): Promise<T> {
+export function latexRequest(url: string, settings: ServerConnection.ISettings): Promise<any> {
   let request = {
     url: '/latex/' + url,
     method: 'GET',
@@ -83,13 +75,7 @@ export function latexRequest<T>(
 /**
  * Activate the file browser.
  */
-function activateLatexPlugin(
-  app: JupyterLab,
-  manager: IDocumentManager,
-  editorTracker: IEditorTracker,
-  restorer: ILayoutRestorer,
-  state: IStateDB
-): void {
+function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorTracker: IEditorTracker, restorer: ILayoutRestorer, state: IStateDB): void {
   const { commands } = app;
 
   const serverSettings = ServerConnection.makeSettings();
