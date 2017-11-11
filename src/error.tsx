@@ -26,7 +26,7 @@ class ErrorPanel extends Widget {
   }
 
   set text(value: string) {
-    ReactDOM.render(<LatexError text={this.text}/>, this.node);
+    ReactDOM.render(<LatexError text={value}/>, this.node);
   }
 }
 
