@@ -161,9 +161,7 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
 
     // Update the set of active previews and cache the values.
     Private.previews.add(texContext.path);
-    const paths: string[] = [];
-    Private.previews.forEach(path => paths.push(path));
-    state.save(id, { paths });
+    state.save(id, { paths: Array.from(Private.previews) });
   };
 
   // If there are any active previews in the statedb,
