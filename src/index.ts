@@ -155,9 +155,13 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
     });
 
     // When the tex file is closed, remove it from the cache.
+    // Also close any open error panels.
     // The listener should be removed in its own dispose() method.
     texContext.disposed.connect(() => {
       Private.previews.delete(texContext.path);
+      if (errorPanel) {
+        errorPanel.close();
+      }
     });
 
     // Update the set of active previews and cache the values.
