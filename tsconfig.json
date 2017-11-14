@@ -4,7 +4,7 @@
     "noImplicitAny": true,
     "noEmitOnError": true,
     "noUnusedLocals": true,
-    "lib": ["ES5", "DOM", "ES2015.Promise", "ES2015.Collection"],
+    "lib": ["ES5", "DOM", "ES2015.Iterable", "ES2015.Promise", "ES2015.Collection"],
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "ES5",
