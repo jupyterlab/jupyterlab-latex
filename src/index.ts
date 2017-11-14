@@ -144,7 +144,8 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
     }).catch((err) => {
       // If there was an error, show the error panel
       // with the error log.
-      errorPanel = Private.createErrorPanel(err.xhr.response);
+      errorPanel = Private.createErrorPanel();
+      errorPanel.text = err.xhr.response;
       // On disposal, set the reference to null
       errorPanel.disposed.connect( () => {
         errorPanel = null;
@@ -222,9 +223,8 @@ namespace Private {
    * Create an error panel widget.
    */
   export
-  function createErrorPanel(initialText: string = ''): ErrorPanel {
+  function createErrorPanel(): ErrorPanel {
     const errorPanel = new ErrorPanel();
-    errorPanel.text = initialText;
     errorPanel.id = `latex-error-${++id}`;
     errorPanel.title.label = 'LaTeX Error';
     errorPanel.title.closable = true;
