@@ -120,8 +120,8 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
           errorPanel.close();
         }
       }).catch((err) => {
-        // If there was an error, read the log
-        // file from disk and show it.
+        // If there was an error, show the error panel
+        // with the error log.
         if (!errorPanel) {
           errorPanel = Private.createErrorPanel();
           // On disposal, set the reference to null
@@ -142,8 +142,8 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
       const pdfWidget = manager.openOrReveal(pdfFilePath);
       pdfContext = manager.contextForWidget(pdfWidget);
     }).catch((err) => {
-      // If there was an error, read the log
-      // file from disk and show it.
+      // If there was an error, show the error panel
+      // with the error log.
       errorPanel = Private.createErrorPanel(err.xhr.response);
       // On disposal, set the reference to null
       errorPanel.disposed.connect( () => {
