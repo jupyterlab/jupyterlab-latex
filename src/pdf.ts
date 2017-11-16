@@ -52,7 +52,7 @@ class RenderedPDF extends Widget implements IRenderMime.IRenderer {
   constructor() {
     super({ node: Private.createNode() });
     PDFJS.disableWorker = true;
-    this._pdfViewer = new (PDFJS as any).PDFViewer({
+    this._pdfViewer = new PDFJS.PDFViewer({
         container: this.node,
     });
   }
@@ -69,6 +69,7 @@ class RenderedPDF extends Widget implements IRenderMime.IRenderer {
       }
       const blob = Private.b64toBlob(data, MIME_TYPE);
 
+      let oldDocument = this._pdfDocument;
       let oldUrl = this._objectUrl;
       this._objectUrl = URL.createObjectURL(blob);
 
@@ -76,6 +77,7 @@ class RenderedPDF extends Widget implements IRenderMime.IRenderer {
       const scrollTop = this.node.scrollTop;
 
       PDFJS.getDocument(this._objectUrl).then((pdfDocument: any) => {
+        this._pdfDocument = pdfDocument;
         this._pdfViewer.setDocument(pdfDocument);
         this._pdfViewer.pagesPromise.then(() => {
           this.node.scrollTop = scrollTop;
@@ -83,6 +85,11 @@ class RenderedPDF extends Widget implements IRenderMime.IRenderer {
         });
       });
 
+      // Release reference to any previous document.
+      if (oldDocument) {
+        oldDocument.cleanup();
+        oldDocument.destroy();
+      }
       // Release reference to any previous object url.
       if (oldUrl) {
         try {
@@ -150,6 +157,7 @@ class RenderedPDF extends Widget implements IRenderMime.IRenderer {
 
   private _objectUrl = '';
   private _pdfViewer: any;
+  private _pdfDocument: any;
 }
 
 
