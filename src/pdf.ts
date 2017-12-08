@@ -13,7 +13,7 @@ import {
   IRenderMime
 } from '@jupyterlab/rendermime-interfaces';
 
-import 'pdfjs-dist';
+import 'pdfjs-dist/webpack';
 import 'pdfjs-dist/web/pdf_viewer';
 
 import '../style/index.css';
@@ -51,7 +51,6 @@ export
 class RenderedPDF extends Widget implements IRenderMime.IRenderer {
   constructor() {
     super({ node: Private.createNode() });
-    PDFJS.disableWorker = true;
     this._pdfViewer = new PDFJS.PDFViewer({
         container: this.node,
     });
