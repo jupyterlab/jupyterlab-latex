@@ -172,6 +172,7 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
         errorPanel.close();
       }
       texContext.fileChanged.disconnect(onFileChanged);
+      state.save(id, { paths: Array.from(Private.previews) });
     };
 
     // When the tex file is closed, remove it from the cache.
