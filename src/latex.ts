@@ -146,7 +146,11 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
     // then open them.
     latexRequest(texContext.path, serverSettings).then(() => {
       // Open the pdf and get a handle on its document context.
-      const pdfWidget = manager.openOrReveal(pdfFilePath);
+      // let pdfWidget: DocumentRegistry.IReadyWidget;
+      let pdfWidget = manager.findWidget(pdfFilePath);
+      if (!pdfWidget) {
+        pdfWidget = manager.openOrReveal(pdfFilePath);
+      }
       pdfContext = manager.contextForWidget(pdfWidget);
       pdfContext.disposed.connect(cleanupPreviews);
     }).catch((err) => {
