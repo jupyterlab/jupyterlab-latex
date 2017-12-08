@@ -160,7 +160,9 @@ class RenderedPDF extends Widget implements IRenderMime.IRenderer {
    * Fit the PDF to the widget width.
    */
   private _resize(): void {
-    this._pdfViewer.currentScaleValue = 'page-width';
+    if (this.isVisible) {
+      this._pdfViewer.currentScaleValue = 'page-width';
+    }
   }
 
   private _objectUrl = '';
