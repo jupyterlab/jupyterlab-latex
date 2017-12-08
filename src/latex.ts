@@ -110,8 +110,8 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
     let pdfContext: DocumentRegistry.IContext<DocumentRegistry.IModel>;
     let errorPanel: ErrorPanel | null = null;
 
+    const onFileChanged = () => {
     // Hook up an event listener for when the '.tex' file is saved.
-    texContext.fileChanged.connect((sender, args) => {
       latexRequest(texContext.path, serverSettings).then(() => {
         // Read the pdf file contents from disk.
         if (pdfContext) {
@@ -119,6 +119,7 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
         } else {
           const pdfWidget = manager.openOrReveal(pdfFilePath);
           pdfContext = manager.contextForWidget(pdfWidget);
+          pdfContext.disposed.connect(cleanupPreviews);
         }
         if (errorPanel) {
           errorPanel.close();
@@ -132,12 +133,14 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
           errorPanel.disposed.connect(() => {
             errorPanel = null;
           });
-          //Add the error panel to the main area.
+          // Add the error panel to the main area.
           app.shell.addToMainArea(errorPanel, { ref: widget.id });
         }
         errorPanel.text = err.xhr.response;
       });
-    });
+    };
+
+    texContext.fileChanged.connect(onFileChanged);
 
     // Run an initial latexRequest so that the appropriate files exist,
     // then open them.
@@ -145,6 +148,7 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
       // Open the pdf and get a handle on its document context.
       const pdfWidget = manager.openOrReveal(pdfFilePath);
       pdfContext = manager.contextForWidget(pdfWidget);
+      pdfContext.disposed.connect(cleanupPreviews);
     }).catch((err) => {
       // If there was an error, show the error panel
       // with the error log.
@@ -154,20 +158,22 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
       errorPanel.disposed.connect( () => {
         errorPanel = null;
       });
-      //Add the error panel to the main area.
+      // Add the error panel to the main area.
       app.shell.addToMainArea(errorPanel, { ref: widget.id });
     });
 
-    // When the tex file is closed, remove it from the cache.
-    // Also close any open error panels.
-    // The listener should be removed in its own dispose() method.
-    texContext.disposed.connect(() => {
+    const cleanupPreviews = () => {
       Private.previews.delete(texContext.path);
       if (errorPanel) {
         errorPanel.close();
       }
-    });
+      texContext.fileChanged.disconnect(onFileChanged);
+    };
 
+    // When the tex file is closed, remove it from the cache.
+    // Also close any open error panels.
+    // The listener should be removed in its own dispose() method.
+    texContext.disposed.connect(cleanupPreviews);
     // Update the set of active previews and cache the values.
     Private.previews.add(texContext.path);
     state.save(id, { paths: Array.from(Private.previews) });
