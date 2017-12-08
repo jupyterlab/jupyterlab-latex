@@ -26,6 +26,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  ReadonlyJSONObject
+} from '@phosphor/coreutils';
+
+import {
   ErrorPanel
 } from './error';
 
@@ -172,7 +176,7 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
   // If there are any active previews in the statedb,
   // activate them upon initialization.
   Promise.all([state.fetch(id), app.restored]).then(([args]) => {
-    let paths = (args && args['paths'] as string[]) || [];
+    let paths = (args && (args as ReadonlyJSONObject)['paths'] as string[]) || [];
     paths.forEach(path => {
       let widget = manager.findWidget(path);
       if (widget) {
