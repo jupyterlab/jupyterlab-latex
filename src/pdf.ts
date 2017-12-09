@@ -72,29 +72,38 @@ class RenderedPDF extends Widget implements IRenderMime.IRenderer {
       let oldUrl = this._objectUrl;
       this._objectUrl = URL.createObjectURL(blob);
 
-      //Try to keep the scroll position.
-      const scrollTop = this.node.scrollTop;
+      let scrollTop: number;
+
+      // Try to keep the scroll position.
+      if (this.isVisible) {
+        scrollTop = this.node.scrollTop;
+      }
+
+      const cleanup = () => {
+        // Release reference to any previous document.
+        if (oldDocument) {
+          oldDocument.cleanup();
+          oldDocument.destroy();
+        }
+        // Release reference to any previous object url.
+        if (oldUrl) {
+          try {
+            URL.revokeObjectURL(oldUrl);
+          } catch (error) { /* no-op */ }
+        }
+      };
 
       PDFJS.getDocument(this._objectUrl).then((pdfDocument: any) => {
         this._pdfDocument = pdfDocument;
         this._pdfViewer.setDocument(pdfDocument);
         this._pdfViewer.pagesPromise.then(() => {
-          this.node.scrollTop = scrollTop;
+          if (this.isVisible) {
+            this.node.scrollTop = scrollTop;
+          }
+          cleanup();
           resolve(void 0);
         });
-      });
-
-      // Release reference to any previous document.
-      if (oldDocument) {
-        oldDocument.cleanup();
-        oldDocument.destroy();
-      }
-      // Release reference to any previous object url.
-      if (oldUrl) {
-        try {
-          URL.revokeObjectURL(oldUrl);
-        } catch (error) { /* no-op */ }
-      }
+      }).catch(cleanup);
     });
   }
 
@@ -151,7 +160,9 @@ class RenderedPDF extends Widget implements IRenderMime.IRenderer {
    * Fit the PDF to the widget width.
    */
   private _resize(): void {
-    this._pdfViewer.currentScaleValue = 'page-width';
+    if (this.isVisible) {
+      this._pdfViewer.currentScaleValue = 'page-width';
+    }
   }
 
   private _objectUrl = '';
@@ -236,7 +247,7 @@ namespace Private {
       byteArrays.push(byteArray);
     }
 
-    var blob = new Blob(byteArrays, {type: contentType});
+    let blob = new Blob(byteArrays, {type: contentType});
     return blob;
   }
 }
