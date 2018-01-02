@@ -62,11 +62,11 @@ export function latexRequest(url: string, settings: ServerConnection.ISettings):
 
   return ServerConnection.makeRequest(fullUrl, {}, settings).then(response => {
     if (response.status !== 200) {
-      return response.json().then(data => {
-        throw new ServerConnection.ResponseError(response, data.message);
+      return response.text().then(data => {
+        throw new ServerConnection.ResponseError(response, data);
       });
     }
-    return response.json();
+    return response.text();
   });
 }
 
