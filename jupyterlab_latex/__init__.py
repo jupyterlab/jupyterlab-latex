@@ -24,6 +24,22 @@ path_regex = r'(?P<path>(?:(?:/[^/]+)+|/?))'
 
 @contextmanager
 def latex_cleanup(workdir='.', whitelist=None):
+    """Context manager for changing directory and removing files when done.
+    
+    By default it works in the current directory, and removes all files that 
+    were not present in the working directory.
+    
+    Parameters
+    ----------
+    
+    workdir = string, optional
+        This represents a path to the working directory for running LaTeX (the
+        default is '.').
+    whitelist = list or None, optional
+        This is the set of files not present before running the LaTeX commands 
+        that are not to be removed when cleaning up.
+    
+    """
     orig_work_dir = os.getcwd()
     os.chdir(os.path.abspath(workdir))
 
@@ -46,7 +62,7 @@ class LatexConfig(Configurable):
     latex_command = Unicode('xelatex', config=True,
         help='The LaTeX command to use when compiling ".tex" files.')
     bib_command = Unicode('bibtex', config=True,
-        help='The bibTeX command to use when compiling ".tex" files.')
+        help='The BibTeX command to use when compiling ".tex" files.')
 
 
 class LatexHandler(APIHandler):
@@ -56,6 +72,19 @@ class LatexHandler(APIHandler):
     
     
     def build_tex_cmd_sequence(self, tex_base_name, run_bibtex=False):
+        """Builds Subprocess calls to LaTeX.
+        
+        Parameters
+        ----------
+        tex_base_name: string
+            This is the name of the tex file to be compiled, without its 
+            extension.
+            
+        returns:
+            This is a sequence of parital functions of 
+            `tornado.process.Subprocess`, which are to be run sequentially
+
+        """
         c = LatexConfig(config=self.config)
         
         full_latex_sequence = (
@@ -86,11 +115,42 @@ class LatexHandler(APIHandler):
                 for cmd in command_sequence]
                     
     def bib_condition(self):
+        """Determines whether BiBTeX should be run.
+        
+        Returns
+        -------
+        boolean
+            true if BibTeX should be run.
+            
+        """
         return any([re.match(r'.*\.bib', x) for x in set(glob.glob("*"))])
 
     
     @gen.coroutine
     def run_latex(self, command_sequence):
+        """Run commands sequentially, returning a 500 code on an error.
+        
+        Parameters
+        ----------
+        command_sequence : list of func
+            This is a sequence of parital functions of 
+            `tornado.process.Subprocess`, which are to be run sequentially
+        
+        Returns
+        -------
+        string
+            Response is either a success or an error string. 
+        
+        Raises
+        ------
+        tornado.process.CalledProcessError
+        
+        Notes
+        -----
+        - LaTeX processes only print to stdout, so errors are gathered from
+          there.
+        
+        """
 
         for cmd in command_sequence:
             process = cmd()
@@ -111,7 +171,7 @@ class LatexHandler(APIHandler):
     @gen.coroutine
     def get(self, path = ''):
         """
-        Given a path, run LaTeX, responding when done.
+        Given a path, run LaTeX, cleanup, and respond when done.
         """
         # Get access to the notebook config object
         tex_file_path = os.path.abspath(path.strip('/'))
