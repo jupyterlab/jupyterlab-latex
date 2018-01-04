@@ -4,6 +4,7 @@ import os
 import subprocess
 import glob
 import re
+import functools
 
 from contextlib import contextmanager
 from subprocess import PIPE
@@ -54,49 +55,57 @@ class LatexHandler(APIHandler):
     """
     
     
-    @gen.coroutine
-    def run_latex(self, tex_dir, tex_base_name, whitelist):
+    def build_tex_cmd_sequence(self, tex_base_name, run_bibtex=False):
         c = LatexConfig(config=self.config)
         
-        with latex_cleanup(
-            workdir=tex_dir,
-            whitelist=whitelist
-            ):
-            full_latex_sequence = [
-                c.latex_command,
-                "-interaction=nonstopmode",
-                "-halt-on-error",
-                "-file-line-error",
-                f"{tex_base_name}",
-                ]
-            full_bibtex_sequence = [
-                c.bib_command,
-                f"{tex_base_name}",
-                ]
-            command_sequence = [list(full_latex_sequence)]
+        full_latex_sequence = (
+            c.latex_command,
+            "-interaction=nonstopmode",
+            "-halt-on-error",
+            "-file-line-error",
+            f"{tex_base_name}",
+            )
+        full_bibtex_sequence = (
+            c.bib_command,
+            f"{tex_base_name}",
+            )
             
-            if any([re.match(r'.*\.bib', x) for x in set(glob.glob("*"))]):
-                command_sequence += [
-                    list(full_bibtex_sequence), 
-                    list(full_latex_sequence), 
-                    list(full_latex_sequence),
-                    ]
-                    
-            for i, cmd in enumerate(command_sequence):
-                process = Subprocess(cmd, 
-                    stdout=Subprocess.STREAM, stderr=Subprocess.STREAM)
-                try:
-                    yield process.wait_for_exit()
-                except CalledProcessError as err:
-                    self.set_status(500)
-                    self.log.error((f'LaTeX command ' 
-                                     '`{" ".join(command_sequence[i])}` '
-                                     'errored with code: ')
-                                   + str(err.returncode))
-                    out = yield process.stdout.read_until_close()
-                    return out
+        command_sequence = [tuple(full_latex_sequence)]
+        
+        if run_bibtex:
+            command_sequence += [
+                tuple(full_bibtex_sequence), 
+                tuple(full_latex_sequence), 
+                tuple(full_latex_sequence),
+                ]
                 
-            return "LaTeX compiled"
+        return [functools.partial(Subprocess, 
+                                  cmd, 
+                                  stdout=Subprocess.STREAM, 
+                                  stderr=Subprocess.STREAM) 
+                for cmd in command_sequence]
+                    
+    def bib_condition(self):
+        return any([re.match(r'.*\.bib', x) for x in set(glob.glob("*"))])
+
+    
+    @gen.coroutine
+    def run_latex(self, command_sequence):
+
+        for cmd in command_sequence:
+            process = cmd()
+            try:
+                yield process.wait_for_exit()
+            except CalledProcessError as err:
+                self.set_status(500)
+                self.log.error((f'LaTeX command ' 
+                                 '`{" ".join(command_sequence[i])}` '
+                                 'errored with code: ')
+                               + str(err.returncode))
+                out = yield process.stdout.read_until_close()
+                return out
+                
+        return "LaTeX compiled"
 
     
     @gen.coroutine
@@ -105,12 +114,17 @@ class LatexHandler(APIHandler):
         Given a path, run LaTeX, responding when done.
         """
         # Get access to the notebook config object
-        tex_file_path=os.path.abspath(path.strip('/'))
-        tex_file_name=os.path.basename(tex_file_path)
-        tex_dir=os.path.dirname(tex_file_path)
-        tex_base_name =  os.path.splitext(tex_file_name)[0]
-        whitelist = [tex_base_name+'.pdf']
-        out = yield self.run_latex(tex_dir, tex_base_name, whitelist)
+        tex_file_path = os.path.abspath(path.strip('/'))
+        tex_base_name = os.path.splitext(os.path.basename(tex_file_path))[0]
+        
+        with latex_cleanup(
+            workdir=os.path.dirname(tex_file_path),
+            whitelist=[tex_base_name+'.pdf'] 
+            ):
+            bibtex = self.bib_condition()
+            cmd_sequence = self.build_tex_cmd_sequence(tex_base_name, 
+                                                       run_bibtex=bibtex)
+            out = yield self.run_latex(cmd_sequence)
         self.finish(out)
 
 def _jupyter_server_extension_paths():
