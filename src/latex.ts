@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  IStateDB, PathExt
+  IStateDB, PathExt, URLExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -58,22 +58,16 @@ const latexPlugin: JupyterLabPlugin<void> = {
  * @returns a Promise resolved with the JSON response.
  */
 export function latexRequest(url: string, settings: ServerConnection.ISettings): Promise<any> {
-  let request = {
-    url: '/latex/' + url,
-    method: 'GET',
-    cache: true
-  };
+  let fullUrl = URLExt.join(settings.baseUrl, 'latex', url);
 
-  return ServerConnection.makeRequest(request, settings)
-    .then(response => {
-      if (response.xhr.status !== 200) {
-        throw ServerConnection.makeError(response);
-      }
-      return response.data;
-    })
-    .catch(response => {
-      throw ServerConnection.makeError(response);
-    });
+  return ServerConnection.makeRequest(fullUrl, {}, settings).then(response => {
+    if (response.status !== 200) {
+      return response.text().then(data => {
+        throw new ServerConnection.ResponseError(response, data);
+      });
+    }
+    return response.text();
+  });
 }
 
 /**
@@ -139,7 +133,7 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
           // Add the error panel to the main area.
           app.shell.addToMainArea(errorPanel, { ref: widget.id });
         }
-        errorPanel.text = err.xhr.response;
+        errorPanel.text = err.message;
       });
     };
 
@@ -159,7 +153,7 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
       // If there was an error, show the error panel
       // with the error log.
       errorPanel = Private.createErrorPanel();
-      errorPanel.text = err.xhr.response;
+      errorPanel.text = err.message;
       // On disposal, set the reference to null
       errorPanel.disposed.connect( () => {
         errorPanel = null;

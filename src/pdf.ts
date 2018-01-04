@@ -96,12 +96,14 @@ class RenderedPDF extends Widget implements IRenderMime.IRenderer {
       PDFJS.getDocument(this._objectUrl).then((pdfDocument: any) => {
         this._pdfDocument = pdfDocument;
         this._pdfViewer.setDocument(pdfDocument);
+        this._pdfViewer.firstPagePromise.then(() => {
+          resolve(void 0);
+        });
         this._pdfViewer.pagesPromise.then(() => {
           if (this.isVisible) {
             this.node.scrollTop = scrollTop;
           }
           cleanup();
-          resolve(void 0);
         });
       }).catch(cleanup);
     });

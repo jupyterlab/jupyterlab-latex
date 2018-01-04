@@ -6,6 +6,7 @@
 .jp-LatexErrorPanel {
   min-height: 120px;
   min-width: 120px;
+  color: var(--jp-error-color1);
 }
 
 .jp-LatexErrorContainer {
