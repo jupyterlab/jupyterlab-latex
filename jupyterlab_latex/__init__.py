@@ -3,6 +3,7 @@ import json
 import os
 import subprocess
 import glob
+import re
 
 from contextlib import contextmanager
 from subprocess import PIPE
@@ -22,6 +23,22 @@ path_regex = r'(?P<path>(?:(?:/[^/]+)+|/?))'
 
 @contextmanager
 def latex_cleanup(workdir='.', whitelist=None):
+    """Context manager for changing directory and removing files when done.
+    
+    By default it works in the current directory, and removes all files that 
+    were not present in the working directory.
+    
+    Parameters
+    ----------
+    
+    workdir = string, optional
+        This represents a path to the working directory for running LaTeX (the
+        default is '.').
+    whitelist = list or None, optional
+        This is the set of files not present before running the LaTeX commands 
+        that are not to be removed when cleaning up.
+    
+    """
     orig_work_dir = os.getcwd()
     os.chdir(os.path.abspath(workdir))
 
@@ -43,45 +60,128 @@ class LatexConfig(Configurable):
     """
     latex_command = Unicode('xelatex', config=True,
         help='The LaTeX command to use when compiling ".tex" files.')
+    bib_command = Unicode('bibtex', config=True,
+        help='The BibTeX command to use when compiling ".tex" files.')
 
 
 class LatexHandler(APIHandler):
     """
     A handler that runs LaTeX on the server.
     """
+    
+    
+    def build_tex_cmd_sequence(self, tex_base_name, run_bibtex=False):
+        """Builds tuples that will be used to call LaTeX shell commands.
+        
+        Parameters
+        ----------
+        tex_base_name: string
+            This is the name of the tex file to be compiled, without its 
+            extension.
+            
+        returns:
+            A list of tuples of strings to be passed to
+            `tornado.process.Subprocess`.
+            
+        """
+        c = LatexConfig(config=self.config)
+        
+        full_latex_sequence = (
+            c.latex_command,
+            "-interaction=nonstopmode",
+            "-halt-on-error",
+            "-file-line-error",
+            f"{tex_base_name}",
+            )
+        full_bibtex_sequence = (
+            c.bib_command,
+            f"{tex_base_name}",
+            )
+            
+        command_sequence = [tuple(full_latex_sequence)]
+        
+        if run_bibtex:
+            command_sequence += [
+                tuple(full_bibtex_sequence), 
+                tuple(full_latex_sequence), 
+                tuple(full_latex_sequence),
+                ]
+                
+        return command_sequence
+                    
+    def bib_condition(self):
+        """Determines whether BiBTeX should be run.
+        
+        Returns
+        -------
+        boolean
+            true if BibTeX should be run.
+            
+        """
+        return any([re.match(r'.*\.bib', x) for x in set(glob.glob("*"))])
+
+    
+    @gen.coroutine
+    def run_latex(self, command_sequence):
+        """Run commands sequentially, returning a 500 code on an error.
+        
+        Parameters
+        ----------
+        command_sequence : list of tuples of strings
+            This is a sequence of tuples of strings to be passed to
+            `tornado.process.Subprocess`, which are to be run sequentially.
+        
+        Returns
+        -------
+        string
+            Response is either a success or an error string. 
+        
+        Raises
+        ------
+        tornado.process.CalledProcessError
+        
+        Notes
+        -----
+        - LaTeX processes only print to stdout, so errors are gathered from
+          there.
+        
+        """
+        for cmd in command_sequence:
+            process = Subprocess(cmd, 
+                                 stdout=Subprocess.STREAM, 
+                                 stderr=Subprocess.STREAM) 
+            try:
+                yield process.wait_for_exit()
+            except CalledProcessError as err:
+                self.set_status(500)
+                self.log.error((f'LaTeX command ' 
+                                 '`{" ".join(cmd)}` '
+                                 'errored with code: ')
+                               + str(err.returncode))
+                out = yield process.stdout.read_until_close()
+                return out
+                
+        return "LaTeX compiled"
+
+    
     @gen.coroutine
     def get(self, path = ''):
         """
-        Given a path, run LaTeX, responding when done.
+        Given a path, run LaTeX, cleanup, and respond when done.
         """
         # Get access to the notebook config object
-        c = LatexConfig(config=self.config)
-
         tex_file_path = os.path.abspath(path.strip('/'))
-        tex_dir = os.path.dirname(tex_file_path)
-
-        tex_file_name = os.path.basename(tex_file_path)
-        output_filename = os.path.splitext(tex_file_name)[0]+".pdf"
+        tex_base_name = os.path.splitext(os.path.basename(tex_file_path))[0]
+        
         with latex_cleanup(
-            workdir=tex_dir,
-            whitelist=[output_filename]
+            workdir=os.path.dirname(tex_file_path),
+            whitelist=[tex_base_name+'.pdf'] 
             ):
-            process = Subprocess([
-                    c.latex_command,
-                    "-interaction=nonstopmode",
-                    "-halt-on-error",
-                    "-file-line-error",
-                    f"{tex_file_name}",
-                ], stdout=Subprocess.STREAM, stderr=Subprocess.STREAM)
-            try:
-                yield process.wait_for_exit()
-                self.finish("LaTeX compiled")
-            except CalledProcessError as err:
-                self.set_status(500)
-                self.log.error('LaTeX command errored with code: '
-                               + str(err.returncode))
-                out = yield process.stdout.read_until_close()
-                self.finish(out)
+            bibtex = self.bib_condition()
+            cmd_sequence = self.build_tex_cmd_sequence(tex_base_name, 
+                                                       run_bibtex=bibtex)
+            out = yield self.run_latex(cmd_sequence)
+        self.finish(out)
 
 def _jupyter_server_extension_paths():
     return [{
