@@ -30,7 +30,15 @@ class ErrorPanel extends Widget {
   }
 
   set text(value: string) {
-    ReactDOM.render(<LatexError text={value}/>, this.node);
+    ReactDOM.render(<LatexError text={value}/>, this.node, () => {this.update(); });
+  }
+
+  /**
+   * Handle an update request.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    const el = this.node.children[0];
+    el.scrollTop = el.scrollHeight;
   }
 
   /**

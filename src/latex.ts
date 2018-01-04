@@ -137,7 +137,10 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
             errorPanel = null;
           });
           // Add the error panel to the main area.
-          app.shell.addToMainArea(errorPanel, { ref: widget.id });
+          app.shell.addToMainArea(errorPanel, {
+            ref: widget.id,
+            mode: 'split-bottom'
+        });
         }
         errorPanel.text = err.message;
         pending = false;
@@ -160,13 +163,16 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
       // If there was an error, show the error panel
       // with the error log.
       errorPanel = Private.createErrorPanel();
-      errorPanel.text = err.message;
       // On disposal, set the reference to null
       errorPanel.disposed.connect( () => {
         errorPanel = null;
       });
       // Add the error panel to the main area.
-      app.shell.addToMainArea(errorPanel, { ref: widget.id });
+      app.shell.addToMainArea(errorPanel, {
+        ref: widget.id,
+        mode: 'split-bottom'
+      });
+      errorPanel.text = err.message;
     });
 
     const cleanupPreviews = () => {
