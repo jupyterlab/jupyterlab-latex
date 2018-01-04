@@ -4,7 +4,6 @@ import os
 import subprocess
 import glob
 import re
-import functools
 
 from contextlib import contextmanager
 from subprocess import PIPE
@@ -72,7 +71,7 @@ class LatexHandler(APIHandler):
     
     
     def build_tex_cmd_sequence(self, tex_base_name, run_bibtex=False):
-        """Builds Subprocess calls to LaTeX.
+        """Builds tuples that will be used to call LaTeX shell commands.
         
         Parameters
         ----------
@@ -81,9 +80,9 @@ class LatexHandler(APIHandler):
             extension.
             
         returns:
-            This is a sequence of parital functions of 
-            `tornado.process.Subprocess`, which are to be run sequentially
-
+            A list of tuples of strings to be passed to
+            `tornado.process.Subprocess`.
+            
         """
         c = LatexConfig(config=self.config)
         
@@ -108,11 +107,7 @@ class LatexHandler(APIHandler):
                 tuple(full_latex_sequence),
                 ]
                 
-        return [functools.partial(Subprocess, 
-                                  cmd, 
-                                  stdout=Subprocess.STREAM, 
-                                  stderr=Subprocess.STREAM) 
-                for cmd in command_sequence]
+        return command_sequence
                     
     def bib_condition(self):
         """Determines whether BiBTeX should be run.
@@ -132,9 +127,9 @@ class LatexHandler(APIHandler):
         
         Parameters
         ----------
-        command_sequence : list of func
-            This is a sequence of parital functions of 
-            `tornado.process.Subprocess`, which are to be run sequentially
+        command_sequence : list of tuples of strings
+            This is a sequence of tuples of strings to be passed to
+            `tornado.process.Subprocess`, which are to be run sequentially.
         
         Returns
         -------
@@ -151,15 +146,16 @@ class LatexHandler(APIHandler):
           there.
         
         """
-
         for cmd in command_sequence:
-            process = cmd()
+            process = Subprocess(cmd, 
+                                 stdout=Subprocess.STREAM, 
+                                 stderr=Subprocess.STREAM) 
             try:
                 yield process.wait_for_exit()
             except CalledProcessError as err:
                 self.set_status(500)
                 self.log.error((f'LaTeX command ' 
-                                 '`{" ".join(command_sequence[i])}` '
+                                 '`{" ".join(cmd)}` '
                                  'errored with code: ')
                                + str(err.returncode))
                 out = yield process.stdout.read_until_close()
