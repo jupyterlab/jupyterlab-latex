@@ -82,7 +82,6 @@ class RenderedPDF extends Widget implements IRenderMime.IRenderer {
       const cleanup = () => {
         // Release reference to any previous document.
         if (oldDocument) {
-          oldDocument.cleanup();
           oldDocument.destroy();
         }
         // Release reference to any previous object url.

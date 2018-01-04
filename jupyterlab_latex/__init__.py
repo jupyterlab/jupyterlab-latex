@@ -22,7 +22,7 @@ from notebook.base.handlers import APIHandler
 path_regex = r'(?P<path>(?:(?:/[^/]+)+|/?))'
 
 @contextmanager
-def latex_cleanup(workdir='.', whitelist=None):
+def latex_cleanup(workdir='.', whitelist=None, blacklist=None):
     """Context manager for changing directory and removing files when done.
     
     By default it works in the current directory, and removes all files that 
@@ -36,19 +36,30 @@ def latex_cleanup(workdir='.', whitelist=None):
         default is '.').
     whitelist = list or None, optional
         This is the set of files not present before running the LaTeX commands 
-        that are not to be removed when cleaning up.
+        that are not to be removed when cleaning up. Defaults to None.
+    blacklist = list or None, optional
+        This is the set of files present before running the LaTeX commands 
+        that need to be removed before cleaning up. Defaults to None.
     
     """
     orig_work_dir = os.getcwd()
     os.chdir(os.path.abspath(workdir))
+    
+    keep_files = set()
+    for fp in blacklist:
+        try:
+            os.remove(fp)
+            keep_files.add(fp)
+        except FileNotFoundError:
+            pass
 
-    if whitelist is None:
-        before = set(glob.glob("*"))
-    else:
-        before = set(glob.glob("*")).union(set(whitelist))
+    before = set(glob.glob("*"))
+    keep_files = keep_files.union(before, 
+                                  set(whitelist if whitelist else [])
+                                  )
     yield
     after = set(glob.glob("*"))
-    for fn in set(after-before):
+    for fn in set(after-keep_files):
         os.remove(fn)
     os.chdir(orig_work_dir)
 
@@ -154,9 +165,8 @@ class LatexHandler(APIHandler):
                 yield process.wait_for_exit()
             except CalledProcessError as err:
                 self.set_status(500)
-                self.log.error((f'LaTeX command ' 
-                                 '`{" ".join(cmd)}` '
-                                 'errored with code: ')
+                self.log.error((f'LaTeX command `{" ".join(cmd)}` '
+                                 'errored with code:\n ')
                                + str(err.returncode))
                 out = yield process.stdout.read_until_close()
                 return out
@@ -175,7 +185,8 @@ class LatexHandler(APIHandler):
         
         with latex_cleanup(
             workdir=os.path.dirname(tex_file_path),
-            whitelist=[tex_base_name+'.pdf'] 
+            whitelist=[tex_base_name+'.pdf'],
+            blacklist=[tex_base_name+'.aux']
             ):
             bibtex = self.bib_condition()
             cmd_sequence = self.build_tex_cmd_sequence(tex_base_name, 
