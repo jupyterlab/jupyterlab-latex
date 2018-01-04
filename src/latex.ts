@@ -103,9 +103,14 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
 
     let pdfContext: DocumentRegistry.IContext<DocumentRegistry.IModel>;
     let errorPanel: ErrorPanel | null = null;
+    let pending = false;
 
-    const onFileChanged = () => {
     // Hook up an event listener for when the '.tex' file is saved.
+    const onFileChanged = () => {
+      if (pending) {
+        return;
+      }
+      pending = true;
       latexRequest(texContext.path, serverSettings).then(() => {
         // Read the pdf file contents from disk.
         if (pdfContext) {
@@ -121,6 +126,7 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
         if (errorPanel) {
           errorPanel.close();
         }
+        pending = false;
       }).catch((err) => {
         // If there was an error, show the error panel
         // with the error log.
@@ -134,6 +140,7 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
           app.shell.addToMainArea(errorPanel, { ref: widget.id });
         }
         errorPanel.text = err.message;
+        pending = false;
       });
     };
 
