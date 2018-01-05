@@ -8,7 +8,7 @@ import re
 from contextlib import contextmanager
 from subprocess import PIPE
 
-import tornado.gen as gen
+from tornado import gen, web
 from tornado.httputil import url_concat
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest, HTTPError
 from tornado.process import Subprocess, CalledProcessError
@@ -132,6 +132,7 @@ class LatexHandler(APIHandler):
         return any([re.match(r'.*\.bib', x) for x in set(glob.glob("*"))])
 
     
+    @web.authenticated
     @gen.coroutine
     def run_latex(self, command_sequence):
         """Run commands sequentially, returning a 500 code on an error.
