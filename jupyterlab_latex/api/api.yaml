@@ -1,0 +1,27 @@
+openapi: 3.0.0
+info:
+  title: JupyterLab LaTeX Live Renderer
+  description: Handles requests from JupyterLab to render LaTeX documents as they are being written.
+  version: 0.1.0
+  
+paths:
+  /latex/{filePath}:
+    get:
+      summary: triggers a compilation on the .tex file located at the filePath.
+      parameters:
+        - name: filePath
+          in: path
+          required: true
+          description: The path to the .tex file relative to the root directory of jupyterlab.
+          schema:
+            type: string
+            format: uri
+      responses:
+        '200':
+          description: The document was successfully built.
+        '400':
+          description: The request did not specify a .tex file.
+        '404':
+          description: The request specified a file that does not exist.
+        '500':
+          description: The compilation steps for building the pdf had an error.
