@@ -22,7 +22,7 @@ from notebook.base.handlers import APIHandler
 path_regex = r'(?P<path>(?:(?:/[^/]+)+|/?))'
 
 @contextmanager
-def latex_cleanup(workdir='.', whitelist=None, blacklist=None):
+def latex_cleanup(workdir='.', whitelist=None, greylist=None):
     """Context manager for changing directory and removing files when done.
     
     By default it works in the current directory, and removes all files that 
@@ -37,16 +37,16 @@ def latex_cleanup(workdir='.', whitelist=None, blacklist=None):
     whitelist = list or None, optional
         This is the set of files not present before running the LaTeX commands 
         that are not to be removed when cleaning up. Defaults to None.
-    blacklist = list or None, optional
-        This is the set of files present before running the LaTeX commands 
-        that need to be removed before cleaning up. Defaults to None.
-    
+    greylist = list or None, optional
+        This is the set of files that need to be removed before running LaTeX 
+        commands but which, if present, will not by removed when cleaning up. 
+        Defaults to None.
     """
     orig_work_dir = os.getcwd()
     os.chdir(os.path.abspath(workdir))
     
     keep_files = set()
-    for fp in blacklist:
+    for fp in greylist:
         try:
             os.remove(fp)
             keep_files.add(fp)
@@ -181,17 +181,25 @@ class LatexHandler(APIHandler):
         """
         # Get access to the notebook config object
         tex_file_path = os.path.abspath(path.strip('/'))
-        tex_base_name = os.path.splitext(os.path.basename(tex_file_path))[0]
+        tex_base_name, ext = os.path.splitext(os.path.basename(tex_file_path))
         
-        with latex_cleanup(
-            workdir=os.path.dirname(tex_file_path),
-            whitelist=[tex_base_name+'.pdf'],
-            blacklist=[tex_base_name+'.aux']
-            ):
-            bibtex = self.bib_condition()
-            cmd_sequence = self.build_tex_cmd_sequence(tex_base_name, 
-                                                       run_bibtex=bibtex)
-            out = yield self.run_latex(cmd_sequence)
+        if not os.path.exists(tex_file_path):
+            self.set_status(404)
+            out = f"There is no file at `{tex_file_path}`."
+        elif ext != '.tex':
+            self.set_status(400)
+            out = (f"The file at `{tex_file_path}` does not end with .tex. "
+                    "You can only run LaTeX on a file ending with .tex.")
+        else:
+            with latex_cleanup(
+                workdir=os.path.dirname(tex_file_path),
+                whitelist=[tex_base_name+'.pdf'],
+                greylist=[tex_base_name+'.aux']
+                ):
+                bibtex = self.bib_condition()
+                cmd_sequence = self.build_tex_cmd_sequence(tex_base_name, 
+                                                           run_bibtex=bibtex)
+                out = yield self.run_latex(cmd_sequence)
         self.finish(out)
 
 def _jupyter_server_extension_paths():
