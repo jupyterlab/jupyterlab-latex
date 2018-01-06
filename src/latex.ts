@@ -105,6 +105,28 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
     let errorPanel: ErrorPanel | null = null;
     let pending = false;
 
+    const findOpenOrRevealPDF = () => {
+      let pdfWidget = manager.findWidget(pdfFilePath);
+      if (!pdfWidget) {
+        pdfWidget = manager.openOrReveal(pdfFilePath);
+      }
+      pdfContext = manager.contextForWidget(pdfWidget);
+      pdfContext.disposed.connect(cleanupPreviews);
+    };
+
+    const errorPanelInit = () => {
+      errorPanel = Private.createErrorPanel();
+      // On disposal, set the reference to null
+      errorPanel.disposed.connect(() => {
+        errorPanel = null;
+      });
+      // Add the error panel to the main area.
+      app.shell.addToMainArea(errorPanel, {
+        ref: widget.id,
+        mode: 'split-bottom'
+      });
+    };
+
     // Hook up an event listener for when the '.tex' file is saved.
     const onFileChanged = () => {
       if (pending) {
@@ -113,16 +135,7 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
       pending = true;
       latexRequest(texContext.path, serverSettings).then(() => {
         // Read the pdf file contents from disk.
-        if (pdfContext) {
-          pdfContext.revert();
-        } else {
-          let pdfWidget = manager.findWidget(pdfFilePath);
-          if (!pdfWidget) {
-            pdfWidget = manager.openOrReveal(pdfFilePath);
-          }
-          pdfContext = manager.contextForWidget(pdfWidget);
-          pdfContext.disposed.connect(cleanupPreviews);
-        }
+        pdfContext ? pdfContext.revert() : findOpenOrRevealPDF();
         if (errorPanel) {
           errorPanel.close();
         }
@@ -131,16 +144,7 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
         // If there was an error, show the error panel
         // with the error log.
         if (!errorPanel) {
-          errorPanel = Private.createErrorPanel();
-          // On disposal, set the reference to null
-          errorPanel.disposed.connect(() => {
-            errorPanel = null;
-          });
-          // Add the error panel to the main area.
-          app.shell.addToMainArea(errorPanel, {
-            ref: widget.id,
-            mode: 'split-bottom'
-        });
+          errorPanelInit();
         }
         errorPanel.text = err.message;
         pending = false;
@@ -153,25 +157,11 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
     // then open them.
     latexRequest(texContext.path, serverSettings).then(() => {
       // Open the pdf and get a handle on its document context.
-      let pdfWidget = manager.findWidget(pdfFilePath);
-      if (!pdfWidget) {
-        pdfWidget = manager.openOrReveal(pdfFilePath);
-      }
-      pdfContext = manager.contextForWidget(pdfWidget);
-      pdfContext.disposed.connect(cleanupPreviews);
+      findOpenOrRevealPDF();
     }).catch((err) => {
       // If there was an error, show the error panel
       // with the error log.
-      errorPanel = Private.createErrorPanel();
-      // On disposal, set the reference to null
-      errorPanel.disposed.connect( () => {
-        errorPanel = null;
-      });
-      // Add the error panel to the main area.
-      app.shell.addToMainArea(errorPanel, {
-        ref: widget.id,
-        mode: 'split-bottom'
-      });
+      errorPanelInit();
       errorPanel.text = err.message;
     });
 
