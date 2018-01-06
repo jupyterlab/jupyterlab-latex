@@ -117,7 +117,8 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
     const findOpenOrRevealPDF = () => {
       let pdfWidget = manager.findWidget(pdfFilePath);
       if (!pdfWidget) {
-        pdfWidget = manager.openOrReveal(pdfFilePath, 'PDFJS');
+        pdfWidget = manager.openOrReveal(pdfFilePath, 'PDFJS',undefined,
+          {'mode': 'split-right'});
       }
       pdfContext = manager.contextForWidget(pdfWidget);
       pdfContext.disposed.connect(cleanupPreviews);
