@@ -6,7 +6,7 @@ import setuptools
 setuptools.setup(
     name='jupyterlab_latex',
     description='A Jupyter Notebook server extension which acts as an endpoint for LaTeX.',
-    version='0.1.1',
+    version='0.1.0',
     packages=setuptools.find_packages(),
     author          = 'Jupyter Development Team',
     author_email    = 'jupyter@googlegroups.com',

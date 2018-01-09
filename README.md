@@ -12,7 +12,7 @@ an error panel will open detailing the LaTeX error.
 
 ## Requirements
 
-* JupyterLab 0.29
+* JupyterLab 0.31
 * An application that can compile `.tex` files to PDF on your notebook server (e.g., `pdflatex` or `xelatex`).
 
 ## Installation
@@ -20,11 +20,33 @@ an error panel will open detailing the LaTeX error.
 This extension includes both a notebook server extension (which interfaces with the LaTeX compiler)
 and a lab extension (which provides the UI for the LaTeX preview).
 In order to use it, you must enable both of them.
+
+To install the server extension, run the following in your terminal:
+```bash
+pip install jupyterlab_latex
+```
+
+To install the lab extension, run
+```bash
+jupyter labextension install jupyterlab-latex
+```
+
+## Installing from source
+
+You can also install from source in order to develop the extension.
+
 From the `jupyterlab-latex` directory, enter the following into your terminal:
 ```bash
 pip install .
-jupyter labextension install .
 jupyter serverextension enable jupyterlab_latex
+```
+This installs the server extension.
+
+Then, to install the lab extension, run
+```bash
+jlpm install
+jlpm run build
+jupyter labextension install .
 ```
 
 ## Customization
