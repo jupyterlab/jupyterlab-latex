@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/application';
 
 import {
+  InstanceTracker
+} from '@jupyterlab/apputils';
+
+import {
   IStateDB, PathExt, URLExt
 } from '@jupyterlab/coreutils';
 
@@ -33,6 +37,10 @@ import {
   ErrorPanel
 } from './error';
 
+import {
+  PDFJSViewer, PDFJSViewerFactory
+} from './pdf';
+
 import '../style/index.css';
 
 namespace CommandIDs {
@@ -57,7 +65,8 @@ const latexPlugin: JupyterLabPlugin<void> = {
  *
  * @returns a Promise resolved with the JSON response.
  */
-export function latexRequest(url: string, settings: ServerConnection.ISettings): Promise<any> {
+export
+function latexRequest(url: string, settings: ServerConnection.ISettings): Promise<any> {
   let fullUrl = URLExt.join(settings.baseUrl, 'latex', url);
 
   return ServerConnection.makeRequest(fullUrl, {}, settings).then(response => {
@@ -108,7 +117,7 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
     const findOpenOrRevealPDF = () => {
       let pdfWidget = manager.findWidget(pdfFilePath);
       if (!pdfWidget) {
-        pdfWidget = manager.openOrReveal(pdfFilePath);
+        pdfWidget = manager.openOrReveal(pdfFilePath, 'PDFJS');
       }
       pdfContext = manager.contextForWidget(pdfWidget);
       pdfContext.disposed.connect(cleanupPreviews);
@@ -219,7 +228,66 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
   return;
 }
 
-export default latexPlugin;
+/**
+ * The list of file types for pdfs.
+ */
+const FILE_TYPES = [
+  'PDF'
+];
+
+/**
+ * The name of the factory that creates pdf widgets.
+ */
+const FACTORY = 'PDFJS';
+
+/**
+ * The pdf file handler extension.
+ */
+const pdfjsPlugin: JupyterLabPlugin<void> = {
+  activate: activatePDFJS,
+  id: '@jupyterlab/pdfjs-extension:plugin',
+  requires: [ ILayoutRestorer ],
+  autoStart: true
+};
+
+function activatePDFJS(app: JupyterLab, restorer: ILayoutRestorer): void {
+  const namespace = 'pdfjs-widget';
+  const factory = new PDFJSViewerFactory({
+    name: FACTORY,
+    modelName: 'base64',
+    fileTypes: FILE_TYPES,
+    readOnly: true
+  });
+  const tracker = new InstanceTracker<PDFJSViewer>({ namespace });
+
+  // Handle state restoration.
+  restorer.restore(tracker, {
+    command: 'docmanager:open',
+    args: widget => ({ path: widget.context.path, factory: FACTORY }),
+    name: widget => widget.context.path
+  });
+
+  app.docRegistry.addWidgetFactory(factory);
+
+  factory.widgetCreated.connect((sender, widget) => {
+    // Notify the instance tracker if restore data needs to update.
+    widget.context.pathChanged.connect(() => { tracker.save(widget); });
+    tracker.add(widget);
+
+    const types = app.docRegistry.getFileTypesForPath(widget.context.path);
+
+    if (types.length > 0) {
+      widget.title.iconClass = types[0].iconClass;
+      widget.title.iconLabel = types[0].iconLabel;
+    }
+  });
+}
+
+/**
+ * Export the plugins as default.
+ */
+const plugins: JupyterLabPlugin<any>[] = [ latexPlugin, pdfjsPlugin ];
+export default plugins;
 
 /**
  * A namespace for private module data.

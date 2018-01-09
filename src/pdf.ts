@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  PromiseDelegate
+} from '@phosphor/coreutils';
+
+import {
   Message
 } from '@phosphor/messaging';
 
@@ -10,8 +14,12 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IRenderMime
-} from '@jupyterlab/rendermime-interfaces';
+  PathExt
+} from '@jupyterlab/coreutils';
+
+import {
+  ABCWidgetFactory, DocumentRegistry
+} from '@jupyterlab/docregistry';
 
 import 'pdfjs-dist/webpack';
 import 'pdfjs-dist/web/pdf_viewer';
@@ -48,20 +56,64 @@ declare const PDFJS: any;
  * A class for rendering a PDF document.
  */
 export
-class RenderedPDF extends Widget implements IRenderMime.IRenderer {
-  constructor() {
+class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
+  constructor(context: DocumentRegistry.Context) {
     super({ node: Private.createNode() });
+    this.context = context;
     this._pdfViewer = new PDFJS.PDFViewer({
         container: this.node,
     });
+
+    this._onTitleChanged();
+    context.pathChanged.connect(this._onTitleChanged, this);
+
+    context.ready.then(() => {
+      if (this.isDisposed) {
+        return;
+      }
+      this._render().then(() => {
+        this._ready.resolve(void 0);
+      });
+      context.model.contentChanged.connect(this.update, this);
+      context.fileChanged.connect(this.update, this);
+    });
+  }
+
+  /**
+   * The pdfjs widget's context.
+   */
+  readonly context: DocumentRegistry.Context;
+
+  /**
+   * A promise that resolves when the pdf viewer is ready.
+   */
+  get ready(): Promise<void> {
+    return this._ready.promise;
+  }
+
+  /**
+   * Dispose of the resources held by the pdf widget.
+   */
+  dispose() {
+    try {
+      URL.revokeObjectURL(this._objectUrl);
+    } catch (error) { /* no-op */ }
+    super.dispose();
+  }
+
+  /**
+   * Handle a change to the title.
+   */
+  private _onTitleChanged(): void {
+    this.title.label = PathExt.basename(this.context.localPath);
   }
 
   /**
    * Render PDF into this widget's node.
    */
-  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+  private _render(): Promise<void> {
     return new Promise<void>(resolve => {
-      let data = model.data[MIME_TYPE] as string;
+      let data = this.context.model.toString();
       // If there is no data, do nothing.
       if (!data) {
         resolve (void 0);
@@ -109,16 +161,6 @@ class RenderedPDF extends Widget implements IRenderMime.IRenderer {
   }
 
   /**
-   * Dispose of the resources held by the pdf widget.
-   */
-  dispose() {
-    try {
-      URL.revokeObjectURL(this._objectUrl);
-    } catch (error) { /* no-op */ }
-    super.dispose();
-  }
-
-  /**
    * Handle DOM events for the widget.
    */
   handleEvent(event: Event): void {
@@ -158,6 +200,16 @@ class RenderedPDF extends Widget implements IRenderMime.IRenderer {
   }
 
   /**
+   * Handle `update-request` messages for the widget.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    if (this.isDisposed || !this.context.isReady) {
+      return;
+    }
+    this._render();
+  }
+
+  /**
    * Fit the PDF to the widget width.
    */
   private _resize(): void {
@@ -166,41 +218,24 @@ class RenderedPDF extends Widget implements IRenderMime.IRenderer {
     }
   }
 
+  private _ready = new PromiseDelegate<void>();
   private _objectUrl = '';
   private _pdfViewer: any;
   private _pdfDocument: any;
 }
 
-
 /**
- * A mime renderer factory for PDF data.
+ * A widget factory for images.
  */
 export
-const rendererFactory: IRenderMime.IRendererFactory = {
-  safe: false,
-  mimeTypes: [MIME_TYPE],
-  createRenderer: options => new RenderedPDF()
-};
-
-
-const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
-  {
-    id: '@jupyterlab/pdfjs-extension:factory',
-    rendererFactory,
-    rank: 0,
-    dataType: 'string',
-    documentWidgetFactoryOptions: {
-      name: 'PDFJS',
-      modelName: 'base64',
-      primaryFileType: 'PDF',
-      fileTypes: ['PDF'],
-      defaultFor: ['PDF']
-    }
+class PDFJSViewerFactory extends ABCWidgetFactory<PDFJSViewer, DocumentRegistry.IModel> {
+  /**
+   * Create a new widget given a context.
+   */
+  protected createNewWidget(context: DocumentRegistry.IContext<DocumentRegistry.IModel>): PDFJSViewer {
+    return new PDFJSViewer(context);
   }
-];
-
-export default extensions;
-
+}
 
 /**
  * A namespace for PDF widget private data.

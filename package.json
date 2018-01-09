@@ -19,8 +19,7 @@
     "latex"
   ],
   "jupyterlab": {
-    "extension": "lib/latex",
-    "mimeExtension": "lib/pdf"
+    "extension": "lib/index.js"
   },
   "scripts": {
     "build": "tsc",
@@ -31,7 +30,7 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^0.14.0",
-    "@jupyterlab/apputils": "^0.14.0",
+    "@jupyterlab/apputils": "^0.14.1",
     "@jupyterlab/coreutils": "^1.0.1",
     "@jupyterlab/docmanager": "^0.14.0",
     "@jupyterlab/docregistry": "^0.14.0",
@@ -46,10 +45,10 @@
   },
   "devDependencies": {
     "@types/pdfjs-dist": "^0.1.0",
-    "rimraf": "^2.5.2",
-    "typescript": "~2.4.1",
     "@types/react": "~16.0.19",
-    "@types/react-dom": "~16.0.2"
+    "@types/react-dom": "~16.0.2",
+    "rimraf": "^2.5.2",
+    "typescript": "~2.4.1"
   },
   "repository": {
     "type": "git",
