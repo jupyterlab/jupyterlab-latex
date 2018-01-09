@@ -92,17 +92,9 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
   }
 
   /**
-   * Whether the widget has been disposed.
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
-
-  /**
    * Dispose of the resources held by the pdf widget.
    */
   dispose() {
-    this._isDisposed = true;
     try {
       URL.revokeObjectURL(this._objectUrl);
     } catch (error) { /* no-op */ }
@@ -227,7 +219,6 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
   }
 
   private _ready = new PromiseDelegate<void>();
-  private _isDisposed = false;
   private _objectUrl = '';
   private _pdfViewer: any;
   private _pdfDocument: any;
