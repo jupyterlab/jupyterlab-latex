@@ -15,7 +15,7 @@ setuptools.setup(
     license         = 'BSD',
     platforms       = "Linux, Mac OS X, Windows",
     keywords        = ['Jupyter', 'JupyterLab', 'LaTeX'],
-    python_requires = '>=3.4',
+    python_requires = '>=3.6',
     classifiers     = [
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
