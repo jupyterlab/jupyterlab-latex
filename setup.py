@@ -4,12 +4,24 @@ Setup module for the jupyterlab-latex
 from __future__ import print_function
 
 import setuptools
-from setupbase import ensure_python
+from setupbase import (
+    create_cmdclass, ensure_python, find_packages
+    )
+
+ensure_python(['>=3.6'])
+
+data_files_spec = [
+    ('etc/jupyter/jupyter_notebook_config.d',
+     'jupyter-config/jupyter_notebook_config.d', 'jupyterlab_latex.json'),
+]
+
+cmdclass = create_cmdclass(data_files_spec=data_files_spec)
 
 setup_dict = dict(
     name='jupyterlab_latex',
     description='A Jupyter Notebook server extension which acts as an endpoint for LaTeX.',
-    packages=setuptools.find_packages(),
+    packages=find_packages(),
+    cmdclass=cmdclass,
     author          = 'Jupyter Development Team',
     author_email    = 'jupyter@googlegroups.com',
     url             = 'http://jupyter.org',
@@ -27,8 +39,7 @@ setup_dict = dict(
     ],
     install_requires=[
         'notebook'
-    ],
-    package_data={'jupyterlab_latex':['api/*']},
+    ]
 )
 
 try:
@@ -42,8 +53,8 @@ except ValueError as e:
 
 from jupyterlab_latex import __version__
 
-        
-    
+
+
 
 setuptools.setup(
     version=__version__,
