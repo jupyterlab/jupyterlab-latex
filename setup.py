@@ -2,7 +2,16 @@
 Setup module for the jupyterlab-latex
 """
 import setuptools
-from jupyterlab_latex import __version__
+from setupbase import ensure_python
+try:
+    from jupyterlab_latex import __version__
+except SyntaxError:
+    # If there was a syntax error, it is probably
+    # due to an older python than we support, so
+    # check that for a more meaningful error message.
+    ensure_python(['>=3.6'])
+
+ensure_python(['>=3.6'])
 
 setuptools.setup(
     name='jupyterlab_latex',
