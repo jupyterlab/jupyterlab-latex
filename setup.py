@@ -5,7 +5,10 @@ import setuptools
 from setupbase import ensure_python
 try:
     from jupyterlab_latex import __version__
-except:
+except SyntaxError:
+    # If there was a syntax error, it is probably
+    # due to an older python than we support, so
+    # check that for a more meaningful error message.
     ensure_python(['>=3.6'])
 
 ensure_python(['>=3.6'])
