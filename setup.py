@@ -1,8 +1,6 @@
 """
 Setup module for the jupyterlab-latex
 """
-from __future__ import print_function
-
 import setuptools
 from setupbase import ensure_python
 
