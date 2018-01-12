@@ -1,13 +1,14 @@
 """
 Setup module for the jupyterlab-latex
 """
-import setuptools
-from jupyterlab_latex import __version__
+from __future__ import print_function
 
-setuptools.setup(
+import setuptools
+from setupbase import ensure_python
+
+setup_dict = dict(
     name='jupyterlab_latex',
     description='A Jupyter Notebook server extension which acts as an endpoint for LaTeX.',
-    version=__version__,
     packages=setuptools.find_packages(),
     author          = 'Jupyter Development Team',
     author_email    = 'jupyter@googlegroups.com',
@@ -27,5 +28,24 @@ setuptools.setup(
     install_requires=[
         'notebook'
     ],
-    package_data={'jupyterlab_latex':['*']},
+    package_data={'jupyterlab_latex':['api/*']},
+)
+
+try:
+    ensure_python(setup_dict["python_requires"].split(','))
+except ValueError as e:
+    raise  ValueError("{:s}, to use {} you must use python {} ".format(
+                          e,
+                          setup_dict["name"],
+                          setup_dict["python_requires"])
+                     )
+
+from jupyterlab_latex import __version__
+
+        
+    
+
+setuptools.setup(
+    version=__version__,
+    **setup_dict
 )
