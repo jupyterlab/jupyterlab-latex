@@ -8,8 +8,6 @@ from setupbase import (
     create_cmdclass, ensure_python, find_packages
     )
 
-ensure_python(['>=3.6'])
-
 data_files_spec = [
     ('etc/jupyter/jupyter_notebook_config.d',
      'jupyter-config/jupyter_notebook_config.d', 'jupyterlab_latex.json'),
@@ -52,9 +50,6 @@ except ValueError as e:
                      )
 
 from jupyterlab_latex import __version__
-
-
-
 
 setuptools.setup(
     version=__version__,
