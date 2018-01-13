@@ -33,7 +33,7 @@ jupyter serverextension enable --sys-prefix jupyterlab_latex
 
 To install the lab extension, run
 ```bash
-jupyter labextension install jupyterlab-latex
+jupyter labextension install @jupyterlab/latex
 ```
 
 ## Installing from source
