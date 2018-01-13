@@ -8,10 +8,11 @@ from setupbase import (
     create_cmdclass, ensure_python, find_packages
     )
 
-data_files_spec = [
-    ('etc/jupyter/jupyter_notebook_config.d',
-     'jupyter-config/jupyter_notebook_config.d', 'jupyterlab_latex.json'),
-]
+data_files_spec = [(
+    'etc/jupyter/jupyter_notebook_config.d',
+    'jupyter-config/jupyter_notebook_config.d',
+    'jupyterlab_latex.json'
+),]
 
 cmdclass = create_cmdclass(data_files_spec=data_files_spec)
 
@@ -37,7 +38,8 @@ setup_dict = dict(
     ],
     install_requires=[
         'notebook'
-    ]
+    ],
+    package_data={'jupyterlab_latex':['api/*']},
 )
 
 try:
