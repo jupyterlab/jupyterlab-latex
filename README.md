@@ -26,6 +26,11 @@ To install the server extension, run the following in your terminal:
 pip install jupyterlab_latex
 ```
 
+If you are running Notebook 5.2 or earlier, enable the server extension by running
+```bash
+jupyter serverextension enable --sys-prefix jupyterlab_latex
+```
+
 To install the lab extension, run
 ```bash
 jupyter labextension install jupyterlab-latex
@@ -38,9 +43,13 @@ You can also install from source in order to develop the extension.
 From the `jupyterlab-latex` directory, enter the following into your terminal:
 ```bash
 pip install .
-jupyter serverextension enable jupyterlab_latex
 ```
 This installs the server extension.
+
+If you are running Notebook 5.2 or earlier, enable the server extension by running
+```bash
+jupyter serverextension enable --sys-prefix jupyterlab_latex
+```
 
 Then, to install the lab extension, run
 ```bash
