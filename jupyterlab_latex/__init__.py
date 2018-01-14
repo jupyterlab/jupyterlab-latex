@@ -13,7 +13,7 @@ from tornado.httputil import url_concat
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest, HTTPError
 from tornado.process import Subprocess, CalledProcessError
 
-from traitlets import Unicode
+from traitlets import Unicode, Bool
 from traitlets.config import Configurable
 
 from notebook.utils import url_path_join
@@ -75,6 +75,9 @@ class LatexConfig(Configurable):
         help='The LaTeX command to use when compiling ".tex" files.')
     bib_command = Unicode('bibtex', config=True,
         help='The BibTeX command to use when compiling ".tex" files.')
+    allow_shell_escape = Bool(False, config=True,
+        help='Whether to allow shell escapes '+\
+             '(and by extension, arbitrary code execution)')
 
 
 class LatexHandler(APIHandler):
@@ -101,6 +104,7 @@ class LatexHandler(APIHandler):
 
         full_latex_sequence = (
             c.latex_command,
+            "-shell-escape" if c.allow_shell_escape else "-no-shell-escape",
             "-interaction=nonstopmode",
             "-halt-on-error",
             "-file-line-error",
