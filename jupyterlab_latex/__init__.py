@@ -4,7 +4,6 @@ import json
 import os
 import glob
 import re
-import enum
 
 from contextlib import contextmanager
 from subprocess import PIPE
@@ -14,7 +13,7 @@ from tornado.httputil import url_concat
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest, HTTPError
 from tornado.process import Subprocess, CalledProcessError
 
-from traitlets import Unicode, UseEnum
+from traitlets import Unicode, CaselessStrEnum
 from traitlets.config import Configurable
 
 from notebook.utils import url_path_join
@@ -66,10 +65,6 @@ def latex_cleanup(workdir='.', whitelist=None, greylist=None):
         os.remove(fn)
     os.chdir(orig_work_dir)
 
-class LatexShellEscape(enum.Enum):
-    restricted = 1
-    allow = 2
-    disallow = 3
 
 class LatexConfig(Configurable):
     """
@@ -80,8 +75,8 @@ class LatexConfig(Configurable):
         help='The LaTeX command to use when compiling ".tex" files.')
     bib_command = Unicode('bibtex', config=True,
         help='The BibTeX command to use when compiling ".tex" files.')
-    shell_escape = UseEnum(LatexShellEscape,
-        default_value=LatexShellEscape.restricted, config=True,
+    shell_escape = CaselessStrEnum(['restricted', 'allow', 'disallow'],
+        default_value='restricted', config=True,
         help='Whether to allow shell escapes '+\
         '(and by extension, arbitrary code execution). '+\
         'Can be "restricted", for restricted shell escapes, '+\
@@ -111,9 +106,9 @@ class LatexHandler(APIHandler):
         c = LatexConfig(config=self.config)
 
         escape_flag = ''
-        if c.shell_escape == LatexShellEscape.allow:
+        if c.shell_escape == 'allow':
             escape_flag = '-shell-escape'
-        if c.shell_escape == LatexShellEscape.disallow:
+        if c.shell_escape == 'disallow':
             escape_flag = '-no-shell-escape'
         full_latex_sequence = [
             c.latex_command,
