@@ -4,6 +4,7 @@ import json
 import os
 import glob
 import re
+import enum
 
 from contextlib import contextmanager
 from subprocess import PIPE
@@ -13,7 +14,7 @@ from tornado.httputil import url_concat
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest, HTTPError
 from tornado.process import Subprocess, CalledProcessError
 
-from traitlets import Unicode, Bool
+from traitlets import Unicode, UseEnum
 from traitlets.config import Configurable
 
 from notebook.utils import url_path_join
@@ -65,6 +66,10 @@ def latex_cleanup(workdir='.', whitelist=None, greylist=None):
         os.remove(fn)
     os.chdir(orig_work_dir)
 
+class LatexShellEscape(enum.Enum):
+    restricted = 1
+    allow = 2
+    disallow = 3
 
 class LatexConfig(Configurable):
     """
@@ -75,16 +80,19 @@ class LatexConfig(Configurable):
         help='The LaTeX command to use when compiling ".tex" files.')
     bib_command = Unicode('bibtex', config=True,
         help='The BibTeX command to use when compiling ".tex" files.')
-    allow_shell_escape = Bool(False, config=True,
+    shell_escape = UseEnum(LatexShellEscape,
+        default_value=LatexShellEscape.restricted, config=True,
         help='Whether to allow shell escapes '+\
-             '(and by extension, arbitrary code execution)')
+        '(and by extension, arbitrary code execution). '+\
+        'Can be "restricted", for restricted shell escapes, '+\
+        '"allow", to allow all shell escapes, or "disallow", '+\
+        'to disallow all shell escapes')
 
 
 class LatexHandler(APIHandler):
     """
     A handler that runs LaTeX on the server.
     """
-
 
     def build_tex_cmd_sequence(self, tex_base_name, run_bibtex=False):
         """Builds tuples that will be used to call LaTeX shell commands.
@@ -102,14 +110,22 @@ class LatexHandler(APIHandler):
         """
         c = LatexConfig(config=self.config)
 
-        full_latex_sequence = (
+        escape_flag = ''
+        if c.shell_escape == LatexShellEscape.allow:
+            escape_flag = '-shell-escape'
+        if c.shell_escape == LatexShellEscape.disallow:
+            escape_flag = '-no-shell-escape'
+        full_latex_sequence = [
             c.latex_command,
-            "-shell-escape" if c.allow_shell_escape else "-no-shell-escape",
             "-interaction=nonstopmode",
             "-halt-on-error",
             "-file-line-error",
-            f"{tex_base_name}",
-            )
+            ]
+        if escape_flag != '':
+            full_latex_sequence.append(escape_flag)
+
+        full_latex_sequence.append(f"{tex_base_name}")
+
         full_bibtex_sequence = (
             c.bib_command,
             f"{tex_base_name}",
