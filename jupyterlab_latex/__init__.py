@@ -6,12 +6,10 @@ import glob
 import re
 
 from contextlib import contextmanager
-from subprocess import PIPE
 
 from tornado import gen, web
 from tornado.httputil import url_concat
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest, HTTPError
-from tornado.process import Subprocess, CalledProcessError
 
 from traitlets import Unicode
 from traitlets.config import Configurable
@@ -94,7 +92,7 @@ class LatexHandler(APIHandler):
             
         returns:
             A list of tuples of strings to be passed to
-            `tornado.process.Subprocess`.
+            `subprocess.run`.
             
         """
         c = LatexConfig(config=self.config)
@@ -135,7 +133,6 @@ class LatexHandler(APIHandler):
 
     
     @web.authenticated
-    @gen.coroutine
     def run_latex(self, command_sequence):
         """Run commands sequentially, returning a 500 code on an error.
         
@@ -143,7 +140,7 @@ class LatexHandler(APIHandler):
         ----------
         command_sequence : list of tuples of strings
             This is a sequence of tuples of strings to be passed to
-            `tornado.process.Subprocess`, which are to be run sequentially.
+            `subprocess.run`, which are to be run sequentially.
         
         Returns
         -------
@@ -152,7 +149,7 @@ class LatexHandler(APIHandler):
         
         Raises
         ------
-        tornado.process.CalledProcessError
+        subrocess.CalledProcessError
         
         Notes
         -----
@@ -161,23 +158,20 @@ class LatexHandler(APIHandler):
         
         """
         for cmd in command_sequence:
-            process = Subprocess(cmd, 
-                                 stdout=Subprocess.STREAM, 
-                                 stderr=Subprocess.STREAM) 
             try:
-                yield process.wait_for_exit()
-            except CalledProcessError as err:
+                process = subprocess.run(cmd, stdout=subprocess.PIPE)
+                process.check_returncode()
+            except subprocess.CalledProcessError as err:
                 self.set_status(500)
                 self.log.error((f'LaTeX command `{" ".join(cmd)}` '
                                  'errored with code:\n ')
                                + str(err.returncode))
-                out = yield process.stdout.read_until_close()
+                out = str(process.stdout)
                 return out
                 
         return "LaTeX compiled"
 
     
-    @gen.coroutine
     def get(self, path = ''):
         """
         Given a path, run LaTeX, cleanup, and respond when done.
@@ -202,7 +196,7 @@ class LatexHandler(APIHandler):
                 bibtex = self.bib_condition()
                 cmd_sequence = self.build_tex_cmd_sequence(tex_base_name, 
                                                            run_bibtex=bibtex)
-                out = yield self.run_latex(cmd_sequence)
+                out = self.run_latex(cmd_sequence)
         self.finish(out)
 
 def _jupyter_server_extension_paths():
@@ -218,5 +212,7 @@ def load_jupyter_server_extension(nb_server_app):
         nb_server_app (NotebookWebApplication): handle to the Notebook webserver instance.
     """
     web_app = nb_server_app.web_app
-    host_pattern = '.*$'
-    web_app.add_handlers(host_pattern, [(r'/latex%s' % path_regex, LatexHandler)])
+    base_url = web_app.settings['base_url']
+    endpoint = url_path_join(base_url, 'latex')
+    handlers = [(endpoint + "(.*)", LatexHandler)]
+    web_app.add_handlers('.*$', handlers)
