@@ -110,16 +110,14 @@ class LatexHandler(APIHandler):
             escape_flag = '-shell-escape'
         if c.shell_escape == 'disallow':
             escape_flag = '-no-shell-escape'
-        full_latex_sequence = [
+        full_latex_sequence = list(filter(lambda x: x != '', [
             c.latex_command,
+            escape_flag,
             "-interaction=nonstopmode",
             "-halt-on-error",
             "-file-line-error",
-            ]
-        if escape_flag != '':
-            full_latex_sequence.append(escape_flag)
-
-        full_latex_sequence.append(f"{tex_base_name}")
+            f"{tex_base_name}"
+            ]))
 
         full_bibtex_sequence = (
             c.bib_command,
