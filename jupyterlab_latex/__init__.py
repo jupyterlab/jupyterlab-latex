@@ -221,22 +221,22 @@ class LatexHandler(APIHandler):
                 out = yield self.run_latex(cmd_sequence)
         self.finish(out)
 
-"""
-Run a command using the synchronous `subprocess.run`.
-The asynchronous `run_command_async` should be preferred,
-but does not work on Windows, so use this as a fallback.
-
-Parameters
-----------
-iterable
-    An iterable of command-line arguments to run in the subprocess.
-
-Returns
--------
-A tuple containing the (return code, stdout)
-"""
 @gen.coroutine
 def run_command_sync(cmd):
+    """
+    Run a command using the synchronous `subprocess.run`.
+    The asynchronous `run_command_async` should be preferred,
+    but does not work on Windows, so use this as a fallback.
+
+    Parameters
+    ----------
+    iterable
+        An iterable of command-line arguments to run in the subprocess.
+
+    Returns
+    -------
+    A tuple containing the (return code, stdout)
+    """
     try:
         process = subprocess.run(cmd, stdout=subprocess.PIPE)
         process.check_returncode()
@@ -247,20 +247,20 @@ def run_command_sync(cmd):
         out = str(process.stdout)
     return (code, out)
 
-"""
-Run a command using the asynchronous `tornado.process.Subprocess`.
-
-Parameters
-----------
-iterable
-    An iterable of command-line arguments to run in the subprocess.
-
-Returns
--------
-A tuple containing the (return code, stdout)
-"""
 @gen.coroutine
 def run_command_async(cmd):
+    """
+    Run a command using the asynchronous `tornado.process.Subprocess`.
+
+    Parameters
+    ----------
+    iterable
+        An iterable of command-line arguments to run in the subprocess.
+
+    Returns
+    -------
+    A tuple containing the (return code, stdout)
+    """
     process = Subprocess(cmd,
                          stdout=Subprocess.STREAM,
                          stderr=Subprocess.STREAM)
