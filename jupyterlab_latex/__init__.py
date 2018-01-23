@@ -167,10 +167,6 @@ class LatexHandler(APIHandler):
         string
             Response is either a success or an error string.
 
-        Raises
-        ------
-        subprocess.CalledProcessError
-
         Notes
         -----
         - LaTeX processes only print to stdout, so errors are gathered from
@@ -180,32 +176,18 @@ class LatexHandler(APIHandler):
         # Windows does not support async subprocesses, so
         # use a synchronous system calls.
         if sys.platform == 'win32':
-            for cmd in command_sequence:
-                try:
-                    process = subprocess.run(cmd, stdout=subprocess.PIPE)
-                    process.check_returncode()
-                except subprocess.CalledProcessError as err:
-                    self.set_status(500)
-                    self.log.error((f'LaTeX command `{" ".join(cmd)}` '
-                                     'errored with code:\n ')
-                                   + str(err.returncode))
-                    out = str(process.stdout)
-                    return out
-
+            run_command = run_command_sync
         else:
-            for cmd in command_sequence:
-                process = Subprocess(cmd,
-                                     stdout=Subprocess.STREAM,
-                                     stderr=Subprocess.STREAM)
-                try:
-                    yield process.wait_for_exit()
-                except CalledProcessError as err:
-                    self.set_status(500)
-                    self.log.error((f'LaTeX command `{" ".join(cmd)}` '
-                                     'errored with code:\n ')
-                                   + str(err.returncode))
-                    out = yield process.stdout.read_until_close()
-                    return out
+            run_command = run_command_async
+
+        for cmd in command_sequence:
+            code, output = yield run_command(cmd)
+            if code != 0:
+                self.set_status(500)
+                self.log.error((f'LaTeX command `{" ".join(cmd)}` '
+                                 'errored with code:\n ')
+                               + str(code))
+                return output
 
         return "LaTeX compiled"
 
@@ -238,6 +220,59 @@ class LatexHandler(APIHandler):
                                                            run_bibtex=bibtex)
                 out = yield self.run_latex(cmd_sequence)
         self.finish(out)
+
+"""
+Run a command using the synchronous `subprocess.run`.
+The asynchronous `run_command_async` should be preferred,
+but does not work on Windows, so use this as a fallback.
+
+Parameters
+----------
+iterable
+    An iterable of command-line arguments to run in the subprocess.
+
+Returns
+-------
+A tuple containing the (return code, stdout)
+"""
+@gen.coroutine
+def run_command_sync(cmd):
+    try:
+        process = subprocess.run(cmd, stdout=subprocess.PIPE)
+        process.check_returncode()
+        code = process.returncode
+        out = str(process.stdout)
+    except subprocess.CalledProcessError as err:
+        code = process.returncode
+        out = str(process.stdout)
+    return (code, out)
+
+"""
+Run a command using the asynchronous `tornado.process.Subprocess`.
+
+Parameters
+----------
+iterable
+    An iterable of command-line arguments to run in the subprocess.
+
+Returns
+-------
+A tuple containing the (return code, stdout)
+"""
+@gen.coroutine
+def run_command_async(cmd):
+    process = Subprocess(cmd,
+                         stdout=Subprocess.STREAM,
+                         stderr=Subprocess.STREAM)
+    try:
+        yield process.wait_for_exit()
+    except CalledProcessError as err:
+        pass
+    code = process.returncode
+    out = yield process.stdout.read_until_close()
+    return (code, out)
+
+
 
 def _jupyter_server_extension_paths():
     return [{
