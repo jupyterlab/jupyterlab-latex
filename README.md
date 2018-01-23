@@ -66,3 +66,23 @@ your `jupyter_notebook_config.py` file:
 ```python
 c.LatexConfig.latex_command = 'pdflatex'
 ```
+
+The extension defaults to running `bibtex` for generating a bibliography
+if a `.bib` file is found. You can also configure the bibliography command
+by setting
+```python
+c.LatexConfig.bibtex_command = '<custom_bib_command>'
+```
+
+LaTeX files have the ability to run arbitrary code by triggering external
+shell commands. This is a security risk, and so most LaTeX distributions
+restrict the commands that you can run in the shell.
+
+You can customize the behavior by setting the `LatexConfig.shell_escape` value.
+It can take three values: `"restricted"` (default) to allow only commands
+considered safe to be executed, `"allow"` to allow all commands, and `"disallow"`
+to disallow all commands.
+For example, to force your LaTeX distribution to run any command, use:
+```python
+c.LatexConfig.shell_escape = "allow"
+```
