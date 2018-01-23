@@ -1,12 +1,13 @@
 """ JupyterLab LaTex : live LaTeX editing for JupyterLab """
 
+import glob
 import json
 import os
-import glob
 import re
+import subprocess
+import sys
 
 from contextlib import contextmanager
-from subprocess import PIPE
 
 from tornado import gen, web
 from tornado.httputil import url_concat
@@ -149,7 +150,6 @@ class LatexHandler(APIHandler):
         return any([re.match(r'.*\.bib', x) for x in set(glob.glob("*"))])
 
 
-    @web.authenticated
     @gen.coroutine
     def run_latex(self, command_sequence):
         """Run commands sequentially, returning a 500 code on an error.
@@ -159,6 +159,8 @@ class LatexHandler(APIHandler):
         command_sequence : list of tuples of strings
             This is a sequence of tuples of strings to be passed to
             `tornado.process.Subprocess`, which are to be run sequentially.
+            On Windows, `tornado.process.Subprocess` is unavailable, so
+            we use the synchronous `subprocess.run`.
 
         Returns
         -------
@@ -167,7 +169,7 @@ class LatexHandler(APIHandler):
 
         Raises
         ------
-        tornado.process.CalledProcessError
+        subprocess.CalledProcessError
 
         Notes
         -----
@@ -175,23 +177,40 @@ class LatexHandler(APIHandler):
           there.
 
         """
-        for cmd in command_sequence:
-            process = Subprocess(cmd, 
-                                 stdout=Subprocess.STREAM,
-                                 stderr=Subprocess.STREAM)
-            try:
-                yield process.wait_for_exit()
-            except CalledProcessError as err:
-                self.set_status(500)
-                self.log.error((f'LaTeX command `{" ".join(cmd)}` '
-                                 'errored with code:\n ')
-                               + str(err.returncode))
-                out = yield process.stdout.read_until_close()
-                return out
+        # Windows does not support async subprocesses, so
+        # use a synchronous system calls.
+        if sys.platform == 'win32':
+            for cmd in command_sequence:
+                try:
+                    process = subprocess.run(cmd, stdout=subprocess.PIPE)
+                    process.check_returncode()
+                except subprocess.CalledProcessError as err:
+                    self.set_status(500)
+                    self.log.error((f'LaTeX command `{" ".join(cmd)}` '
+                                     'errored with code:\n ')
+                                   + str(err.returncode))
+                    out = str(process.stdout)
+                    return out
+
+        else:
+            for cmd in command_sequence:
+                process = Subprocess(cmd,
+                                     stdout=Subprocess.STREAM,
+                                     stderr=Subprocess.STREAM)
+                try:
+                    yield process.wait_for_exit()
+                except CalledProcessError as err:
+                    self.set_status(500)
+                    self.log.error((f'LaTeX command `{" ".join(cmd)}` '
+                                     'errored with code:\n ')
+                                   + str(err.returncode))
+                    out = yield process.stdout.read_until_close()
+                    return out
 
         return "LaTeX compiled"
 
 
+    @web.authenticated
     @gen.coroutine
     def get(self, path = ''):
         """
