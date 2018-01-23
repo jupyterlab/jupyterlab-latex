@@ -21,8 +21,6 @@ from notebook.base.handlers import APIHandler
 
 path_regex = r'(?P<path>(?:(?:/[^/]+)+|/?))'
 
-__version__ = '0.1.0'
-
 @contextmanager
 def latex_cleanup(workdir='.', whitelist=None, greylist=None):
     """Context manager for changing directory and removing files when done.
