@@ -203,8 +203,8 @@ class LatexHandler(APIHandler):
         tex_base_name, ext = os.path.splitext(os.path.basename(tex_file_path))
 
         if not os.path.exists(tex_file_path):
-            self.set_status(404)
-            out = f"There is no file at `{tex_file_path}`."
+            self.set_status(403)
+            out = f"Request cannot be completed; no file at `{tex_file_path}`."
         elif ext != '.tex':
             self.set_status(400)
             out = (f"The file at `{tex_file_path}` does not end with .tex. "
