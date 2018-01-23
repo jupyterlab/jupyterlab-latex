@@ -100,8 +100,10 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
     if (!texContext) {
       return;
     }
-    // If there is already an active preview for this context, bail.
+    // If there is already an active preview for this context,
+    // trigger a save then bail.
     if (Private.previews.has(texContext.path)) {
+      texContext.save();
       return;
     }
 
@@ -117,7 +119,7 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
     const findOpenOrRevealPDF = () => {
       let pdfWidget = manager.findWidget(pdfFilePath);
       if (!pdfWidget) {
-        pdfWidget = manager.openOrReveal(pdfFilePath, 'PDFJS',undefined,
+        pdfWidget = manager.openOrReveal(pdfFilePath, 'PDFJS', undefined,
           {'mode': 'split-right'});
       }
       pdfContext = manager.contextForWidget(pdfWidget);
