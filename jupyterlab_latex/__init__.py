@@ -287,7 +287,8 @@ def load_jupyter_server_extension(nb_server_app):
         nb_server_app (NotebookWebApplication): handle to the Notebook webserver instance.
     """
     web_app = nb_server_app.web_app
+    # Prepend the base_url so that it works in a jupyterhub setting
     base_url = web_app.settings['base_url']
     endpoint = url_path_join(base_url, 'latex')
-    handlers = [(endpoint + "(.*)", LatexHandler)]
+    handlers = [(f'{endpoint}{path_regex}', LatexHandler)]
     web_app.add_handlers('.*$', handlers)
