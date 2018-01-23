@@ -3,7 +3,7 @@ Setup module for the jupyterlab-latex
 """
 import setuptools
 from setupbase import (
-    create_cmdclass, ensure_python, find_packages
+    create_cmdclass, ensure_python, find_packages, get_version
     )
 
 data_files_spec = [(
@@ -16,6 +16,7 @@ cmdclass = create_cmdclass(data_files_spec=data_files_spec)
 
 setup_dict = dict(
     name='jupyterlab_latex',
+    version=get_version("jupyterlab_latex/_version.py"),
     description='A Jupyter Notebook server extension which acts as an endpoint for LaTeX.',
     packages=find_packages(),
     cmdclass=cmdclass,
@@ -49,9 +50,4 @@ except ValueError as e:
                           setup_dict["python_requires"])
                      )
 
-from jupyterlab_latex import __version__
-
-setuptools.setup(
-    version=__version__,
-    **setup_dict
-)
+setuptools.setup(**setup_dict)

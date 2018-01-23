@@ -19,9 +19,9 @@ from traitlets.config import Configurable
 from notebook.utils import url_path_join
 from notebook.base.handlers import APIHandler
 
-path_regex = r'(?P<path>(?:(?:/[^/]+)+|/?))'
+from ._version import __version__
 
-__version__ = '0.1.0'
+path_regex = r'(?P<path>(?:(?:/[^/]+)+|/?))'
 
 @contextmanager
 def latex_cleanup(workdir='.', whitelist=None, greylist=None):
@@ -112,13 +112,14 @@ class LatexHandler(APIHandler):
             escape_flag = '-no-shell-escape'
         elif c.shell_escape == 'restricted':
             escape_flag = '-shell-restricted'
+            
         full_latex_sequence = (
             c.latex_command,
             escape_flag,
             "-interaction=nonstopmode",
             "-halt-on-error",
             "-file-line-error",
-            f"{tex_base_name}"
+            f"{tex_base_name}",
             )
 
         full_bibtex_sequence = (
@@ -126,13 +127,13 @@ class LatexHandler(APIHandler):
             f"{tex_base_name}",
             )
 
-        command_sequence = [tuple(full_latex_sequence)]
+        command_sequence = [full_latex_sequence]
 
         if run_bibtex:
             command_sequence += [
-                tuple(full_bibtex_sequence),
-                tuple(full_latex_sequence),
-                tuple(full_latex_sequence),
+                full_bibtex_sequence,
+                full_latex_sequence,
+                full_latex_sequence,
                 ]
 
         return command_sequence
@@ -202,8 +203,8 @@ class LatexHandler(APIHandler):
         tex_base_name, ext = os.path.splitext(os.path.basename(tex_file_path))
 
         if not os.path.exists(tex_file_path):
-            self.set_status(404)
-            out = f"There is no file at `{tex_file_path}`."
+            self.set_status(403)
+            out = f"Request cannot be completed; no file at `{tex_file_path}`."
         elif ext != '.tex':
             self.set_status(400)
             out = (f"The file at `{tex_file_path}` does not end with .tex. "
