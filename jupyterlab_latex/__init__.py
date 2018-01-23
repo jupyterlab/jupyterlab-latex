@@ -112,14 +112,14 @@ class LatexHandler(APIHandler):
             escape_flag = '-no-shell-escape'
         elif c.shell_escape == 'restricted':
             escape_flag = '-shell-restricted'
-        full_latex_sequence = [
+        full_latex_sequence = (
             c.latex_command,
             escape_flag,
             "-interaction=nonstopmode",
             "-halt-on-error",
             "-file-line-error",
             f"{tex_base_name}"
-            ]
+            )
 
         full_bibtex_sequence = (
             c.bib_command,
