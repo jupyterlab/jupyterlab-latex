@@ -239,12 +239,10 @@ def run_command_sync(cmd):
     """
     try:
         process = subprocess.run(cmd, stdout=subprocess.PIPE)
-        process.check_returncode()
-        code = process.returncode
-        out = str(process.stdout)
     except subprocess.CalledProcessError as err:
-        code = process.returncode
-        out = str(process.stdout)
+        pass
+    code = process.returncode
+    out = str(process.stdout)
     return (code, out)
 
 @gen.coroutine
