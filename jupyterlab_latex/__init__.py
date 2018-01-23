@@ -19,6 +19,8 @@ from traitlets.config import Configurable
 from notebook.utils import url_path_join
 from notebook.base.handlers import APIHandler
 
+from ._version import __version__
+
 path_regex = r'(?P<path>(?:(?:/[^/]+)+|/?))'
 
 @contextmanager
@@ -110,13 +112,14 @@ class LatexHandler(APIHandler):
             escape_flag = '-no-shell-escape'
         elif c.shell_escape == 'restricted':
             escape_flag = '-shell-restricted'
+            
         full_latex_sequence = (
             c.latex_command,
             escape_flag,
             "-interaction=nonstopmode",
             "-halt-on-error",
             "-file-line-error",
-            f"{tex_base_name}"
+            f"{tex_base_name}",
             )
 
         full_bibtex_sequence = (
@@ -124,13 +127,13 @@ class LatexHandler(APIHandler):
             f"{tex_base_name}",
             )
 
-        command_sequence = [tuple(full_latex_sequence)]
+        command_sequence = [full_latex_sequence]
 
         if run_bibtex:
             command_sequence += [
-                tuple(full_bibtex_sequence),
-                tuple(full_latex_sequence),
-                tuple(full_latex_sequence),
+                full_bibtex_sequence,
+                full_latex_sequence,
+                full_latex_sequence,
                 ]
 
         return command_sequence
