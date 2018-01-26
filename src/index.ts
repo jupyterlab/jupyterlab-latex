@@ -126,7 +126,11 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
       pdfContext.disposed.connect(cleanupPreviews);
     };
 
-    const errorPanelInit = () => {
+    const errorPanelInit = (err: ServerConnection.ResponseError ) => {
+      if (err.response.status === 404) {
+        throw err;
+      }
+
       errorPanel = Private.createErrorPanel();
       // On disposal, set the reference to null
       errorPanel.disposed.connect(() => {
@@ -156,7 +160,7 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
         // If there was an error, show the error panel
         // with the error log.
         if (!errorPanel) {
-          errorPanelInit();
+          errorPanelInit(err);
         }
         errorPanel.text = err.message;
         pending = false;
@@ -173,8 +177,8 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
     }).catch((err) => {
       // If there was an error, show the error panel
       // with the error log.
-      errorPanelInit();
       errorPanel.text = err.message;
+      errorPanelInit(err);
     });
 
     const cleanupPreviews = () => {
