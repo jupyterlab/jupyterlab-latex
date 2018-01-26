@@ -5,7 +5,7 @@ An extension for JupyterLab which allows for live-editing of LaTeX documents.
 ## Usage
 
 To use, right-click on a `.tex` document within JupyterLab, and select `Show LaTeX Preview`:
-![preview](show_preview.png)
+![preview](images/show_preview.png)
 This will compile the `.tex` file and open the rendered PDF document.
 Subsequent saves of the file will automatically update the PDF.
 If the PDF fails to compile (possibly due to a syntax error),
