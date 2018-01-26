@@ -1,12 +1,13 @@
 """ JupyterLab LaTex : live LaTeX editing for JupyterLab """
 
+import glob
 import json
 import os
-import glob
 import re
+import subprocess
+import sys
 
 from contextlib import contextmanager
-from subprocess import PIPE
 
 from tornado import gen, web
 from tornado.httputil import url_concat
@@ -150,7 +151,6 @@ class LatexHandler(APIHandler):
         return any([re.match(r'.*\.bib', x) for x in set(glob.glob("*"))])
 
 
-    @web.authenticated
     @gen.coroutine
     def run_latex(self, command_sequence):
         """Run commands sequentially, returning a 500 code on an error.
@@ -160,15 +160,13 @@ class LatexHandler(APIHandler):
         command_sequence : list of tuples of strings
             This is a sequence of tuples of strings to be passed to
             `tornado.process.Subprocess`, which are to be run sequentially.
+            On Windows, `tornado.process.Subprocess` is unavailable, so
+            we use the synchronous `subprocess.run`.
 
         Returns
         -------
         string
             Response is either a success or an error string.
-
-        Raises
-        ------
-        tornado.process.CalledProcessError
 
         Notes
         -----
@@ -176,23 +174,25 @@ class LatexHandler(APIHandler):
           there.
 
         """
+        # Windows does not support async subprocesses, so
+        # use a synchronous system calls.
+        if sys.platform == 'win32':
+            run_command = run_command_sync
+        else:
+            run_command = run_command_async
+
         for cmd in command_sequence:
-            process = Subprocess(cmd, 
-                                 stdout=Subprocess.STREAM,
-                                 stderr=Subprocess.STREAM)
-            try:
-                yield process.wait_for_exit()
-            except CalledProcessError as err:
+            code, output = yield run_command(cmd)
+            if code != 0:
                 self.set_status(500)
                 self.log.error((f'LaTeX command `{" ".join(cmd)}` '
-                                 'errored with code:\n ')
-                               + str(err.returncode))
-                out = yield process.stdout.read_until_close()
-                return out
+                                 f'errored with code: {code}'))
+                return output
 
         return "LaTeX compiled"
 
 
+    @web.authenticated
     @gen.coroutine
     def get(self, path = ''):
         """
@@ -221,6 +221,57 @@ class LatexHandler(APIHandler):
                 out = yield self.run_latex(cmd_sequence)
         self.finish(out)
 
+@gen.coroutine
+def run_command_sync(cmd):
+    """
+    Run a command using the synchronous `subprocess.run`.
+    The asynchronous `run_command_async` should be preferred,
+    but does not work on Windows, so use this as a fallback.
+
+    Parameters
+    ----------
+    iterable
+        An iterable of command-line arguments to run in the subprocess.
+
+    Returns
+    -------
+    A tuple containing the (return code, stdout)
+    """
+    try:
+        process = subprocess.run(cmd, stdout=subprocess.PIPE)
+    except subprocess.CalledProcessError as err:
+        pass
+    code = process.returncode
+    out = str(process.stdout)
+    return (code, out)
+
+@gen.coroutine
+def run_command_async(cmd):
+    """
+    Run a command using the asynchronous `tornado.process.Subprocess`.
+
+    Parameters
+    ----------
+    iterable
+        An iterable of command-line arguments to run in the subprocess.
+
+    Returns
+    -------
+    A tuple containing the (return code, stdout)
+    """
+    process = Subprocess(cmd,
+                         stdout=Subprocess.STREAM,
+                         stderr=Subprocess.STREAM)
+    try:
+        yield process.wait_for_exit()
+    except CalledProcessError as err:
+        pass
+    code = process.returncode
+    out = yield process.stdout.read_until_close()
+    return (code, out)
+
+
+
 def _jupyter_server_extension_paths():
     return [{
         'module': 'jupyterlab_latex'
@@ -234,5 +285,8 @@ def load_jupyter_server_extension(nb_server_app):
         nb_server_app (NotebookWebApplication): handle to the Notebook webserver instance.
     """
     web_app = nb_server_app.web_app
-    host_pattern = '.*$'
-    web_app.add_handlers(host_pattern, [(r'/latex%s' % path_regex, LatexHandler)])
+    # Prepend the base_url so that it works in a jupyterhub setting
+    base_url = web_app.settings['base_url']
+    endpoint = url_path_join(base_url, 'latex')
+    handlers = [(f'{endpoint}{path_regex}', LatexHandler)]
+    web_app.add_handlers('.*$', handlers)
