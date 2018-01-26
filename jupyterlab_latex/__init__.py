@@ -185,8 +185,7 @@ class LatexHandler(APIHandler):
             if code != 0:
                 self.set_status(500)
                 self.log.error((f'LaTeX command `{" ".join(cmd)}` '
-                                 'errored with code:\n ')
-                               + str(code))
+                                 f'errored with code: {code}'))
                 return output
 
         return "LaTeX compiled"
