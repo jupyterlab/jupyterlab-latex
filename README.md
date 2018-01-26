@@ -14,7 +14,7 @@ an error panel will open detailing the LaTeX error.
 ## Requirements
 
 * JupyterLab 0.31
-* An application that can compile `.tex` files to PDF (e.g., `pdflatex`, `xelatex`, or `pdflatex.exe` on Windows with MiKTeX). This application must be available as a command in the same environment as the notebook server.
+* An application that can compile `.tex` files to PDF (e.g., `pdflatex`, `xelatex`; use `pdflatex.exe` on Windows with MiKTeX). This application must be available as a command in the same environment as the notebook server.
 * An application that can process `.bib` files for producing bibliographies. As withe the LaTeX command, this must be available in the same environment as the notebook server.
 
 ## Installation
