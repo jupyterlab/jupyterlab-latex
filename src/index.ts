@@ -126,7 +126,7 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
       pdfContext.disposed.connect(cleanupPreviews);
     };
 
-    const errorPanelInit = (err: ServerConnection.ResponseError ) => {
+    const errorPanelInit = ( err: ServerConnection.ResponseError ) => {
       if (err.response.status === 404) {
         throw err;
       }
@@ -141,6 +141,7 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
         ref: widget.id,
         mode: 'split-bottom'
       });
+      errorPanel.text = err.message;
     };
 
     // Hook up an event listener for when the '.tex' file is saved.
@@ -162,7 +163,6 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
         if (!errorPanel) {
           errorPanelInit(err);
         }
-        errorPanel.text = err.message;
         pending = false;
       });
     };
@@ -177,7 +177,6 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
     }).catch((err) => {
       // If there was an error, show the error panel
       // with the error log.
-      errorPanel.text = err.message;
       errorPanelInit(err);
     });
 
