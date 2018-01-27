@@ -6,7 +6,8 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  InstanceTracker
+  InstanceTracker,
+  showErrorMessage
 } from '@jupyterlab/apputils';
 
 import {
@@ -126,9 +127,17 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
       pdfContext.disposed.connect(cleanupPreviews);
     };
 
-    const errorPanelInit = ( err: ServerConnection.ResponseError ) => {
+    const errorPanelInit = (err: ServerConnection.ResponseError) => {
       if (err.response.status === 404) {
-        throw err;
+        const noServerExt = {
+          message: 'You probably do not have jupyterlab_latex '
+                   + 'installed or enabled. '
+                   + 'Please, run "pip install -U jupyterlab_latex." '
+                   + 'If that does not work, try "jupyter serverextension '
+                   + 'enable --sys-prefix jupyterlab_latex".'
+        };
+        showErrorMessage('Server Extension Error', noServerExt);
+        return;
       }
 
       errorPanel = Private.createErrorPanel();
