@@ -6,7 +6,8 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  InstanceTracker
+  InstanceTracker,
+  showErrorMessage
 } from '@jupyterlab/apputils';
 
 import {
@@ -126,7 +127,19 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
       pdfContext.disposed.connect(cleanupPreviews);
     };
 
-    const errorPanelInit = () => {
+    const errorPanelInit = (err: ServerConnection.ResponseError) => {
+      if (err.response.status === 404) {
+        const noServerExt = {
+          message: 'You probably do not have jupyterlab_latex '
+                   + 'installed or enabled. '
+                   + 'Please, run "pip install -U jupyterlab_latex." '
+                   + 'If that does not work, try "jupyter serverextension '
+                   + 'enable --sys-prefix jupyterlab_latex".'
+        };
+        showErrorMessage('Server Extension Error', noServerExt);
+        return;
+      }
+
       errorPanel = Private.createErrorPanel();
       // On disposal, set the reference to null
       errorPanel.disposed.connect(() => {
@@ -137,6 +150,7 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
         ref: widget.id,
         mode: 'split-bottom'
       });
+      errorPanel.text = err.message;
     };
 
     // Hook up an event listener for when the '.tex' file is saved.
@@ -156,9 +170,8 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
         // If there was an error, show the error panel
         // with the error log.
         if (!errorPanel) {
-          errorPanelInit();
+          errorPanelInit(err);
         }
-        errorPanel.text = err.message;
         pending = false;
       });
     };
@@ -173,8 +186,7 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
     }).catch((err) => {
       // If there was an error, show the error panel
       // with the error log.
-      errorPanelInit();
-      errorPanel.text = err.message;
+      errorPanelInit(err);
     });
 
     const cleanupPreviews = () => {
