@@ -1,5 +1,7 @@
 # JupyterLab LaTeX
 
+[![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/ian-r-rose/jupyterlab-latex/binderable?filepath=lab%2Ftree%2Funtitled.tex)
+
 An extension for JupyterLab which allows for live-editing of LaTeX documents.
 
 ## Usage
