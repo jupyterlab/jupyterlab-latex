@@ -1,1 +1,1 @@
-texlive
+texlive-xetex
