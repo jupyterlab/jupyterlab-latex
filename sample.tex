@@ -1,0 +1,45 @@
+\documentclass{article}
+\usepackage{graphicx}
+
+\begin{document}
+
+\title{JupyterLab \LaTeX}
+\date{}
+\maketitle
+
+\section{Introduction}
+This is a sample document demonstrating the ability live-edit
+\LaTeX documents in JupyterLab.
+\\
+\\
+Right-click on this document, and select "Show LaTeX Preview".
+A new panel should open up on the right with the PDF that is generated
+by this document. If there are any errors in the document, an
+error panel should open below.
+\\
+\\
+We can write equations:
+\begin{equation}
+    \rho \left( \frac{\partial \mathbf{u}}{\partial t} + \mathbf{u} \cdot \nabla \mathbf{u} \right) =
+    -\nabla P + \eta \nabla^2 \mathbf{u} + \rho \mathbf{g}.
+\end{equation}
+\\
+\\
+And we can write tables:
+\begin{center}
+  \begin{tabular}{ | l | c | r| }
+    \hline
+    1 & 2 & 3 \\ 
+    4 & 5 & 6 \\ 
+    7 & 8 & 9 \\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsection{We can add new subsections}
+And we can include images, such as the Jupyter logo:
+\begin{center}
+  \includegraphics[width=0.65\textwidth]{images/jupyter_logo.png}
+\end{center}
+
+\end{document}
