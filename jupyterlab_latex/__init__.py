@@ -89,6 +89,10 @@ class LatexHandler(APIHandler):
     """
     A handler that runs LaTeX on the server.
     """
+    
+    def initialize(self, notebook_dir):
+        self.notebook_dir = notebook_dir
+
 
     def build_tex_cmd_sequence(self, tex_base_name, run_bibtex=False):
         """Builds tuples that will be used to call LaTeX shell commands.
@@ -288,5 +292,8 @@ def load_jupyter_server_extension(nb_server_app):
     # Prepend the base_url so that it works in a jupyterhub setting
     base_url = web_app.settings['base_url']
     endpoint = url_path_join(base_url, 'latex')
-    handlers = [(f'{endpoint}{path_regex}', LatexHandler)]
+    handlers = [(f'{endpoint}{path_regex}', 
+                 LatexHandler, 
+                 {"notebook_dir": nb_server_app.notebook_dir}
+                )]
     web_app.add_handlers('.*$', handlers)
