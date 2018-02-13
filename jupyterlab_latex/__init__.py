@@ -286,7 +286,7 @@ def load_jupyter_server_extension(nb_server_app):
     Called when the extension is loaded.
 
     Args:
-        nb_server_app (NotebookWebApplication): handle to the Notebook webserver instance.
+        nb_server_app (NotebookApp): handle to the Notebook webserver instance.
     """
     web_app = nb_server_app.web_app
     # Prepend the base_url so that it works in a jupyterhub setting
