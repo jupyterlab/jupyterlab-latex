@@ -89,6 +89,10 @@ class LatexHandler(APIHandler):
     """
     A handler that runs LaTeX on the server.
     """
+    
+    def initialize(self, notebook_dir):
+        self.notebook_dir = notebook_dir
+
 
     def build_tex_cmd_sequence(self, tex_base_name, run_bibtex=False):
         """Builds tuples that will be used to call LaTeX shell commands.
@@ -199,7 +203,7 @@ class LatexHandler(APIHandler):
         Given a path, run LaTeX, cleanup, and respond when done.
         """
         # Get access to the notebook config object
-        tex_file_path = os.path.abspath(path.strip('/'))
+        tex_file_path = os.path.join(self.notebook_dir, path.strip('/'))
         tex_base_name, ext = os.path.splitext(os.path.basename(tex_file_path))
 
         if not os.path.exists(tex_file_path):
@@ -282,11 +286,14 @@ def load_jupyter_server_extension(nb_server_app):
     Called when the extension is loaded.
 
     Args:
-        nb_server_app (NotebookWebApplication): handle to the Notebook webserver instance.
+        nb_server_app (NotebookApp): handle to the Notebook webserver instance.
     """
     web_app = nb_server_app.web_app
     # Prepend the base_url so that it works in a jupyterhub setting
     base_url = web_app.settings['base_url']
     endpoint = url_path_join(base_url, 'latex')
-    handlers = [(f'{endpoint}{path_regex}', LatexHandler)]
+    handlers = [(f'{endpoint}{path_regex}', 
+                 LatexHandler, 
+                 {"notebook_dir": nb_server_app.notebook_dir}
+                )]
     web_app.add_handlers('.*$', handlers)
