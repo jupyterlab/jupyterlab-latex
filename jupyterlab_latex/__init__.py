@@ -203,7 +203,7 @@ class LatexHandler(APIHandler):
         Given a path, run LaTeX, cleanup, and respond when done.
         """
         # Get access to the notebook config object
-        tex_file_path = os.path.abspath(path.strip('/'))
+        tex_file_path = os.path.join(self.notebook_dir, path.strip('/'))
         tex_base_name, ext = os.path.splitext(os.path.basename(tex_file_path))
 
         if not os.path.exists(tex_file_path):
