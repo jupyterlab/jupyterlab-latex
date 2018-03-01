@@ -290,6 +290,35 @@ class LatexSynctexHandler(APIHandler):
 
         return cmd
 
+    def parse_synctex_response(self, response):
+        """
+        Take the stdout response of SyncTex and parse it
+        into a dictionary.
+
+        Parameters
+        ----------
+        response: string
+            The response output to stdout from SyncTex
+
+        returns:
+            A dictionary with the parsed response.
+
+        """
+        lines = response.split('\n')
+        started = False
+        result = {}
+        for line in lines:
+            if line == 'SyncTeX result begin':
+                started = True
+                continue
+            elif line == 'SyncTeX result end':
+                break
+            if started:
+                vals = line.split(':')
+                result[vals[0].strip()] = vals[1].strip()
+                self.log.info(str(vals))
+        return result
+
 
     @gen.coroutine
     def run_synctex(self, cmd):
@@ -319,7 +348,8 @@ class LatexSynctexHandler(APIHandler):
             self.set_status(500)
             self.log.error((f'SyncTex command `{" ".join(cmd)}` '
                               f'errored with code: {code}'))
-            self.log.error(f'{cmd}, {output}')
+        else:
+            output = json.dumps(self.parse_synctex_response(output.decode('utf-8')))
         return output
 
 
