@@ -76,6 +76,8 @@ class LatexConfig(Configurable):
         help='The LaTeX command to use when compiling ".tex" files.')
     bib_command = Unicode('bibtex', config=True,
         help='The BibTeX command to use when compiling ".tex" files.')
+    synctex_command = Unicode('synctex', config=True,
+        help='The synctex command to use when syncronizing between .tex and .pdf files.')
     shell_escape = CaselessStrEnum(['restricted', 'allow', 'disallow'],
         default_value='restricted', config=True,
         help='Whether to allow shell escapes '+\
@@ -89,7 +91,7 @@ class LatexBuildHandler(APIHandler):
     """
     A handler that runs LaTeX on the server.
     """
-    
+
     def initialize(self, notebook_dir):
         self.notebook_dir = notebook_dir
 
@@ -117,13 +119,14 @@ class LatexBuildHandler(APIHandler):
             escape_flag = '-no-shell-escape'
         elif c.shell_escape == 'restricted':
             escape_flag = '-shell-restricted'
-            
+
         full_latex_sequence = (
             c.latex_command,
             escape_flag,
             "-interaction=nonstopmode",
             "-halt-on-error",
             "-file-line-error",
+            "-synctex=1",
             f"{tex_base_name}",
             )
 
@@ -178,12 +181,6 @@ class LatexBuildHandler(APIHandler):
           there.
 
         """
-        # Windows does not support async subprocesses, so
-        # use a synchronous system calls.
-        if sys.platform == 'win32':
-            run_command = run_command_sync
-        else:
-            run_command = run_command_async
 
         for cmd in command_sequence:
             code, output = yield run_command(cmd)
@@ -202,6 +199,7 @@ class LatexBuildHandler(APIHandler):
         """
         Given a path, run LaTeX, cleanup, and respond when done.
         """
+
         # Get access to the notebook config object
         tex_file_path = os.path.join(self.notebook_dir, path.strip('/'))
         tex_base_name, ext = os.path.splitext(os.path.basename(tex_file_path))
@@ -216,7 +214,7 @@ class LatexBuildHandler(APIHandler):
         else:
             with latex_cleanup(
                 workdir=os.path.dirname(tex_file_path),
-                whitelist=[tex_base_name+'.pdf'],
+                whitelist=[tex_base_name+'.pdf', tex_base_name+'synctex.gz'],
                 greylist=[tex_base_name+'.aux']
                 ):
                 bibtex = self.bib_condition()
@@ -224,6 +222,143 @@ class LatexBuildHandler(APIHandler):
                                                            run_bibtex=bibtex)
                 out = yield self.run_latex(cmd_sequence)
         self.finish(out)
+
+
+class LatexSynctexHandler(APIHandler):
+    """
+    A handler that runs synctex on the server.
+    """
+
+    def initialize(self, notebook_dir):
+        self.notebook_dir = notebook_dir
+
+
+    def build_synctex_edit_cmd(self, pdf_name, pos):
+        """Builds tuple that will be used to call the synctex edit shell command.
+
+        Parameters
+        ----------
+        pdf_name: string
+            This is the name of pdf tex file, without the extension
+
+        pos: dict
+            A dictionary containing the position in the pdf file
+            document to map.
+
+        returns:
+            A dictionary containing the mapped position data.
+
+        """
+        c = LatexConfig(config=self.config)
+        data = f'-i {pos["page"]}:{pos["x"]}:{pos["y"]}:{pdf_name+".pdf"}'
+
+        cmd = (
+            c.synctex_command,
+            'edit',
+            '-o',
+            f'{pos["page"]}:{pos["x"]}:{pos["y"]}:{pdf_name+".pdf"}'
+            )
+
+        return cmd
+
+    def build_synctex_view_cmd(self, tex_name, pos):
+        """Builds tuple that will be used to call the synctex view shell command.
+
+        Parameters
+        ----------
+        tex_name: string
+            This is the base name of the tex file, without the extension
+
+        pos: dict
+            A dictionary containing the position in the tex file
+            document to map.
+
+        returns:
+            A dictionary containing the mapped position data.
+
+        """
+        c = LatexConfig(config=self.config)
+
+        cmd = (
+            c.synctex_command,
+            'view',
+            '-i',
+            f'{pos["line"]}:{pos["column"]}:{tex_name+".tex"}',
+            '-o',
+            f'{tex_name+".pdf"}'
+            )
+
+        return cmd
+
+
+    @gen.coroutine
+    def run_synctex(self, cmd):
+        """Run commands sequentially, returning a 500 code on an error.
+
+        Parameters
+        ----------
+        command_sequence : list of tuples of strings
+            This is a sequence of tuples of strings to be passed to
+            `tornado.process.Subprocess`, which are to be run sequentially.
+            On Windows, `tornado.process.Subprocess` is unavailable, so
+            we use the synchronous `subprocess.run`.
+
+        Returns
+        -------
+        string
+            Response is either a success or an error string.
+
+        Notes
+        -----
+        - SyncTex processes only print to stdout, so errors are gathered from
+          there.
+
+        """
+        code, output = yield run_command(cmd)
+        if code != 0:
+            self.set_status(500)
+            self.log.error((f'SyncTex command `{" ".join(cmd)}` '
+                              f'errored with code: {code}'))
+            self.log.error(f'{cmd}, {output}')
+        return output
+
+
+    @web.authenticated
+    @gen.coroutine
+    def get(self, path = ''):
+        """
+        Given a path, run SyncTex, and respond when done.
+        """
+        # Get access to the notebook config object
+        full_file_path = os.path.join(self.notebook_dir, path.strip('/'))
+        workdir = os.path.dirname(full_file_path)
+        base_name, ext = os.path.splitext(os.path.basename(full_file_path))
+
+        if not os.path.exists(full_file_path):
+            self.set_status(403)
+            out = f"Request cannot be completed; no file at `{full_file_path}`."
+        elif ext != '.tex' and ext != '.pdf':
+            self.set_status(400)
+            out = (f"The file `{ext}` does not end with .tex of .pdf. "
+                    "You can only run SyncTex on a file ending with .tex or .pdf.")
+        else:
+            if ext == '.pdf':
+                pos = {
+                    'page': self.get_query_argument('page', default='1'),
+                    'x': self.get_query_argument('x', default='0'),
+                    'y': self.get_query_argument('y', default='0'),
+                    }
+                cmd = self.build_synctex_edit_cmd(base_name, pos)
+            elif ext == '.tex':
+                pos = {
+                    'line': self.get_query_argument('line', default='1'),
+                    'column': self.get_query_argument('column', default='1'),
+                    }
+                cmd = self.build_synctex_view_cmd(base_name, pos)
+
+            out = yield self.run_synctex(cmd)
+        self.finish(out)
+
 
 @gen.coroutine
 def run_command_sync(cmd):
@@ -274,6 +409,13 @@ def run_command_async(cmd):
     out = yield process.stdout.read_until_close()
     return (code, out)
 
+# Windows does not support async subprocesses, so
+# use a synchronous system calls.
+if sys.platform == 'win32':
+    run_command = run_command_sync
+else:
+    run_command = run_command_async
+
 
 
 def _jupyter_server_extension_paths():
@@ -293,10 +435,14 @@ def load_jupyter_server_extension(nb_server_app):
     base_url = web_app.settings['base_url']
     latex = url_path_join(base_url, 'latex')
     build = url_path_join(latex, 'build')
-    sync = url_path_join(latex, 'synctex')
+    synctex = url_path_join(latex, 'synctex')
 
     handlers = [(f'{build}{path_regex}',
                  LatexBuildHandler,
                  {"notebook_dir": nb_server_app.notebook_dir}
-                )]
+                ),
+                (f'{synctex}{path_regex}',
+                 LatexSynctexHandler,
+                 {"notebook_dir": nb_server_app.notebook_dir}
+                 )]
     web_app.add_handlers('.*$', handlers)
