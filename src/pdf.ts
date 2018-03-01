@@ -92,13 +92,21 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
   }
 
   /**
-   * Set the scroll
+   * Get the scroll position.
+   */
+  getScroll(): PDFJSViewer.IPosition {
+    return {
+      page: this._pdfViewer.currentPageNumber,
+      x: 0,
+      y: 0
+    };
+  }
+
+  /**
+   * Set the scroll position.
    */
   setScroll(pos: PDFJSViewer.IPosition): void {
-    console.log(pos);
-    this._pdfViewer.scrollPageIntoView({
-      pageNumber: pos.page
-    });
+    this._pdfViewer.currentPageNumber = pos.page;
   }
 
   /**
@@ -291,6 +299,7 @@ namespace Private {
     let pdf = document.createElement('div');
     pdf.className = PDF_CLASS;
     node.appendChild(pdf);
+    node.tabIndex = -1;
     return node;
   }
 

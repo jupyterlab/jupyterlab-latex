@@ -11,6 +11,10 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
+  CodeEditor
+} from '@jupyterlab/codeeditor';
+
+import {
   IStateDB, PathExt, URLExt
 } from '@jupyterlab/coreutils';
 
@@ -23,7 +27,7 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  IEditorTracker
+  FileEditor, IEditorTracker
 } from '@jupyterlab/fileeditor';
 
 import {
@@ -85,17 +89,7 @@ namespace CommandIDs {
  * The options for a SyncTeX view command,
  * mapping the editor position the PDF.
  */
-interface ISynctexViewOptions {
-  /**
-   * The line in the editor.
-   */
-  line: number;
-
-  /**
-   * The column in the editor/
-   */
-  column: number;
-}
+type ISynctexViewOptions = CodeEditor.IPosition;
 
 /**
  * The options for a SyncTeX edit command,
@@ -159,7 +153,12 @@ function synctexEditRequest(path: string, pos: ISynctexEditOptions, settings: Se
         throw new ServerConnection.ResponseError(response, data);
       });
     }
-    return response.json() as Promise<ISynctexViewOptions>;
+    return response.json().then(json => {
+      return {
+        line: parseInt(json.Line, 10),
+        column: parseInt(json.Column, 10)
+      } as ISynctexViewOptions;
+    });
   });
 }
 
@@ -351,16 +350,43 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
 
   commands.addCommand(CommandIDs.synctexEdit, {
     execute: () => {
-      const pos = {
-        page: 1,
-        x: 2,
-        y: 3
-      };
-      return synctexEditRequest('hello', pos, serverSettings);
-    },
-    label: 'Reveal Position in Editor'
-  });
+      // Get the pdf widget that had its contextMenu activated.
+      let widget = pdfTracker.currentWidget;
+      if (widget) {
+        // Get the page number.
+        const pos = widget.getScroll();
 
+        // Request the synctex position for the PDF
+        return synctexEditRequest(widget.context.path, pos, serverSettings)
+        .then((view: ISynctexViewOptions) => {
+          // Find the right editor widget.
+          let editorWidget: FileEditor | undefined = undefined;
+          const baseName = PathExt.basename(widget.context.path, '.pdf');
+          const dirName = PathExt.dirname(widget.context.path);
+          const texFilePath = PathExt.join(dirName, baseName + '.tex');
+          editorTracker.forEach(editor => {
+            if (editor.context.path === texFilePath) {
+              editorWidget = editor;
+            }
+          });
+          if (!editorWidget) {
+            return;
+          }
+          // Scroll the editor.
+          editorWidget.editor.setCursorPosition(view);
+        });
+      }
+    },
+    isEnabled: hasWidget,
+    isVisible: () => {
+      const widget = pdfTracker.currentWidget;
+      const baseName = PathExt.basename(widget.context.path, '.pdf');
+      const dirName = PathExt.dirname(widget.context.path);
+      const texFilePath = PathExt.join(dirName, baseName + '.tex');
+      return widget && Private.previews.has(texFilePath);
+    },
+    label: 'Scroll Editor to Page'
+  });
   commands.addCommand(CommandIDs.synctexView, {
     execute: () => {
       // Get the current widget that had its contextMenu activated.
@@ -378,7 +404,6 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
           const dirName = PathExt.dirname(widget.context.path);
           const pdfFilePath = PathExt.join(dirName, baseName + '.pdf');
           pdfTracker.forEach(pdf => {
-            console.log(pdf.context.path, pdfFilePath);
 
             if (pdf.context.path === pdfFilePath) {
               pdfWidget = pdf;
@@ -407,6 +432,21 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
   app.contextMenu.addItem({
     command: CommandIDs.synctexView,
     selector: '.jp-FileEditor'
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.synctexEdit,
+    selector: '.jp-PDFJSContainer'
+  });
+
+  app.commands.addKeyBinding({
+    selector: '.jp-FileEditor',
+    keys: ['Accel Shift X'],
+    command: CommandIDs.synctexView
+  });
+  app.commands.addKeyBinding({
+    selector: '.jp-PDFJSContainer',
+    keys: ['Accel Shift X'],
+    command: CommandIDs.synctexEdit
   });
   return;
 }
