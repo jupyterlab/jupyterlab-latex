@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  InstanceTracker,
+  IInstanceTracker, InstanceTracker,
   showErrorMessage
 } from '@jupyterlab/apputils';
 
@@ -31,7 +31,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  ReadonlyJSONObject
+  ReadonlyJSONObject, Token
 } from '@phosphor/coreutils';
 
 import {
@@ -43,6 +43,23 @@ import {
 } from './pdf';
 
 import '../style/index.css';
+
+
+/**
+ * A class that tracks editor widgets.
+ */
+export
+interface IPDFJSTracker extends IInstanceTracker<PDFJSViewer> {}
+
+
+/* tslint:disable */
+/**
+ * The editor tracker token.
+ */
+export
+const IPDFJSTracker = new Token<IPDFJSTracker>('@jupyterlab/latex:IPDFJSTracker');
+/* tslint:enable */
+
 
 namespace CommandIDs {
   /**
@@ -84,31 +101,19 @@ interface ISynctexViewOptions {
  * The options for a SyncTeX edit command,
  * mapping the pdf position to an editor position.
  */
-interface ISynctexEditOptions {
-  /**
-   * The page of the pdf.
-   */
-  page: number;
-
-  /**
-   * The x-position on the page, in pts, where
-   * the PDF is assumed to be 72dpi.
-   */
-  x: number;
-
-  /**
-   * The y-position on the page, in pts, where
-   * the PDF is assumed to be 72dpi.
-   */
-  y: number;
-}
+type ISynctexEditOptions = PDFJSViewer.IPosition;
 
 /**
  * The JupyterLab plugin for the LaTeX extension.
  */
 const latexPlugin: JupyterLabPlugin<void> = {
   id: 'jupyterlab-latex:open',
-  requires: [IDocumentManager, IEditorTracker, ILayoutRestorer, IStateDB],
+  requires: [
+    IDocumentManager,
+    IEditorTracker,
+    ILayoutRestorer,
+    IPDFJSTracker,
+    IStateDB],
   activate: activateLatexPlugin,
   autoStart: true
 };
@@ -177,14 +182,20 @@ function synctexViewRequest(path: string, pos: ISynctexViewOptions, settings: Se
         throw new ServerConnection.ResponseError(response, data);
       });
     }
-    return response.json() as Promise<ISynctexEditOptions>;
+    return response.json().then(json => {
+      return {
+        page: parseInt(json.Page, 10),
+        x: parseFloat(json.x),
+        y: parseFloat(json.y)
+      } as ISynctexEditOptions;
+    });
   });
 }
 
 /**
  * Activate the file browser.
  */
-function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorTracker: IEditorTracker, restorer: ILayoutRestorer, state: IStateDB): void {
+function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorTracker: IEditorTracker, restorer: ILayoutRestorer, pdfTracker: IPDFJSTracker, state: IStateDB): void {
   const { commands } = app;
   const id = 'jupyterlab-latex';
 
@@ -355,16 +366,34 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
       // Get the current widget that had its contextMenu activated.
       let widget = editorTracker.currentWidget;
       if (widget) {
+        // Get the cursor position.
         const pos = widget.editor.getCursorPosition();
+
+        // Request the synctex position for the PDF
         return synctexViewRequest(widget.context.path, pos, serverSettings)
         .then((edit: ISynctexEditOptions) => {
-          console.log(edit);
+          // Find the right pdf widget.
+          let pdfWidget: PDFJSViewer | undefined = undefined;
+          const baseName = PathExt.basename(widget.context.path, '.tex');
+          const dirName = PathExt.dirname(widget.context.path);
+          const pdfFilePath = PathExt.join(dirName, baseName + '.pdf');
+          pdfTracker.forEach(pdf => {
+            console.log(pdf.context.path, pdfFilePath);
+
+            if (pdf.context.path === pdfFilePath) {
+              pdfWidget = pdf;
+            }
+          });
+          if (!pdfWidget) {
+            return;
+          }
+          // Scroll the pdf.
+          pdfWidget.setScroll(edit);
         });
       }
     },
     isEnabled: hasWidget,
     isVisible: () => {
-      console.log('Visible?');
       let widget = editorTracker.currentWidget;
       return widget && Private.previews.has(widget.context.path);
     },
@@ -397,14 +426,15 @@ const FACTORY = 'PDFJS';
 /**
  * The pdf file handler extension.
  */
-const pdfjsPlugin: JupyterLabPlugin<void> = {
+const pdfjsPlugin: JupyterLabPlugin<IPDFJSTracker> = {
   activate: activatePDFJS,
   id: '@jupyterlab/pdfjs-extension:plugin',
   requires: [ ILayoutRestorer ],
+  provides: IPDFJSTracker,
   autoStart: true
 };
 
-function activatePDFJS(app: JupyterLab, restorer: ILayoutRestorer): void {
+function activatePDFJS(app: JupyterLab, restorer: ILayoutRestorer): IPDFJSTracker {
   const namespace = 'pdfjs-widget';
   const factory = new PDFJSViewerFactory({
     name: FACTORY,
@@ -435,6 +465,8 @@ function activatePDFJS(app: JupyterLab, restorer: ILayoutRestorer): void {
       widget.title.iconLabel = types[0].iconLabel;
     }
   });
+
+  return tracker;
 }
 
 /**
