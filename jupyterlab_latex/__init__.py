@@ -316,7 +316,6 @@ class LatexSynctexHandler(APIHandler):
             if started:
                 vals = line.split(':')
                 result[vals[0].strip()] = vals[1].strip()
-                self.log.info(str(vals))
         return result
 
 

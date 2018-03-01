@@ -45,8 +45,64 @@ import {
 import '../style/index.css';
 
 namespace CommandIDs {
-  export const openLatexPreview = 'latex:open-preview';
+  /**
+   * Open a live preview for a `.tex` document.
+   */
+  export
+  const openLatexPreview = 'latex:open-preview';
+
+  /**
+   * Reveal in the editor a position from the pdf using SyncTeX.
+   */
+  export
+  const synctexEdit = 'latex:synctex-edit';
+
+  /**
+   * Reveal in the pdf a position from the editor using SyncTeX.
+   */
+  export
+  const synctexView = 'latex:synctex-view';
 }
+
+/**
+ * The options for a SyncTeX view command,
+ * mapping the editor position the PDF.
+ */
+interface ISynctexViewOptions {
+  /**
+   * The line in the editor.
+   */
+  line: number;
+
+  /**
+   * The column in the editor/
+   */
+  column: number;
+}
+
+/**
+ * The options for a SyncTeX edit command,
+ * mapping the pdf position to an editor position.
+ */
+interface ISynctexEditOptions {
+  /**
+   * The page of the pdf.
+   */
+  page: number;
+
+  /**
+   * The x-position on the page, in pts, where
+   * the PDF is assumed to be 72dpi.
+   */
+  x: number;
+
+  /**
+   * The y-position on the page, in pts, where
+   * the PDF is assumed to be 72dpi.
+   */
+  y: number;
+}
+
 /**
  * The JupyterLab plugin for the LaTeX extension.
  */
@@ -60,11 +116,11 @@ const latexPlugin: JupyterLabPlugin<void> = {
 /**
  * Make a request to the notebook server LaTeX endpoint.
  *
- * @param url - the path to the .tex file to watch.
+ * @param path - the path to the .tex file to watch.
  *
  * @param settings - the settings for the current notebook server.
  *
- * @returns a Promise resolved with the JSON response.
+ * @returns a Promise resolved with the text response.
  */
 function latexBuildRequest(path: string, settings: ServerConnection.ISettings): Promise<any> {
   let fullUrl = URLExt.join(settings.baseUrl, 'latex', 'build', path);
@@ -76,6 +132,52 @@ function latexBuildRequest(path: string, settings: ServerConnection.ISettings): 
       });
     }
     return response.text();
+  });
+}
+
+/**
+ * Make a request to the notebook server SyncTeX endpoint.
+ *
+ * @param path - the path to the .tex or .pdf file.
+ *
+ * @param settings - the settings for the current notebook server.
+ *
+ * @returns a Promise resolved with the JSON response.
+ */
+function synctexEditRequest(path: string, pos: ISynctexEditOptions, settings: ServerConnection.ISettings): Promise<ISynctexViewOptions> {
+  let url = URLExt.join(settings.baseUrl, 'latex', 'synctex', path);
+  url += `?page=${pos.page}&x=${pos.x}&y=${pos.y}`;
+
+  return ServerConnection.makeRequest(url, {}, settings).then(response => {
+    if (response.status !== 200) {
+      return response.text().then(data => {
+        throw new ServerConnection.ResponseError(response, data);
+      });
+    }
+    return response.json() as Promise<ISynctexViewOptions>;
+  });
+}
+
+/**
+ * Make a request to the notebook server SyncTeX endpoint.
+ *
+ * @param path - the path to the .tex or .pdf file.
+ *
+ * @param settings - the settings for the current notebook server.
+ *
+ * @returns a Promise resolved with the JSON response.
+ */
+function synctexViewRequest(path: string, pos: ISynctexViewOptions, settings: ServerConnection.ISettings): Promise<ISynctexEditOptions> {
+  let url = URLExt.join(settings.baseUrl, 'latex', 'synctex', path);
+  url += `?line=${pos.line}&column=${pos.column}`;
+
+  return ServerConnection.makeRequest(url, {}, settings).then(response => {
+    if (response.status !== 200) {
+      return response.text().then(data => {
+        throw new ServerConnection.ResponseError(response, data);
+      });
+    }
+    return response.json() as Promise<ISynctexEditOptions>;
   });
 }
 
@@ -235,8 +337,46 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
     },
     label: 'Show LaTeX Preview'
   });
+
+  commands.addCommand(CommandIDs.synctexEdit, {
+    execute: () => {
+      const pos = {
+        page: 1,
+        x: 2,
+        y: 3
+      };
+      return synctexEditRequest('hello', pos, serverSettings);
+    },
+    label: 'Reveal Position in Editor'
+  });
+
+  commands.addCommand(CommandIDs.synctexView, {
+    execute: () => {
+      // Get the current widget that had its contextMenu activated.
+      let widget = editorTracker.currentWidget;
+      if (widget) {
+        const pos = widget.editor.getCursorPosition();
+        return synctexViewRequest(widget.context.path, pos, serverSettings)
+        .then((edit: ISynctexEditOptions) => {
+          console.log(edit);
+        });
+      }
+    },
+    isEnabled: hasWidget,
+    isVisible: () => {
+      console.log('Visible?');
+      let widget = editorTracker.currentWidget;
+      return widget && Private.previews.has(widget.context.path);
+    },
+    label: 'Scroll PDF to Cursor'
+  });
+
   app.contextMenu.addItem({
     command: CommandIDs.openLatexPreview,
+    selector: '.jp-FileEditor'
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.synctexView,
     selector: '.jp-FileEditor'
   });
   return;
