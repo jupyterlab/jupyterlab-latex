@@ -66,9 +66,8 @@ const latexPlugin: JupyterLabPlugin<void> = {
  *
  * @returns a Promise resolved with the JSON response.
  */
-export
-function latexRequest(url: string, settings: ServerConnection.ISettings): Promise<any> {
-  let fullUrl = URLExt.join(settings.baseUrl, 'latex', url);
+function latexBuildRequest(path: string, settings: ServerConnection.ISettings): Promise<any> {
+  let fullUrl = URLExt.join(settings.baseUrl, 'latex', 'build', path);
 
   return ServerConnection.makeRequest(fullUrl, {}, settings).then(response => {
     if (response.status !== 200) {
@@ -159,7 +158,7 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
         return;
       }
       pending = true;
-      latexRequest(texContext.path, serverSettings).then(() => {
+      latexBuildRequest(texContext.path, serverSettings).then(() => {
         // Read the pdf file contents from disk.
         pdfContext ? pdfContext.revert() : findOpenOrRevealPDF();
         if (errorPanel) {
@@ -180,7 +179,7 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
 
     // Run an initial latexRequest so that the appropriate files exist,
     // then open them.
-    latexRequest(texContext.path, serverSettings).then(() => {
+    latexBuildRequest(texContext.path, serverSettings).then(() => {
       // Open the pdf and get a handle on its document context.
       findOpenOrRevealPDF();
     }).catch((err) => {
