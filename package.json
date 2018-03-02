@@ -8,6 +8,7 @@
     "lib/*/*.js",
     "lib/*.d.ts",
     "lib/*.js",
+    "schema/*.json",
     "style/*.*"
   ],
   "directories": {
@@ -20,7 +21,8 @@
     "latex"
   ],
   "jupyterlab": {
-    "extension": "lib/index.js"
+    "extension": "lib/index.js",
+    "schemaDir": "schema"
   },
   "scripts": {
     "build": "tsc",
@@ -39,6 +41,7 @@
     "@jupyterlab/fileeditor": "^0.15.0",
     "@jupyterlab/services": "^1.0.2",
     "@phosphor/coreutils": "^1.3.0",
+    "@phosphor/disposable": "^1.1.2",
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/widgets": "^1.5.0",
     "pdfjs-dist": "2.0.104",

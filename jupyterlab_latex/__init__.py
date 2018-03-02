@@ -120,13 +120,18 @@ class LatexBuildHandler(APIHandler):
         elif c.shell_escape == 'restricted':
             escape_flag = '-shell-restricted'
 
+        # Get the synctex query parameter, defaulting to
+        # 1 if it is not set or is invalid.
+        synctex = self.get_query_argument('synctex', default='1')
+        synctex = '1' if synctex != '0' else synctex
+
         full_latex_sequence = (
             c.latex_command,
             escape_flag,
             "-interaction=nonstopmode",
             "-halt-on-error",
             "-file-line-error",
-            "-synctex=1",
+            f"-synctex={synctex}",
             f"{tex_base_name}",
             )
 
