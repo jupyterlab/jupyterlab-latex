@@ -219,7 +219,7 @@ class LatexBuildHandler(APIHandler):
         else:
             with latex_cleanup(
                 workdir=os.path.dirname(tex_file_path),
-                whitelist=[tex_base_name+'.pdf', tex_base_name+'synctex.gz'],
+                whitelist=[tex_base_name+'.pdf', tex_base_name+'.synctex.gz'],
                 greylist=[tex_base_name+'.aux']
                 ):
                 bibtex = self.bib_condition()
@@ -371,6 +371,9 @@ class LatexSynctexHandler(APIHandler):
         if not os.path.exists(full_file_path):
             self.set_status(403)
             out = f"Request cannot be completed; no file at `{full_file_path}`."
+        elif not os.path.exists(os.path.join(workdir, base_name + '.synctex.gz')):
+            self.set_status(403)
+            out = f"Request cannot be completed; no SyncTeX file found in `{workdir}`."
         elif ext != '.tex' and ext != '.pdf':
             self.set_status(400)
             out = (f"The file `{ext}` does not end with .tex of .pdf. "
