@@ -163,8 +163,8 @@ function synctexEditRequest(path: string, pos: ISynctexEditOptions, settings: Se
     }
     return response.json().then(json => {
       return {
-        line: parseInt(json.Line, 10),
-        column: parseInt(json.Column, 10)
+        line: parseInt(json.line, 10),
+        column: parseInt(json.column, 10)
       } as ISynctexViewOptions;
     });
   });
@@ -191,7 +191,7 @@ function synctexViewRequest(path: string, pos: ISynctexViewOptions, settings: Se
     }
     return response.json().then(json => {
       return {
-        page: parseInt(json.Page, 10),
+        page: parseInt(json.page, 10),
         x: parseFloat(json.x),
         y: parseFloat(json.y)
       } as ISynctexEditOptions;

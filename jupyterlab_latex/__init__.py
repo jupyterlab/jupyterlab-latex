@@ -295,7 +295,7 @@ class LatexSynctexHandler(APIHandler):
 
         return cmd
 
-    def parse_synctex_response(self, response):
+    def parse_synctex_response(self, response, pos):
         """
         Take the stdout response of SyncTex and parse it
         into a dictionary.
@@ -303,7 +303,10 @@ class LatexSynctexHandler(APIHandler):
         Parameters
         ----------
         response: string
-            The response output to stdout from SyncTex
+            The response output to stdout from SyncTeX
+
+        pos: dict
+            The position that was input to SyncTeX
 
         returns:
             A dictionary with the parsed response.
@@ -311,6 +314,7 @@ class LatexSynctexHandler(APIHandler):
         """
         lines = response.split('\n')
         started = False
+        synctex_fields = ["line", "column", "page", "x", "y"]
         result = {}
         for line in lines:
             if line == 'SyncTeX result begin':
@@ -319,9 +323,10 @@ class LatexSynctexHandler(APIHandler):
             elif line == 'SyncTeX result end':
                 break
             if started:
-                vals = line.split(':')
-                result[vals[0].strip()] = vals[1].strip()
-        return result
+                vals = line.lower().split(':')
+                if vals[0].strip() in synctex_fields:
+                    result[vals[0].strip()] = vals[1].strip()
+        return { **result, **pos }
 
 
     @gen.coroutine
@@ -352,8 +357,6 @@ class LatexSynctexHandler(APIHandler):
             self.set_status(500)
             self.log.error((f'SyncTex command `{" ".join(cmd)}` '
                               f'errored with code: {code}'))
-        else:
-            output = json.dumps(self.parse_synctex_response(output.decode('utf-8')))
         return output
 
 
@@ -394,6 +397,7 @@ class LatexSynctexHandler(APIHandler):
                 cmd = self.build_synctex_view_cmd(base_name, pos)
 
             out = yield self.run_synctex(cmd)
+            out = json.dumps(self.parse_synctex_response(out.decode('utf-8'), pos))
         self.finish(out)
 
 
