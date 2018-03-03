@@ -295,39 +295,6 @@ class LatexSynctexHandler(APIHandler):
 
         return cmd
 
-    def parse_synctex_response(self, response, pos):
-        """
-        Take the stdout response of SyncTex and parse it
-        into a dictionary.
-
-        Parameters
-        ----------
-        response: string
-            The response output to stdout from SyncTeX
-
-        pos: dict
-            The position that was input to SyncTeX
-
-        returns:
-            A dictionary with the parsed response.
-
-        """
-        lines = response.split('\n')
-        started = False
-        synctex_fields = ["line", "column", "page", "x", "y"]
-        result = {}
-        for line in lines:
-            if line == 'SyncTeX result begin':
-                started = True
-                continue
-            elif line == 'SyncTeX result end':
-                break
-            if started:
-                vals = line.lower().split(':')
-                if vals[0].strip() in synctex_fields:
-                    result[vals[0].strip()] = vals[1].strip()
-        return { **result, **pos }
-
 
     @gen.coroutine
     def run_synctex(self, cmd):
@@ -397,7 +364,7 @@ class LatexSynctexHandler(APIHandler):
                 cmd = self.build_synctex_view_cmd(base_name, pos)
 
             out = yield self.run_synctex(cmd)
-            out = json.dumps(self.parse_synctex_response(out.decode('utf-8'), pos))
+            out = json.dumps(parse_synctex_response(out.decode('utf-8'), pos))
         self.finish(out)
 
 
@@ -457,6 +424,33 @@ if sys.platform == 'win32':
 else:
     run_command = run_command_async
 
+
+def parse_synctex_response(response, pos):
+    """
+    Take the stdout response of SyncTex and parse it
+    into a dictionary.
+
+    Parameters
+    ----------
+    response: string
+        The response output to stdout from SyncTeX
+
+    pos: dict
+        The position that was input to SyncTeX
+
+    returns:
+        A dictionary with the parsed response.
+
+    """
+    fields = ["line", "column", "page", "x", "y"]
+    match = re.search(r'SyncTeX result begin\n(.*?)\nSyncTeX result end',
+            response, flags=re.DOTALL)
+    if match is None:
+        raise Exception('Unable to parse SyncTeX response')
+    lines = match.group(1).lower().replace(' ', '').split('\n')
+    result = { l.split(':')[0]: l.split(':')[1] for l in lines if l.split(':')[0] in fields }
+
+    return { **result, **pos }
 
 
 def _jupyter_server_extension_paths():
