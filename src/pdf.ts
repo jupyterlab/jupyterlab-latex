@@ -14,7 +14,7 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  Widget, BoxLayout
+  Widget, PanelLayout
 } from '@phosphor/widgets';
 
 import {
@@ -97,18 +97,13 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
   constructor(context: DocumentRegistry.Context) {
     super();
 
-    const layout = this.layout = new BoxLayout({ spacing: 0 });
+    const layout = this.layout = new PanelLayout();
     this._viewer = new Widget({ node: Private.createNode() });
-
-    this._pdfViewer = new PDFJS.PDFViewer({
-        container: this._viewer.node,
-    });
+    this._pdfViewer = new PDFJS.PDFViewer({ container: this._viewer.node });
     this._toolbar = Private.createToolbar(this._pdfViewer);
 
     layout.addWidget(this._toolbar);
     layout.addWidget(this._viewer);
-    BoxLayout.setStretch(this._toolbar, 0);
-    BoxLayout.setStretch(this._viewer, 1);
 
     this.context = context;
     this._onTitleChanged();
@@ -425,7 +420,7 @@ namespace Private {
     const toolbar = new Toolbar();
 
     toolbar.addClass('jp-Toolbar');
-    toolbar.addClass('jp-NotebookPanel-toolbar');
+    toolbar.addClass('jp-PDFJS-toolbar');
 
     toolbar.addItem('previous', new ToolbarButton({
       className: 'jp-PreviousIcon',
