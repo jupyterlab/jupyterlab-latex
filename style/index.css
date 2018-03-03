@@ -23,3 +23,19 @@
   width: 100%;
   height: 100%;
 }
+
+.jp-PreviousIcon {
+  background-image: url(previous.svg);
+}
+
+.jp-NextIcon {
+  background-image: url(next.svg);
+}
+
+.jp-ZoomInIcon {
+  background-image: url(zoom_in.svg);
+}
+
+.jp-ZoomOutIcon {
+  background-image: url(zoom_out.svg);
+}

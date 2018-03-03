@@ -220,11 +220,11 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
         this._pdfViewer.setDocument(pdfDocument);
         // this._pdfjsToolbar.setPagesCount(pdfDocument.numPages, false);
         this._pdfViewer.firstPagePromise.then(() => {
+          this._pdfViewer.currentScaleValue = scale;
           resolve(void 0);
         });
         this._pdfViewer.pagesPromise.then(() => {
           if (this.isVisible) {
-            this._pdfViewer.currentScaleValue = scale;
             this._viewer.node.scrollTop = scrollTop;
           }
           cleanup();
@@ -242,7 +242,7 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
     }
     switch (event.type) {
       case 'pagesinit':
-        this._fit();
+        this.fit();
         break;
       case 'click':
         this._handleClick(event as MouseEvent);
@@ -326,10 +326,12 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
   }
 
   /**
-   * On resize, use the computed row and column sizes to resize the terminal.
+   * Fit the PDF to the widget width.
    */
-  protected onResize(msg: Widget.ResizeMessage): void {
-    this._fit();
+  fit(): void {
+    if (this.isVisible) {
+      this._pdfViewer.currentScaleValue = 'page-width';
+    }
   }
 
   /**
@@ -342,14 +344,6 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
     this._render();
   }
 
-  /**
-   * Fit the PDF to the widget width.
-   */
-  private _fit(): void {
-    if (this.isVisible) {
-      this._pdfViewer.currentScaleValue = 'page-width';
-    }
-  }
 
 
   private _ready = new PromiseDelegate<void>();
@@ -428,40 +422,31 @@ namespace Private {
   export
   function createToolbar(pdfViewer: any): Toolbar<ToolbarButton> {
     const toolbar = new Toolbar();
+
     toolbar.addClass('jp-Toolbar');
     toolbar.addClass('jp-NotebookPanel-toolbar');
 
-    toolbar.addItem('next', new ToolbarButton({
-      className: 'jp-CopyIcon',
-      onClick: () => {
-        pdfViewer.currentPageNumber =
-          Math.min(pdfViewer.currentPageNumber + 1, pdfViewer.pagesCount);
-      },
-      tooltip: 'Next Page'
-    }));
     toolbar.addItem('previous', new ToolbarButton({
-      className: 'jp-CopyIcon',
+      className: 'jp-PreviousIcon',
       onClick: () => {
         pdfViewer.currentPageNumber =
           Math.max(pdfViewer.currentPageNumber - 1, 1);
       },
       tooltip: 'Previous Page'
     }));
-    toolbar.addItem('zoomIn', new ToolbarButton({
-      className: 'jp-CopyIcon',
+    toolbar.addItem('next', new ToolbarButton({
+      className: 'jp-NextIcon',
       onClick: () => {
-        let newScale = pdfViewer.currentScale;
-
-        newScale = (newScale * SCALE_DELTA).toFixed(2);
-        newScale = Math.ceil(newScale * 10) / 10;
-        newScale = Math.min(MAX_SCALE, newScale);
-
-        pdfViewer.currentScale = newScale;
+        pdfViewer.currentPageNumber =
+          Math.min(pdfViewer.currentPageNumber + 1, pdfViewer.pagesCount);
       },
-      tooltip: 'Zoom In'
+      tooltip: 'Next Page'
     }));
+
+    toolbar.addItem('spacer', Toolbar.createSpacerItem());
+
     toolbar.addItem('zoomOut', new ToolbarButton({
-      className: 'jp-CopyIcon',
+      className: 'jp-ZoomOutIcon',
       onClick: () => {
         let newScale = pdfViewer.currentScale;
 
@@ -472,6 +457,19 @@ namespace Private {
         pdfViewer.currentScale = newScale;
       },
       tooltip: 'Zoom Out'
+    }));
+    toolbar.addItem('zoomIn', new ToolbarButton({
+      className: 'jp-ZoomInIcon',
+      onClick: () => {
+        let newScale = pdfViewer.currentScale;
+
+        newScale = (newScale * SCALE_DELTA).toFixed(2);
+        newScale = Math.ceil(newScale * 10) / 10;
+        newScale = Math.min(MAX_SCALE, newScale);
+
+        pdfViewer.currentScale = newScale;
+      },
+      tooltip: 'Zoom In'
     }));
 
     return toolbar;
