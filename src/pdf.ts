@@ -193,10 +193,12 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
       let oldUrl = this._objectUrl;
       this._objectUrl = URL.createObjectURL(blob);
 
-      let scrollTop: number;
+      let scale: number | string = 'page-width';
+      let scrollTop = 0;
 
-      // Try to keep the scroll position.
+      // Try to keep the scale and scroll position.
       if (this.isVisible) {
+        scale = this._pdfViewer.currentScaleValue;
         scrollTop = this._viewer.node.scrollTop;
       }
 
@@ -222,6 +224,7 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
         });
         this._pdfViewer.pagesPromise.then(() => {
           if (this.isVisible) {
+            this._pdfViewer.currentScaleValue = scale;
             this._viewer.node.scrollTop = scrollTop;
           }
           cleanup();
@@ -239,7 +242,7 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
     }
     switch (event.type) {
       case 'pagesinit':
-        this._resize();
+        this._fit();
         break;
       case 'click':
         this._handleClick(event as MouseEvent);
@@ -326,7 +329,7 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
    * On resize, use the computed row and column sizes to resize the terminal.
    */
   protected onResize(msg: Widget.ResizeMessage): void {
-    this._resize();
+    this._fit();
   }
 
   /**
@@ -342,7 +345,7 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
   /**
    * Fit the PDF to the widget width.
    */
-  private _resize(): void {
+  private _fit(): void {
     if (this.isVisible) {
       this._pdfViewer.currentScaleValue = 'page-width';
     }
