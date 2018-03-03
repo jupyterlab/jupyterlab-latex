@@ -13,6 +13,8 @@ Subsequent saves of the file will automatically update the PDF.
 If the PDF fails to compile (possibly due to a syntax error),
 an error panel will open detailing the LaTeX error.
 
+For more advanced usage documentation, see [here](docs/advanced.md).
+
 ## Requirements
 
 * JupyterLab 0.31
@@ -41,28 +43,6 @@ To install the lab extension, run
 jupyter labextension install @jupyterlab/latex
 ```
 
-## Installing from source
-
-You can also install from source in order to develop the extension.
-
-From the `jupyterlab-latex` directory, enter the following into your terminal:
-```bash
-pip install .
-```
-This installs the server extension.
-
-If you are running Notebook 5.2 or earlier, enable the server extension by running
-```bash
-jupyter serverextension enable --sys-prefix jupyterlab_latex
-```
-
-Then, to install the lab extension, run
-```bash
-jlpm install
-jlpm run build
-jupyter labextension install .
-```
-
 ## Customization
 
 The extension defaults to running `xelatex` on the server.
@@ -77,17 +57,4 @@ if a `.bib` file is found. You can also configure the bibliography command
 by setting
 ```python
 c.LatexConfig.bibtex_command = '<custom_bib_command>'
-```
-
-LaTeX files have the ability to run arbitrary code by triggering external
-shell commands. This is a security risk, and so most LaTeX distributions
-restrict the commands that you can run in the shell.
-
-You can customize the behavior by setting the `LatexConfig.shell_escape` value.
-It can take three values: `"restricted"` (default) to allow only commands
-considered safe to be executed, `"allow"` to allow all commands, and `"disallow"`
-to disallow all commands.
-For example, to force your LaTeX distribution to run any command, use:
-```python
-c.LatexConfig.shell_escape = "allow"
 ```
