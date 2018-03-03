@@ -198,7 +198,7 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
 
       // Try to keep the scale and scroll position.
       if (this.isVisible) {
-        scale = this._pdfViewer.currentScaleValue;
+        scale = this._pdfViewer.currentScaleValue || scale;
         scrollTop = this._viewer.node.scrollTop;
       }
 
@@ -218,9 +218,10 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
       PDFJS.getDocument(this._objectUrl).then((pdfDocument: any) => {
         this._pdfDocument = pdfDocument;
         this._pdfViewer.setDocument(pdfDocument);
-        // this._pdfjsToolbar.setPagesCount(pdfDocument.numPages, false);
         this._pdfViewer.firstPagePromise.then(() => {
-          this._pdfViewer.currentScaleValue = scale;
+          if (this.isVisible) {
+            this._pdfViewer.currentScaleValue = scale;
+          }
           resolve(void 0);
         });
         this._pdfViewer.pagesPromise.then(() => {
