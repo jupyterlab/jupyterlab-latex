@@ -124,12 +124,12 @@ class LatexHandler(APIHandler):
             "-interaction=nonstopmode",
             "-halt-on-error",
             "-file-line-error",
-            f"{tex_base_name}",
+            tex_base_name,
             )
 
         full_bibtex_sequence = (
             c.bib_command,
-            f"{tex_base_name}",
+            tex_base_name,
             )
 
         command_sequence = [full_latex_sequence]
@@ -189,8 +189,7 @@ class LatexHandler(APIHandler):
             code, output = yield run_command(cmd)
             if code != 0:
                 self.set_status(500)
-                self.log.error((f'LaTeX command `{" ".join(cmd)}` '
-                                 f'errored with code: {code}'))
+                self.log.error('LaTeX command `{0}` errored with code: {1}'.format(" ".join(cmd), code))
                 return output
 
         return "LaTeX compiled"
@@ -208,11 +207,10 @@ class LatexHandler(APIHandler):
 
         if not os.path.exists(tex_file_path):
             self.set_status(403)
-            out = f"Request cannot be completed; no file at `{tex_file_path}`."
+            out = "Request cannot be completed; no file at `{}`.".format(tex_file_path)
         elif ext != '.tex':
             self.set_status(400)
-            out = (f"The file at `{tex_file_path}` does not end with .tex. "
-                    "You can only run LaTeX on a file ending with .tex.")
+            out = "The file at `{}` does not end with .tex. You can only run LaTeX on a file ending with .tex.".format(tex_file_path)
         else:
             with latex_cleanup(
                 workdir=os.path.dirname(tex_file_path),
@@ -292,7 +290,7 @@ def load_jupyter_server_extension(nb_server_app):
     # Prepend the base_url so that it works in a jupyterhub setting
     base_url = web_app.settings['base_url']
     endpoint = url_path_join(base_url, 'latex')
-    handlers = [(f'{endpoint}{path_regex}', 
+    handlers = [('{0}{1}'.format(endpoint, path_regex), 
                  LatexHandler, 
                  {"notebook_dir": nb_server_app.notebook_dir}
                 )]
