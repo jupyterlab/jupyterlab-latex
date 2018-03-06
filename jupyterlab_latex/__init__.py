@@ -237,6 +237,47 @@ class LatexSynctexHandler(APIHandler):
         self.notebook_dir = notebook_dir
 
 
+    def build_synctex_cmd(self, base_name, ext):
+        """
+        Builds the command which will be used to call SyncTeX.
+        If given a `.tex` it will build a forward synchronization command.
+        If given a `.pdf` it will build a reverse synchronization command.
+
+        Parameters
+        ----------
+
+        base_name: string
+            The name of the file, without the extension.
+
+        ext: string
+            The extension of the file, either ".pdf" or ".tex"
+
+        returns:
+            A tuple of (cmd, pos), where cmd is a tuple of string commands
+            to be given to the SyncTeX subprocess, and pos is a dictionary
+            containing the position data.
+
+        """
+        if ext == '.pdf':
+            # Construct the position dictionary, where x and y are in dots,
+            # measured from the top-left of a page (assumed to be 72 dpi)
+            pos = {
+                'page': self.get_query_argument('page', default='1'),
+                'x': self.get_query_argument('x', default='0'),
+                'y': self.get_query_argument('y', default='0'),
+                }
+            cmd = self.build_synctex_edit_cmd(base_name, pos)
+        elif ext == '.tex':
+            # Construct the position dictionary, where 'line' and 'column'
+            # are a position in the `.tex` document.
+            pos = {
+                'line': self.get_query_argument('line', default='1'),
+                'column': self.get_query_argument('column', default='1'),
+                }
+            cmd = self.build_synctex_view_cmd(base_name, pos)
+
+        return (cmd, pos)
+
     def build_synctex_edit_cmd(self, pdf_name, pos):
         """Builds tuple that will be used to call the synctex edit shell command.
 
@@ -250,7 +291,7 @@ class LatexSynctexHandler(APIHandler):
             document to map.
 
         returns:
-            A dictionary containing the mapped position data.
+            A tuple of of string commands to be given to the SyncTeX subprocess
 
         """
         c = LatexConfig(config=self.config)
@@ -278,7 +319,7 @@ class LatexSynctexHandler(APIHandler):
             document to map.
 
         returns:
-            A dictionary containing the mapped position data.
+            A tuple of of string commands to be given to the SyncTeX subprocess
 
         """
         c = LatexConfig(config=self.config)
@@ -331,6 +372,20 @@ class LatexSynctexHandler(APIHandler):
     def get(self, path = ''):
         """
         Given a path, run SyncTex, and respond when done.
+
+        Parameters
+        ----------
+        path : string
+            A path to a `.tex` or `.pdf` file. Position arguments
+            should be given in query strings. For forward synchronization with
+            a `.tex` document, the user should give `line` and `column` arguments
+            in the query string. For reverse synchronization, with a `.pdf`
+            document, the user should give `page`, `x`, and `y` in the query string,
+            where `x` and `y` are a position on the page from the top left corner
+            in dots (where the page is assumed to be 72 dpi).
+
+        returns:
+            A JSON object containing the mapped position.
         """
         # Parse the path into the base name and extension of the file
         full_file_path = os.path.join(self.notebook_dir, path.strip('/'))
@@ -348,19 +403,7 @@ class LatexSynctexHandler(APIHandler):
             out = (f"The file `{ext}` does not end with .tex of .pdf. "
                     "You can only run SyncTex on a file ending with .tex or .pdf.")
         else:
-            if ext == '.pdf':
-                pos = {
-                    'page': self.get_query_argument('page', default='1'),
-                    'x': self.get_query_argument('x', default='0'),
-                    'y': self.get_query_argument('y', default='0'),
-                    }
-                cmd = self.build_synctex_edit_cmd(base_name, pos)
-            elif ext == '.tex':
-                pos = {
-                    'line': self.get_query_argument('line', default='1'),
-                    'column': self.get_query_argument('column', default='1'),
-                    }
-                cmd = self.build_synctex_view_cmd(base_name, pos)
+            cmd, pos = self.build_synctex_cmd(base_name, ext)
 
             out = yield self.run_synctex(cmd)
             out = json.dumps(parse_synctex_response(out.decode('utf-8'), pos))
