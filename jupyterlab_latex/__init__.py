@@ -204,8 +204,7 @@ class LatexBuildHandler(APIHandler):
         """
         Given a path, run LaTeX, cleanup, and respond when done.
         """
-
-        # Get access to the notebook config object
+        # Parse the path into the base name and extension of the file
         tex_file_path = os.path.join(self.notebook_dir, path.strip('/'))
         tex_base_name, ext = os.path.splitext(os.path.basename(tex_file_path))
 
@@ -333,7 +332,7 @@ class LatexSynctexHandler(APIHandler):
         """
         Given a path, run SyncTex, and respond when done.
         """
-        # Get access to the notebook config object
+        # Parse the path into the base name and extension of the file
         full_file_path = os.path.join(self.notebook_dir, path.strip('/'))
         workdir = os.path.dirname(full_file_path)
         base_name, ext = os.path.splitext(os.path.basename(full_file_path))
