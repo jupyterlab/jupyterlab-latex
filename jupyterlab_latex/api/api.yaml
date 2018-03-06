@@ -38,7 +38,7 @@ paths:
         - name: filePath
           in: path
           required: true
-          description: The path of the .tex or .pdf file to map. If the path ends in .tex it gets the forward synchronization. If the path ends in .pdf it gets the revers synchronization.
+          description: The path of the .tex or .pdf file to map. If the path ends in .tex it gets the forward synchronization. If the path ends in .pdf it gets the reverse synchronization.
           schema:
             type: string
             format: uri
