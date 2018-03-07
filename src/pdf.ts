@@ -92,6 +92,24 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
   }
 
   /**
+   * Get the scroll position.
+   */
+  getScroll(): PDFJSViewer.IPosition {
+    return {
+      page: this._pdfViewer.currentPageNumber,
+      x: 0,
+      y: 0
+    };
+  }
+
+  /**
+   * Set the scroll position.
+   */
+  setScroll(pos: PDFJSViewer.IPosition): void {
+    this._pdfViewer.currentPageNumber = pos.page;
+  }
+
+  /**
    * Dispose of the resources held by the pdf widget.
    */
   dispose() {
@@ -238,6 +256,36 @@ class PDFJSViewerFactory extends ABCWidgetFactory<PDFJSViewer, DocumentRegistry.
 }
 
 /**
+ * A namespace for PDFJSViewer statics.
+ */
+export
+namespace PDFJSViewer {
+  /**
+   * The options for a SyncTeX edit command,
+   * mapping the pdf position to an editor position.
+   */
+  export
+  interface IPosition {
+    /**
+     * The page of the pdf.
+     */
+    page: number;
+
+    /**
+     * The x-position on the page, in pts, where
+     * the PDF is assumed to be 72dpi.
+     */
+    x: number;
+
+    /**
+     * The y-position on the page, in pts, where
+     * the PDF is assumed to be 72dpi.
+     */
+    y: number;
+  }
+}
+
+/**
  * A namespace for PDF widget private data.
  */
 namespace Private {
@@ -251,6 +299,7 @@ namespace Private {
     let pdf = document.createElement('div');
     pdf.className = PDF_CLASS;
     node.appendChild(pdf);
+    node.tabIndex = -1;
     return node;
   }
 

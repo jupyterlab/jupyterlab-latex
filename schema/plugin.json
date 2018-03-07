@@ -1,0 +1,16 @@
+{
+  "jupyter.lab.setting-icon-class": "jp-FileIcon",
+  "jupyter.lab.setting-icon-label": "LaTeX",
+  "title": "LaTeX",
+  "description": "LaTeX settings.",
+  "properties": {
+    "synctex": {
+      "type": "boolean",
+      "title": "SyncTeX",
+      "description": "Whether to use SyncTeX for linking document views",
+      "default": true
+    }
+  },
+  "additionalProperties": false,
+  "type": "object"
+}

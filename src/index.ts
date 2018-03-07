@@ -6,12 +6,16 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  InstanceTracker,
+  IInstanceTracker, InstanceTracker,
   showErrorMessage
 } from '@jupyterlab/apputils';
 
 import {
-  IStateDB, PathExt, URLExt
+  CodeEditor
+} from '@jupyterlab/codeeditor';
+
+import {
+  IStateDB, PathExt, ISettingRegistry, URLExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -23,7 +27,7 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  IEditorTracker
+  FileEditor, IEditorTracker
 } from '@jupyterlab/fileeditor';
 
 import {
@@ -31,8 +35,12 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  ReadonlyJSONObject
+  ReadonlyJSONObject, Token
 } from '@phosphor/coreutils';
+
+import {
+  DisposableSet
+} from '@phosphor/disposable';
 
 import {
   ErrorPanel
@@ -44,15 +52,69 @@ import {
 
 import '../style/index.css';
 
+
+/**
+ * A class that tracks editor widgets.
+ */
+export
+interface IPDFJSTracker extends IInstanceTracker<PDFJSViewer> {}
+
+
+/* tslint:disable */
+/**
+ * The editor tracker token.
+ */
+export
+const IPDFJSTracker = new Token<IPDFJSTracker>('@jupyterlab/latex:IPDFJSTracker');
+/* tslint:enable */
+
+const latexPluginId = '@jupyterlab/latex:plugin';
+
 namespace CommandIDs {
-  export const openLatexPreview = 'latex:open-preview';
+  /**
+   * Open a live preview for a `.tex` document.
+   */
+  export
+  const openLatexPreview = 'latex:open-preview';
+
+  /**
+   * Reveal in the editor a position from the pdf using SyncTeX.
+   */
+  export
+  const synctexEdit = 'latex:synctex-edit';
+
+  /**
+   * Reveal in the pdf a position from the editor using SyncTeX.
+   */
+  export
+  const synctexView = 'latex:synctex-view';
 }
+
+/**
+ * The options for a SyncTeX view command,
+ * mapping the editor position the PDF.
+ */
+type ISynctexViewOptions = CodeEditor.IPosition;
+
+/**
+ * The options for a SyncTeX edit command,
+ * mapping the pdf position to an editor position.
+ */
+type ISynctexEditOptions = PDFJSViewer.IPosition;
+
 /**
  * The JupyterLab plugin for the LaTeX extension.
  */
 const latexPlugin: JupyterLabPlugin<void> = {
-  id: 'jupyterlab-latex:open',
-  requires: [IDocumentManager, IEditorTracker, ILayoutRestorer, IStateDB],
+  id: latexPluginId,
+  requires: [
+    IDocumentManager,
+    IEditorTracker,
+    ILayoutRestorer,
+    IPDFJSTracker,
+    ISettingRegistry,
+    IStateDB
+  ],
   activate: activateLatexPlugin,
   autoStart: true
 };
@@ -60,15 +122,15 @@ const latexPlugin: JupyterLabPlugin<void> = {
 /**
  * Make a request to the notebook server LaTeX endpoint.
  *
- * @param url - the path to the .tex file to watch.
+ * @param path - the path to the .tex file to watch.
  *
  * @param settings - the settings for the current notebook server.
  *
- * @returns a Promise resolved with the JSON response.
+ * @returns a Promise resolved with the text response.
  */
-export
-function latexRequest(url: string, settings: ServerConnection.ISettings): Promise<any> {
-  let fullUrl = URLExt.join(settings.baseUrl, 'latex', url);
+function latexBuildRequest(path: string, synctex: boolean, settings: ServerConnection.ISettings): Promise<any> {
+  let fullUrl = URLExt.join(settings.baseUrl, 'latex', 'build', path);
+  fullUrl += `?synctex=${synctex ? 1 : 0}`;
 
   return ServerConnection.makeRequest(fullUrl, {}, settings).then(response => {
     if (response.status !== 200) {
@@ -81,11 +143,70 @@ function latexRequest(url: string, settings: ServerConnection.ISettings): Promis
 }
 
 /**
+ * Make a request to the notebook server SyncTeX endpoint.
+ *
+ * @param path - the path to the .tex or .pdf file.
+ *
+ * @param settings - the settings for the current notebook server.
+ *
+ * @returns a Promise resolved with the JSON response.
+ */
+function synctexEditRequest(path: string, pos: ISynctexEditOptions, settings: ServerConnection.ISettings): Promise<ISynctexViewOptions> {
+  let url = URLExt.join(settings.baseUrl, 'latex', 'synctex', path);
+  url += `?page=${pos.page}&x=${pos.x}&y=${pos.y}`;
+
+  return ServerConnection.makeRequest(url, {}, settings).then(response => {
+    if (response.status !== 200) {
+      return response.text().then(data => {
+        throw new ServerConnection.ResponseError(response, data);
+      });
+    }
+    return response.json().then(json => {
+      return {
+        line: parseInt(json.line, 10),
+        column: parseInt(json.column, 10)
+      } as ISynctexViewOptions;
+    });
+  });
+}
+
+/**
+ * Make a request to the notebook server SyncTeX endpoint.
+ *
+ * @param path - the path to the .tex or .pdf file.
+ *
+ * @param settings - the settings for the current notebook server.
+ *
+ * @returns a Promise resolved with the JSON response.
+ */
+function synctexViewRequest(path: string, pos: ISynctexViewOptions, settings: ServerConnection.ISettings): Promise<ISynctexEditOptions> {
+  let url = URLExt.join(settings.baseUrl, 'latex', 'synctex', path);
+  url += `?line=${pos.line}&column=${pos.column}`;
+
+  return ServerConnection.makeRequest(url, {}, settings).then(response => {
+    if (response.status !== 200) {
+      return response.text().then(data => {
+        throw new ServerConnection.ResponseError(response, data);
+      });
+    }
+    return response.json().then(json => {
+      return {
+        page: parseInt(json.page, 10),
+        x: parseFloat(json.x),
+        y: parseFloat(json.y)
+      } as ISynctexEditOptions;
+    });
+  });
+}
+
+/**
  * Activate the file browser.
  */
-function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorTracker: IEditorTracker, restorer: ILayoutRestorer, state: IStateDB): void {
+function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorTracker: IEditorTracker, restorer: ILayoutRestorer, pdfTracker: IPDFJSTracker, settingRegistry: ISettingRegistry, state: IStateDB): void {
   const { commands } = app;
   const id = 'jupyterlab-latex';
+
+  let synctex = true;
 
   // Settings for the notebook server.
   const serverSettings = ServerConnection.makeSettings();
@@ -159,7 +280,7 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
         return;
       }
       pending = true;
-      latexRequest(texContext.path, serverSettings).then(() => {
+      latexBuildRequest(texContext.path, synctex, serverSettings).then(() => {
         // Read the pdf file contents from disk.
         pdfContext ? pdfContext.revert() : findOpenOrRevealPDF();
         if (errorPanel) {
@@ -180,7 +301,7 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
 
     // Run an initial latexRequest so that the appropriate files exist,
     // then open them.
-    latexRequest(texContext.path, serverSettings).then(() => {
+    latexBuildRequest(texContext.path, synctex, serverSettings).then(() => {
       // Open the pdf and get a handle on its document context.
       findOpenOrRevealPDF();
     }).catch((err) => {
@@ -219,6 +340,29 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
     });
   });
 
+  // Fetch the initial state of the settings.
+  Promise.all([settingRegistry.load(latexPluginId), app.restored])
+  .then(([settings]) => {
+    let disposables = new DisposableSet();
+    const onSettingsUpdated = (settings: ISettingRegistry.ISettings) => {
+      // Get the new value of the synctex setting.
+      const val = settings.get('synctex').composite as boolean | null;
+      synctex = (val === true || val === false) ? val : true;
+      // Trash any existing synctex commands
+      disposables.dispose();
+
+      // If SyncTeX is enabled, add the commands.
+      if (synctex) {
+        disposables =
+          addSynctexCommands(app, editorTracker, pdfTracker, serverSettings);
+      }
+    };
+    settings.changed.connect(onSettingsUpdated);
+    onSettingsUpdated(settings);
+  }).catch((reason: Error) => {
+    console.error(reason.message);
+  });
+
   commands.addCommand(CommandIDs.openLatexPreview, {
     execute: () => {
       // Get the current widget that had its contextMenu activated.
@@ -236,11 +380,127 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
     },
     label: 'Show LaTeX Preview'
   });
+
   app.contextMenu.addItem({
     command: CommandIDs.openLatexPreview,
     selector: '.jp-FileEditor'
   });
+
   return;
+}
+
+/**
+ * Add commands, keyboard shortcuts, and menu items for SyncTeX-related things.
+ */
+function addSynctexCommands(app: JupyterLab, editorTracker: IEditorTracker, pdfTracker: IPDFJSTracker, serverSettings: ServerConnection.ISettings): DisposableSet {
+  const disposables = new DisposableSet();
+
+  const hasPDFWidget = () => !!pdfTracker.currentWidget;
+  const hasEditorWidget = () => !!editorTracker.currentWidget;
+
+  // Add the command for the PDF-to-editor mapping.
+  disposables.add(app.commands.addCommand(CommandIDs.synctexEdit, {
+    execute: () => {
+      // Get the pdf widget that had its contextMenu activated.
+      let widget = pdfTracker.currentWidget;
+      if (widget) {
+        // Get the page number.
+        const pos = widget.getScroll();
+
+        // Request the synctex position for the PDF
+        return synctexEditRequest(widget.context.path, pos, serverSettings)
+        .then((view: ISynctexViewOptions) => {
+          // Find the right editor widget.
+          let editorWidget: FileEditor | undefined = undefined;
+          const baseName = PathExt.basename(widget.context.path, '.pdf');
+          const dirName = PathExt.dirname(widget.context.path);
+          const texFilePath = PathExt.join(dirName, baseName + '.tex');
+          editorTracker.forEach(editor => {
+            if (editor.context.path === texFilePath) {
+              editorWidget = editor;
+            }
+          });
+          if (!editorWidget) {
+            return;
+          }
+          // Scroll the editor.
+          editorWidget.editor.setCursorPosition(view);
+        });
+      }
+    },
+    isEnabled: hasPDFWidget,
+    isVisible: () => {
+      const widget = pdfTracker.currentWidget;
+      const baseName = PathExt.basename(widget.context.path, '.pdf');
+      const dirName = PathExt.dirname(widget.context.path);
+      const texFilePath = PathExt.join(dirName, baseName + '.tex');
+      return widget && Private.previews.has(texFilePath);
+    },
+    label: 'Scroll Editor to Page'
+  }));
+
+  // Add the command for the editor-to-PDF mapping.
+  disposables.add(app.commands.addCommand(CommandIDs.synctexView, {
+    execute: () => {
+      // Get the current widget that had its contextMenu activated.
+      let widget = editorTracker.currentWidget;
+      if (widget) {
+        // Get the cursor position.
+        const pos = widget.editor.getCursorPosition();
+
+        // Request the synctex position for the PDF
+        return synctexViewRequest(widget.context.path, pos, serverSettings)
+        .then((edit: ISynctexEditOptions) => {
+          // Find the right pdf widget.
+          let pdfWidget: PDFJSViewer | undefined = undefined;
+          const baseName = PathExt.basename(widget.context.path, '.tex');
+          const dirName = PathExt.dirname(widget.context.path);
+          const pdfFilePath = PathExt.join(dirName, baseName + '.pdf');
+          pdfTracker.forEach(pdf => {
+
+            if (pdf.context.path === pdfFilePath) {
+              pdfWidget = pdf;
+            }
+          });
+          if (!pdfWidget) {
+            return;
+          }
+          // Scroll the pdf.
+          pdfWidget.setScroll(edit);
+        });
+      }
+    },
+    isEnabled: hasEditorWidget,
+    isVisible: () => {
+      let widget = editorTracker.currentWidget;
+      return widget && Private.previews.has(widget.context.path);
+    },
+    label: 'Scroll PDF to Cursor'
+  }));
+
+  // Add context menu items
+  disposables.add(app.contextMenu.addItem({
+    command: CommandIDs.synctexView,
+    selector: '.jp-FileEditor'
+  }));
+  disposables.add(app.contextMenu.addItem({
+    command: CommandIDs.synctexEdit,
+    selector: '.jp-PDFJSContainer'
+  }));
+
+  // Add keybindings.
+  disposables.add(app.commands.addKeyBinding({
+    selector: '.jp-FileEditor',
+    keys: ['Accel Shift X'],
+    command: CommandIDs.synctexView
+  }));
+  disposables.add(app.commands.addKeyBinding({
+    selector: '.jp-PDFJSContainer',
+    keys: ['Accel Shift X'],
+    command: CommandIDs.synctexEdit
+  }));
+
+  return disposables;
 }
 
 /**
@@ -258,14 +518,15 @@ const FACTORY = 'PDFJS';
 /**
  * The pdf file handler extension.
  */
-const pdfjsPlugin: JupyterLabPlugin<void> = {
+const pdfjsPlugin: JupyterLabPlugin<IPDFJSTracker> = {
   activate: activatePDFJS,
   id: '@jupyterlab/pdfjs-extension:plugin',
   requires: [ ILayoutRestorer ],
+  provides: IPDFJSTracker,
   autoStart: true
 };
 
-function activatePDFJS(app: JupyterLab, restorer: ILayoutRestorer): void {
+function activatePDFJS(app: JupyterLab, restorer: ILayoutRestorer): IPDFJSTracker {
   const namespace = 'pdfjs-widget';
   const factory = new PDFJSViewerFactory({
     name: FACTORY,
@@ -296,6 +557,8 @@ function activatePDFJS(app: JupyterLab, restorer: ILayoutRestorer): void {
       widget.title.iconLabel = types[0].iconLabel;
     }
   });
+
+  return tracker;
 }
 
 /**
