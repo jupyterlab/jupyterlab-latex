@@ -6,6 +6,10 @@ import {
 } from '@phosphor/coreutils';
 
 import {
+  ElementExt
+} from '@phosphor/domutils';
+
+import {
   Message
 } from '@phosphor/messaging';
 
@@ -189,9 +193,47 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
       case 'pagesinit':
         this._resize();
         break;
+      case 'mousedown':
+        this._handleMouseDown(event as MouseEvent);
+        break;
       default:
         break;
     }
+  }
+
+  private _handleMouseDown(evt: MouseEvent): void {
+    const pos = this._clientToPDFPosition(evt.clientX, evt.clientY);
+    if (!pos) {
+      return;
+    }
+    console.log(pos.x, pos.y);
+  }
+
+  private _clientToPDFPosition(x: number, y: number): PDFJSViewer.IPosition | undefined {
+    let page: any;
+    let pageNumber = 0;
+    for (; pageNumber < this._pdfViewer.pagesCount; pageNumber++) {
+      const pageView = this._pdfViewer.getPageView(pageNumber);
+      const pageDiv = pageView.textLayer.textLayerDiv;
+      if (ElementExt.hitTest(pageDiv, x, y)) {
+        page = pageView;
+        break;
+      }
+    }
+    if (!page) {
+      return;
+    }
+    const pageDiv = page.textLayer.textLayerDiv;
+    const boundingRect = pageDiv.getBoundingClientRect();
+    const localX = x - boundingRect.left;
+    const localY = y - boundingRect.top;
+    const viewport = page.viewport.clone({dontFlip: true});
+    const [pdfX, pdfY] = viewport.convertToPdfPoint(localX, localY);
+    return {
+      page: pageNumber + 1,
+      x: pdfX,
+      y: pdfY
+    } as PDFJSViewer.IPosition;
   }
 
   /**
@@ -200,6 +242,7 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
     this.node.addEventListener('pagesinit', this);
+    this.node.addEventListener('mousedown', this);
   }
 
   /**
