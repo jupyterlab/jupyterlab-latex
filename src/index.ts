@@ -244,8 +244,16 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
         pdfWidget = manager.openOrReveal(pdfFilePath, 'PDFJS', undefined,
           {'mode': 'split-right'});
       }
+      (pdfWidget as PDFJSViewer).positionRequested.connect(reverseSearch);
       pdfContext = manager.contextForWidget(pdfWidget);
       pdfContext.disposed.connect(cleanupPreviews);
+    };
+
+    const reverseSearch = (s: PDFJSViewer, pos: PDFJSViewer.IPosition) => {
+      synctexEditRequest(s.context.path, pos, serverSettings)
+        .then((view: ISynctexViewOptions) => {
+          (widget as FileEditor).editor.setCursorPosition(view);
+        });
     };
 
     const errorPanelInit = (err: ServerConnection.ResponseError) => {

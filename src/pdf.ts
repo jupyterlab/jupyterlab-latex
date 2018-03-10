@@ -22,6 +22,11 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
+  ISignal,
+  Signal
+} from '@phosphor/signaling';
+
+import {
   ABCWidgetFactory, DocumentRegistry
 } from '@jupyterlab/docregistry';
 
@@ -123,6 +128,10 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
     super.dispose();
   }
 
+  get positionRequested(): ISignal<this, PDFJSViewer.IPosition> {
+    return this._positionRequested;
+  }
+
   /**
    * Handle a change to the title.
    */
@@ -206,7 +215,7 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
     if (!pos) {
       return;
     }
-    console.log(pos.x, pos.y);
+    this._positionRequested.emit(pos);
   }
 
   private _clientToPDFPosition(x: number, y: number): PDFJSViewer.IPosition | undefined {
@@ -279,10 +288,12 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
     }
   }
 
+
   private _ready = new PromiseDelegate<void>();
   private _objectUrl = '';
   private _pdfViewer: any;
   private _pdfDocument: any;
+  private _positionRequested = new Signal<this, PDFJSViewer.IPosition>(this);
 }
 
 /**
