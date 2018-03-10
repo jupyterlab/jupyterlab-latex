@@ -56,6 +56,11 @@ export
 const PDF_CONTAINER_CLASS = 'jp-PDFJSContainer';
 
 /**
+ * A boolean indicating whether the platform is Mac.
+ */
+const IS_MAC = !!navigator.platform.match(/Mac/i);
+
+/**
  * PDFJS adds a global object to the page called `PDFJS`.
  * Declare a reference to that.
  */
@@ -202,19 +207,28 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
       case 'pagesinit':
         this._resize();
         break;
-      case 'mousedown':
-        this._handleMouseDown(event as MouseEvent);
+      case 'click':
+        this._handleClick(event as MouseEvent);
         break;
       default:
         break;
     }
   }
 
-  private _handleMouseDown(evt: MouseEvent): void {
+  private _handleClick(evt: MouseEvent): void {
+    // If it is a normal click, return without doing anything.
+    if ((IS_MAC && !evt.metaKey) || (!IS_MAC && !evt.ctrlKey)) {
+      return;
+    }
+
+    // Get the page position of the click.
     const pos = this._clientToPDFPosition(evt.clientX, evt.clientY);
+
+    // If the click was not on a page, do nothing.
     if (!pos) {
       return;
     }
+    // Emit the `positionRequested` signal.
     this._positionRequested.emit(pos);
   }
 
@@ -251,7 +265,7 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
     this.node.addEventListener('pagesinit', this);
-    this.node.addEventListener('mousedown', this);
+    this.node.addEventListener('click', this);
   }
 
   /**
@@ -259,7 +273,8 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
    */
   protected onBeforeDetach(msg: Message): void {
     let node = this.node;
-    node.removeEventListener('pagesinit', this, true);
+    node.removeEventListener('pagesinit', this);
+    node.removeEventListener('click', this);
   }
 
   /**
