@@ -217,7 +217,12 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
 
   private _handleClick(evt: MouseEvent): void {
     // If it is a normal click, return without doing anything.
-    if ((IS_MAC && !evt.metaKey) || (!IS_MAC && !evt.ctrlKey)) {
+    const shiftAccel = (evt: MouseEvent): boolean => {
+      return evt.shiftKey ?
+        IS_MAC && evt.metaKey || !IS_MAC && evt.ctrlKey :
+        false;
+    };
+    if (!shiftAccel(evt)) {
       return;
     }
 
