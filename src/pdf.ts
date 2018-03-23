@@ -242,6 +242,12 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
     let pageNumber = 0;
     for (; pageNumber < this._pdfViewer.pagesCount; pageNumber++) {
       const pageView = this._pdfViewer.getPageView(pageNumber);
+      // If the page is not rendered (as happens when it is
+      // scrolled out of view), then the textLayer div doesn't
+      // exist, and we can safely skip it.
+      if (!pageView.textLayer) {
+        continue;
+      }
       const pageDiv = pageView.textLayer.textLayerDiv;
       if (ElementExt.hitTest(pageDiv, x, y)) {
         page = pageView;
