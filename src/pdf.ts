@@ -136,7 +136,7 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
   /**
    * Get the scroll position.
    */
-  getScroll(): PDFJSViewer.IPosition {
+  get position(): PDFJSViewer.IPosition {
     return {
       page: this._pdfViewer.currentPageNumber,
       x: 0,
@@ -147,8 +147,22 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
   /**
    * Set the scroll position.
    */
-  setScroll(pos: PDFJSViewer.IPosition): void {
-    this._pdfViewer.currentPageNumber = pos.page;
+  set position(pos: PDFJSViewer.IPosition) {
+    // Clamp the page number.
+    const pageNumber = Math.max(
+      Math.min(pos.page, this._pdfViewer.pagesCount + 1), 1);
+    // Scroll page into view using a very undocumented
+    // set of options.
+    this._pdfViewer.scrollPageIntoView({
+      pageNumber,
+      destArray: [
+        pageNumber,
+        { name: 'XYZ' },
+        pos.x,
+        pos.y,
+        this._pdfViewer.currentScaleValue
+      ]
+    });
   }
 
   /**

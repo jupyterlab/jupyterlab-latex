@@ -417,7 +417,7 @@ function addSynctexCommands(app: JupyterLab, editorTracker: IEditorTracker, pdfT
       let widget = pdfTracker.currentWidget;
       if (widget) {
         // Get the page number.
-        const pos = widget.getScroll();
+        const pos = widget.position;
 
         // Request the synctex position for the PDF
         return synctexEditRequest(widget.context.path, pos, serverSettings)
@@ -458,7 +458,8 @@ function addSynctexCommands(app: JupyterLab, editorTracker: IEditorTracker, pdfT
       let widget = editorTracker.currentWidget;
       if (widget) {
         // Get the cursor position.
-        const pos = widget.editor.getCursorPosition();
+        let pos = widget.editor.getCursorPosition();
+        pos = { line: pos.line + 1, column: pos.column + 1 };
 
         // Request the synctex position for the PDF
         return synctexViewRequest(widget.context.path, pos, serverSettings)
@@ -469,7 +470,6 @@ function addSynctexCommands(app: JupyterLab, editorTracker: IEditorTracker, pdfT
           const dirName = PathExt.dirname(widget.context.path);
           const pdfFilePath = PathExt.join(dirName, baseName + '.pdf');
           pdfTracker.forEach(pdf => {
-
             if (pdf.context.path === pdfFilePath) {
               pdfWidget = pdf;
             }
@@ -478,7 +478,7 @@ function addSynctexCommands(app: JupyterLab, editorTracker: IEditorTracker, pdfT
             return;
           }
           // Scroll the pdf.
-          pdfWidget.setScroll(edit);
+          pdfWidget.position = { ...edit, x: 0 };
         });
       }
     },
