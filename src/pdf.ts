@@ -6,6 +6,10 @@ import {
 } from '@phosphor/coreutils';
 
 import {
+  ElementExt
+} from '@phosphor/domutils';
+
+import {
   Message
 } from '@phosphor/messaging';
 
@@ -16,6 +20,11 @@ import {
 import {
   PathExt
 } from '@jupyterlab/coreutils';
+
+import {
+  ISignal,
+  Signal
+} from '@phosphor/signaling';
 
 import {
   ABCWidgetFactory, DocumentRegistry
@@ -45,6 +54,11 @@ const PDF_CLASS = 'pdfViewer';
  */
 export
 const PDF_CONTAINER_CLASS = 'jp-PDFJSContainer';
+
+/**
+ * A boolean indicating whether the platform is Mac.
+ */
+const IS_MAC = !!navigator.platform.match(/Mac/i);
 
 /**
  * PDFJS adds a global object to the page called `PDFJS`.
@@ -119,6 +133,10 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
     super.dispose();
   }
 
+  get positionRequested(): ISignal<this, PDFJSViewer.IPosition> {
+    return this._positionRequested;
+  }
+
   /**
    * Handle a change to the title.
    */
@@ -189,9 +207,67 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
       case 'pagesinit':
         this._resize();
         break;
+      case 'click':
+        this._handleClick(event as MouseEvent);
+        break;
       default:
         break;
     }
+  }
+
+  private _handleClick(evt: MouseEvent): void {
+    // If it is a normal click, return without doing anything.
+    const shiftAccel = (evt: MouseEvent): boolean => {
+      return evt.shiftKey ?
+        IS_MAC && evt.metaKey || !IS_MAC && evt.ctrlKey :
+        false;
+    };
+    if (!shiftAccel(evt)) {
+      return;
+    }
+
+    // Get the page position of the click.
+    const pos = this._clientToPDFPosition(evt.clientX, evt.clientY);
+
+    // If the click was not on a page, do nothing.
+    if (!pos) {
+      return;
+    }
+    // Emit the `positionRequested` signal.
+    this._positionRequested.emit(pos);
+  }
+
+  private _clientToPDFPosition(x: number, y: number): PDFJSViewer.IPosition | undefined {
+    let page: any;
+    let pageNumber = 0;
+    for (; pageNumber < this._pdfViewer.pagesCount; pageNumber++) {
+      const pageView = this._pdfViewer.getPageView(pageNumber);
+      // If the page is not rendered (as happens when it is
+      // scrolled out of view), then the textLayer div doesn't
+      // exist, and we can safely skip it.
+      if (!pageView.textLayer) {
+        continue;
+      }
+      const pageDiv = pageView.textLayer.textLayerDiv;
+      if (ElementExt.hitTest(pageDiv, x, y)) {
+        page = pageView;
+        break;
+      }
+    }
+    if (!page) {
+      return;
+    }
+    const pageDiv = page.textLayer.textLayerDiv;
+    const boundingRect = pageDiv.getBoundingClientRect();
+    const localX = x - boundingRect.left;
+    const localY = y - boundingRect.top;
+    const viewport = page.viewport.clone({dontFlip: true});
+    const [pdfX, pdfY] = viewport.convertToPdfPoint(localX, localY);
+    return {
+      page: pageNumber + 1,
+      x: pdfX,
+      y: pdfY
+    } as PDFJSViewer.IPosition;
   }
 
   /**
@@ -200,6 +276,7 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
     this.node.addEventListener('pagesinit', this);
+    this.node.addEventListener('click', this);
   }
 
   /**
@@ -207,7 +284,8 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
    */
   protected onBeforeDetach(msg: Message): void {
     let node = this.node;
-    node.removeEventListener('pagesinit', this, true);
+    node.removeEventListener('pagesinit', this);
+    node.removeEventListener('click', this);
   }
 
   /**
@@ -236,10 +314,12 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
     }
   }
 
+
   private _ready = new PromiseDelegate<void>();
   private _objectUrl = '';
   private _pdfViewer: any;
   private _pdfDocument: any;
+  private _positionRequested = new Signal<this, PDFJSViewer.IPosition>(this);
 }
 
 /**

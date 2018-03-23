@@ -244,8 +244,20 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
         pdfWidget = manager.openOrReveal(pdfFilePath, 'PDFJS', undefined,
           {'mode': 'split-right'});
       }
+      (pdfWidget as PDFJSViewer).positionRequested.connect(reverseSearch);
       pdfContext = manager.contextForWidget(pdfWidget);
       pdfContext.disposed.connect(cleanupPreviews);
+    };
+
+    const reverseSearch = (s: PDFJSViewer, pos: PDFJSViewer.IPosition) => {
+      // SyncTeX's column/x mapping seems to be very unreliable.
+      // We get better results by only trying to sync the line/y position.
+      synctexEditRequest(s.context.path, { ...pos, x: 0}, serverSettings)
+        .then((view: ISynctexViewOptions) => {
+          // SyncTex line is one-based, so subtract 1.
+          const cursor = { line: view.line - 1, column: 0 };
+          (widget as FileEditor).editor.setCursorPosition(cursor);
+        });
     };
 
     const errorPanelInit = (err: ServerConnection.ResponseError) => {
