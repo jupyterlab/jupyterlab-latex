@@ -192,7 +192,7 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
       let scrollTop = 0;
 
       // Try to keep the scale and scroll position.
-      if (this.isVisible) {
+      if (this._hasRendered && this.isVisible) {
         scale = this._pdfViewer.currentScaleValue || scale;
         scrollTop = this._viewer.node.scrollTop;
       }
@@ -217,6 +217,7 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
           if (this.isVisible) {
             this._pdfViewer.currentScaleValue = scale;
           }
+          this._hasRendered = true;
           resolve(void 0);
         });
         this._pdfViewer.pagesPromise.then(() => {
@@ -237,9 +238,6 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
       return;
     }
     switch (event.type) {
-      case 'pagesinit':
-        this.fit();
-        break;
       case 'click':
         this._handleClick(event as MouseEvent);
         break;
@@ -309,7 +307,6 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
     this._viewer.node.addEventListener('click', this);
-    this._viewer.node.addEventListener('pagesinit', this);
   }
 
   /**
@@ -317,7 +314,6 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
    */
   protected onBeforeDetach(msg: Message): void {
     let node = this._viewer.node;
-    node.removeEventListener('pagesinit', this);
     node.removeEventListener('click', this);
   }
 
@@ -349,6 +345,7 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
   private _positionRequested = new Signal<this, PDFJSViewer.IPosition>(this);
   private _viewer: Widget;
   private _toolbar: Toolbar<Widget>;
+  private _hasRendered = false;
 }
 
 /**
