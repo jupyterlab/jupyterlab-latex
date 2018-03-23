@@ -213,6 +213,12 @@ def parse_synctex_response(response, pos):
     if match is None:
         raise Exception('Unable to parse SyncTeX response')
     lines = match.group(1).lower().replace(' ', '').split('\n')
-    result = { l.split(':')[0]: l.split(':')[1] for l in lines if l.split(':')[0] in fields }
-
-    return { **result, **pos }
+    result = {}
+    for l in lines:
+        key, value = l.split(":")
+        if key in fields:
+            result[key] = value
+            fields.remove(key)
+    for f in fields:
+        result[f] = pos[f]
+    return result
