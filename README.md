@@ -56,5 +56,5 @@ The extension defaults to running `bibtex` for generating a bibliography
 if a `.bib` file is found. You can also configure the bibliography command
 by setting
 ```python
-c.LatexConfig.bibtex_command = '<custom_bib_command>'
+c.LatexConfig.bib_command = '<custom_bib_command>'
 ```
