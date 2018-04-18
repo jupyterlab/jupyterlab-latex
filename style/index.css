@@ -3,6 +3,20 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+/*-----------------------------------------------------------------------------
+| Variables
+|----------------------------------------------------------------------------*/
+
+:root {
+  --jp-private-pdfjs-toolbar-height: 28px;
+}
+
+/*-----------------------------------------------------------------------------
+
+/*-----------------------------------------------------------------------------
+| Styles
+|----------------------------------------------------------------------------*/
+
 .jp-LatexErrorPanel {
   min-height: 120px;
   min-width: 120px;
@@ -21,5 +35,33 @@
   overflow: auto;
   position: absolute;
   width: 100%;
-  height: 100%;
+  height: calc(100% - var(--jp-private-pdfjs-toolbar-height));
+}
+
+.jp-PDFJS-toolbar {
+  padding: 2px;
+  height: var(--jp-private-pdfjs-toolbar-height);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  background: var(--jp-toolbar-background);
+  z-index: 1;
+}
+
+.jp-PreviousIcon {
+  background-image: url(previous.svg);
+}
+
+.jp-NextIcon {
+  background-image: url(next.svg);
+}
+
+.jp-ZoomInIcon {
+  background-image: url(zoom_in.svg);
+}
+
+.jp-ZoomOutIcon {
+  background-image: url(zoom_out.svg);
+}
+
+.jp-FitIcon {
+  background-image: url(fit.svg);
 }

@@ -14,8 +14,12 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  Widget
+  Widget, PanelLayout
 } from '@phosphor/widgets';
+
+import {
+  Toolbar, ToolbarButton
+} from '@jupyterlab/apputils';
 
 import {
   PathExt
@@ -61,6 +65,25 @@ const PDF_CONTAINER_CLASS = 'jp-PDFJSContainer';
 const IS_MAC = !!navigator.platform.match(/Mac/i);
 
 /**
+ * The step in scaling factors for zooming the PDF viewer.
+ */
+export
+const SCALE_DELTA = 1.1;
+
+/**
+ * The maximum scaling factor for zooming the PDF viewer.
+ */
+export
+const MAX_SCALE = 10.0;
+
+/**
+ * The minimum scaling factor for zooming the PDF viewer.
+ */
+export
+const MIN_SCALE = 0.25;
+
+
+/**
  * PDFJS adds a global object to the page called `PDFJS`.
  * Declare a reference to that.
  */
@@ -72,12 +95,17 @@ declare const PDFJS: any;
 export
 class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
   constructor(context: DocumentRegistry.Context) {
-    super({ node: Private.createNode() });
-    this.context = context;
-    this._pdfViewer = new PDFJS.PDFViewer({
-        container: this.node,
-    });
+    super();
 
+    const layout = this.layout = new PanelLayout();
+    this._viewer = new Widget({ node: Private.createNode() });
+    this._pdfViewer = new PDFJS.PDFViewer({ container: this._viewer.node });
+    this._toolbar = Private.createToolbar(this._pdfViewer);
+
+    layout.addWidget(this._toolbar);
+    layout.addWidget(this._viewer);
+
+    this.context = context;
     this._onTitleChanged();
     context.pathChanged.connect(this._onTitleChanged, this);
 
@@ -108,7 +136,7 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
   /**
    * Get the scroll position.
    */
-  getScroll(): PDFJSViewer.IPosition {
+  get position(): PDFJSViewer.IPosition {
     return {
       page: this._pdfViewer.currentPageNumber,
       x: 0,
@@ -119,8 +147,23 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
   /**
    * Set the scroll position.
    */
-  setScroll(pos: PDFJSViewer.IPosition): void {
-    this._pdfViewer.currentPageNumber = pos.page;
+  set position(pos: PDFJSViewer.IPosition) {
+    // Clamp the page number.
+    const pageNumber = Math.max(
+      Math.min(pos.page, this._pdfViewer.pagesCount + 1), 1);
+    // Scroll page into view using a very undocumented
+    // set of options. This particular set scrolls it to
+    // an x,y position on a given page, with a given scale value.
+    this._pdfViewer.scrollPageIntoView({
+      pageNumber,
+      destArray: [
+        pageNumber,
+        { name: 'XYZ' },
+        pos.x,
+        pos.y,
+        this._pdfViewer.currentScaleValue
+      ]
+    });
   }
 
   /**
@@ -160,11 +203,13 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
       let oldUrl = this._objectUrl;
       this._objectUrl = URL.createObjectURL(blob);
 
-      let scrollTop: number;
+      let scale: number | string = 'page-width';
+      let scrollTop = 0;
 
-      // Try to keep the scroll position.
-      if (this.isVisible) {
-        scrollTop = this.node.scrollTop;
+      // Try to keep the scale and scroll position.
+      if (this._hasRendered && this.isVisible) {
+        scale = this._pdfViewer.currentScale || scale;
+        scrollTop = this._viewer.node.scrollTop;
       }
 
       const cleanup = () => {
@@ -184,11 +229,15 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
         this._pdfDocument = pdfDocument;
         this._pdfViewer.setDocument(pdfDocument);
         this._pdfViewer.firstPagePromise.then(() => {
+          if (this.isVisible) {
+            this._pdfViewer.currentScaleValue = scale;
+          }
+          this._hasRendered = true;
           resolve(void 0);
         });
         this._pdfViewer.pagesPromise.then(() => {
           if (this.isVisible) {
-            this.node.scrollTop = scrollTop;
+            this._viewer.node.scrollTop = scrollTop;
           }
           cleanup();
         });
@@ -204,9 +253,6 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
       return;
     }
     switch (event.type) {
-      case 'pagesinit':
-        this._resize();
-        break;
       case 'click':
         this._handleClick(event as MouseEvent);
         break;
@@ -275,24 +321,24 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
    */
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
-    this.node.addEventListener('pagesinit', this);
-    this.node.addEventListener('click', this);
+    this._viewer.node.addEventListener('click', this);
   }
 
   /**
    * Handle `before-detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
-    let node = this.node;
-    node.removeEventListener('pagesinit', this);
+    let node = this._viewer.node;
     node.removeEventListener('click', this);
   }
 
   /**
-   * On resize, use the computed row and column sizes to resize the terminal.
+   * Fit the PDF to the widget width.
    */
-  protected onResize(msg: Widget.ResizeMessage): void {
-    this._resize();
+  fit(): void {
+    if (this.isVisible) {
+      this._pdfViewer.currentScaleValue = 'page-width';
+    }
   }
 
   /**
@@ -305,14 +351,6 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
     this._render();
   }
 
-  /**
-   * Fit the PDF to the widget width.
-   */
-  private _resize(): void {
-    if (this.isVisible) {
-      this._pdfViewer.currentScaleValue = 'page-width';
-    }
-  }
 
 
   private _ready = new PromiseDelegate<void>();
@@ -320,6 +358,9 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
   private _pdfViewer: any;
   private _pdfDocument: any;
   private _positionRequested = new Signal<this, PDFJSViewer.IPosition>(this);
+  private _viewer: Widget;
+  private _toolbar: Toolbar<Widget>;
+  private _hasRendered = false;
 }
 
 /**
@@ -381,6 +422,73 @@ namespace Private {
     node.appendChild(pdf);
     node.tabIndex = -1;
     return node;
+  }
+
+  /**
+   * Create the toolbar for the PDF viewer.
+   */
+  export
+  function createToolbar(pdfViewer: any): Toolbar<ToolbarButton> {
+    const toolbar = new Toolbar();
+
+    toolbar.addClass('jp-Toolbar');
+    toolbar.addClass('jp-PDFJS-toolbar');
+
+    toolbar.addItem('previous', new ToolbarButton({
+      className: 'jp-PreviousIcon',
+      onClick: () => {
+        pdfViewer.currentPageNumber =
+          Math.max(pdfViewer.currentPageNumber - 1, 1);
+      },
+      tooltip: 'Previous Page'
+    }));
+    toolbar.addItem('next', new ToolbarButton({
+      className: 'jp-NextIcon',
+      onClick: () => {
+        pdfViewer.currentPageNumber =
+          Math.min(pdfViewer.currentPageNumber + 1, pdfViewer.pagesCount);
+      },
+      tooltip: 'Next Page'
+    }));
+
+    toolbar.addItem('spacer', Toolbar.createSpacerItem());
+
+    toolbar.addItem('zoomOut', new ToolbarButton({
+      className: 'jp-ZoomOutIcon',
+      onClick: () => {
+        let newScale = pdfViewer.currentScale;
+
+        newScale = (newScale / SCALE_DELTA).toFixed(2);
+        newScale = Math.floor(newScale * 10) / 10;
+        newScale = Math.max(MIN_SCALE, newScale);
+
+        pdfViewer.currentScale = newScale;
+      },
+      tooltip: 'Zoom Out'
+    }));
+    toolbar.addItem('zoomIn', new ToolbarButton({
+      className: 'jp-ZoomInIcon',
+      onClick: () => {
+        let newScale = pdfViewer.currentScale;
+
+        newScale = (newScale * SCALE_DELTA).toFixed(2);
+        newScale = Math.ceil(newScale * 10) / 10;
+        newScale = Math.min(MAX_SCALE, newScale);
+
+        pdfViewer.currentScale = newScale;
+      },
+      tooltip: 'Zoom In'
+    }));
+
+    toolbar.addItem('fit', new ToolbarButton({
+      className: 'jp-FitIcon',
+      onClick: () => {
+        pdfViewer.currentScaleValue = 'page-width';
+      },
+      tooltip: 'Fit to Page Width'
+    }));
+
+    return toolbar;
   }
 
   /**

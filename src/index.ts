@@ -289,10 +289,10 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
     // Hook up an event listener for when the '.tex' file is saved.
     const onFileChanged = () => {
       if (pending) {
-        return;
+        return Promise.resolve(void 0);
       }
       pending = true;
-      latexBuildRequest(texContext.path, synctex, serverSettings).then(() => {
+      return latexBuildRequest(texContext.path, synctex, serverSettings).then(() => {
         // Read the pdf file contents from disk.
         pdfContext ? pdfContext.revert() : findOpenOrRevealPDF();
         if (errorPanel) {
@@ -313,13 +313,8 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
 
     // Run an initial latexRequest so that the appropriate files exist,
     // then open them.
-    latexBuildRequest(texContext.path, synctex, serverSettings).then(() => {
-      // Open the pdf and get a handle on its document context.
+    onFileChanged().then(() => {
       findOpenOrRevealPDF();
-    }).catch((err) => {
-      // If there was an error, show the error panel
-      // with the error log.
-      errorPanelInit(err);
     });
 
     const cleanupPreviews = () => {
@@ -417,7 +412,7 @@ function addSynctexCommands(app: JupyterLab, editorTracker: IEditorTracker, pdfT
       let widget = pdfTracker.currentWidget;
       if (widget) {
         // Get the page number.
-        const pos = widget.getScroll();
+        const pos = widget.position;
 
         // Request the synctex position for the PDF
         return synctexEditRequest(widget.context.path, pos, serverSettings)
@@ -458,7 +453,9 @@ function addSynctexCommands(app: JupyterLab, editorTracker: IEditorTracker, pdfT
       let widget = editorTracker.currentWidget;
       if (widget) {
         // Get the cursor position.
-        const pos = widget.editor.getCursorPosition();
+        let pos = widget.editor.getCursorPosition();
+        // SyncTex uses one-based indexing.
+        pos = { line: pos.line + 1, column: pos.column + 1 };
 
         // Request the synctex position for the PDF
         return synctexViewRequest(widget.context.path, pos, serverSettings)
@@ -469,7 +466,6 @@ function addSynctexCommands(app: JupyterLab, editorTracker: IEditorTracker, pdfT
           const dirName = PathExt.dirname(widget.context.path);
           const pdfFilePath = PathExt.join(dirName, baseName + '.pdf');
           pdfTracker.forEach(pdf => {
-
             if (pdf.context.path === pdfFilePath) {
               pdfWidget = pdf;
             }
@@ -477,8 +473,9 @@ function addSynctexCommands(app: JupyterLab, editorTracker: IEditorTracker, pdfT
           if (!pdfWidget) {
             return;
           }
-          // Scroll the pdf.
-          pdfWidget.setScroll(edit);
+          // Scroll the pdf. SyncTex seems unreliable in the x coordinate,
+          // so just use the other parts.
+          pdfWidget.position = { ...edit, x: 0 };
         });
       }
     },
