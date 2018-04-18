@@ -207,7 +207,7 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
 
       // Try to keep the scale and scroll position.
       if (this._hasRendered && this.isVisible) {
-        scale = this._pdfViewer.currentScaleValue || scale;
+        scale = this._pdfViewer.currentScale || scale;
         scrollTop = this._viewer.node.scrollTop;
       }
 
