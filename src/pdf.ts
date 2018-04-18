@@ -152,7 +152,8 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
     const pageNumber = Math.max(
       Math.min(pos.page, this._pdfViewer.pagesCount + 1), 1);
     // Scroll page into view using a very undocumented
-    // set of options.
+    // set of options. This particular set scrolls it to
+    // an x,y position on a given page, with a given scale value.
     this._pdfViewer.scrollPageIntoView({
       pageNumber,
       destArray: [

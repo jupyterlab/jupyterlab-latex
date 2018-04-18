@@ -473,7 +473,8 @@ function addSynctexCommands(app: JupyterLab, editorTracker: IEditorTracker, pdfT
           if (!pdfWidget) {
             return;
           }
-          // Scroll the pdf.
+          // Scroll the pdf. SyncTex seems unreliable in the x coordinate,
+          // so just use the other parts.
           pdfWidget.position = { ...edit, x: 0 };
         });
       }
