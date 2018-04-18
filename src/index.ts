@@ -454,6 +454,7 @@ function addSynctexCommands(app: JupyterLab, editorTracker: IEditorTracker, pdfT
       if (widget) {
         // Get the cursor position.
         let pos = widget.editor.getCursorPosition();
+        // SyncTex uses one-based indexing.
         pos = { line: pos.line + 1, column: pos.column + 1 };
 
         // Request the synctex position for the PDF
