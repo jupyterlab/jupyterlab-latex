@@ -35,7 +35,7 @@
   overflow: auto;
   position: absolute;
   width: 100%;
-  height: 100%;
+  height: calc(100% - var(--jp-private-pdfjs-toolbar-height));
 }
 
 .jp-PDFJS-toolbar {
