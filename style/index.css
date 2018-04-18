@@ -61,3 +61,7 @@
 .jp-ZoomOutIcon {
   background-image: url(zoom_out.svg);
 }
+
+.jp-FitIcon {
+  background-image: url(fit.svg);
+}

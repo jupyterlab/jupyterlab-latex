@@ -480,6 +480,14 @@ namespace Private {
       tooltip: 'Zoom In'
     }));
 
+    toolbar.addItem('fit', new ToolbarButton({
+      className: 'jp-FitIcon',
+      onClick: () => {
+        pdfViewer.currentScaleValue = 'page-width';
+      },
+      tooltip: 'Fit to Page Width'
+    }));
+
     return toolbar;
   }
 
