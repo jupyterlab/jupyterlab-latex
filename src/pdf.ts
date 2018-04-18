@@ -82,6 +82,11 @@ const MAX_SCALE = 10.0;
 export
 const MIN_SCALE = 0.25;
 
+/**
+ * Include a margin for scrolling the PDF.
+ */
+export
+const MARGIN = 72; // 72 dpi
 
 /**
  * PDFJS adds a global object to the page called `PDFJS`.
@@ -151,6 +156,13 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
     // Clamp the page number.
     const pageNumber = Math.max(
       Math.min(pos.page, this._pdfViewer.pagesCount + 1), 1);
+    const page = this._pdfViewer.getPageView(pageNumber - 1);
+
+    // Flip the y position for PDFJS, including a margin so
+    // that it is not at the exact top of the screen.
+    const yMax = page.viewport.viewBox[3];
+    const yPos = Math.max(Math.min(yMax - (pos.y - MARGIN), yMax), 0);
+
     // Scroll page into view using a very undocumented
     // set of options. This particular set scrolls it to
     // an x,y position on a given page, with a given scale value.
@@ -160,7 +172,7 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
         pageNumber,
         { name: 'XYZ' },
         pos.x,
-        pos.y,
+        yPos,
         this._pdfViewer.currentScaleValue
       ]
     });
