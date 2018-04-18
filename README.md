@@ -58,3 +58,7 @@ by setting
 ```python
 c.LatexConfig.bib_command = '<custom_bib_command>'
 ```
+
+## Changes
+
+For information on the changes with different versions of the `jupyterlab-latex` library, see our [changelog](./docs/changelog.md)
