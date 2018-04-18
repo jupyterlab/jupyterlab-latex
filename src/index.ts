@@ -289,10 +289,10 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
     // Hook up an event listener for when the '.tex' file is saved.
     const onFileChanged = () => {
       if (pending) {
-        return;
+        return Promise.resolve(void 0);
       }
       pending = true;
-      latexBuildRequest(texContext.path, synctex, serverSettings).then(() => {
+      return latexBuildRequest(texContext.path, synctex, serverSettings).then(() => {
         // Read the pdf file contents from disk.
         pdfContext ? pdfContext.revert() : findOpenOrRevealPDF();
         if (errorPanel) {
@@ -313,13 +313,8 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
 
     // Run an initial latexRequest so that the appropriate files exist,
     // then open them.
-    latexBuildRequest(texContext.path, synctex, serverSettings).then(() => {
-      // Open the pdf and get a handle on its document context.
+    onFileChanged().then(() => {
       findOpenOrRevealPDF();
-    }).catch((err) => {
-      // If there was an error, show the error panel
-      // with the error log.
-      errorPanelInit(err);
     });
 
     const cleanupPreviews = () => {
