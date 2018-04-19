@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/latex",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "JupyterLab extension for running LaTeX",
   "author": "M Pacer & Ian Rose",
   "files": [
