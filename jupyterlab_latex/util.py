@@ -26,7 +26,7 @@ def run_command_sync(cmd):
     except subprocess.CalledProcessError as err:
         pass
     code = process.returncode
-    out = str(process.stdout)
+    out = process.stdout.decode('utf-8')
     return (code, out)
 
 @gen.coroutine
@@ -52,7 +52,7 @@ def run_command_async(cmd):
         pass
     code = process.returncode
     out = yield process.stdout.read_until_close()
-    return (code, out)
+    return (code, out.decode('utf-8'))
 
 # Windows does not support async subprocesses, so
 # use a synchronous system calls.
