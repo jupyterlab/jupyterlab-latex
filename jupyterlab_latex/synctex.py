@@ -187,7 +187,7 @@ class LatexSynctexHandler(APIHandler):
             cmd, pos = self.build_synctex_cmd(base_name, ext)
 
             out = yield self.run_synctex(cmd)
-            out = json.dumps(parse_synctex_response(out.decode('utf-8'), pos))
+            out = json.dumps(parse_synctex_response(out, pos))
         self.finish(out)
 
 def parse_synctex_response(response, pos):
