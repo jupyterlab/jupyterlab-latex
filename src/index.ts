@@ -249,10 +249,13 @@ function activateLatexPlugin(
           mode: 'split-right'
         });
       }
+      if (!pdfWidget) {
+        return;
+      }
       (pdfWidget as PDFJSDocumentWidget).content.positionRequested.connect(
         reverseSearch
       );
-      pdfContext = manager.contextForWidget(pdfWidget);
+      pdfContext = manager.contextForWidget(pdfWidget)!;
       pdfContext.disposed.connect(cleanupPreviews);
     };
 
@@ -303,7 +306,7 @@ function activateLatexPlugin(
         return Promise.resolve(void 0);
       }
       pending = true;
-      return latexBuildRequest(texContext.path, synctex, serverSettings)
+      return latexBuildRequest(texContext!.path, synctex, serverSettings)
         .then(() => {
           // Read the pdf file contents from disk.
           pdfContext ? pdfContext.revert() : findOpenOrRevealPDF();
@@ -331,6 +334,9 @@ function activateLatexPlugin(
     });
 
     const cleanupPreviews = () => {
+      if (!texContext) {
+        return;
+      }
       Private.previews.delete(texContext.path);
       if (errorPanel) {
         errorPanel.close();
@@ -445,31 +451,34 @@ function addSynctexCommands(
             pos,
             serverSettings
           ).then((view: ISynctexViewOptions) => {
+            if (!widget) {
+              return;
+            }
             // Find the right editor widget.
-            let editorWidget: FileEditor | undefined = undefined;
             const baseName = PathExt.basename(widget.context.path, '.pdf');
             const dirName = PathExt.dirname(widget.context.path);
             const texFilePath = PathExt.join(dirName, baseName + '.tex');
-            editorTracker.forEach(editor => {
-              if (editor.context.path === texFilePath) {
-                editorWidget = editor.content;
-              }
-            });
+            const editorWidget = editorTracker.find(
+              editor => editor.context.path === texFilePath
+            );
             if (!editorWidget) {
               return;
             }
             // Scroll the editor.
-            editorWidget.editor.setCursorPosition(view);
+            editorWidget.content.editor.setCursorPosition(view);
           });
         }
       },
       isEnabled: hasPDFWidget,
       isVisible: () => {
         const widget = pdfTracker.currentWidget;
+        if (!widget) {
+          return false;
+        }
         const baseName = PathExt.basename(widget.context.path, '.pdf');
         const dirName = PathExt.dirname(widget.context.path);
         const texFilePath = PathExt.join(dirName, baseName + '.tex');
-        return widget && Private.previews.has(texFilePath);
+        return Private.previews.has(texFilePath);
       },
       label: 'Scroll Editor to Page'
     })
@@ -493,29 +502,29 @@ function addSynctexCommands(
             pos,
             serverSettings
           ).then((edit: ISynctexEditOptions) => {
+            if (!widget) {
+              return;
+            }
             // Find the right pdf widget.
-            let pdfWidget: PDFJSViewer | undefined = undefined;
             const baseName = PathExt.basename(widget.context.path, '.tex');
             const dirName = PathExt.dirname(widget.context.path);
             const pdfFilePath = PathExt.join(dirName, baseName + '.pdf');
-            pdfTracker.forEach(pdf => {
-              if (pdf.context.path === pdfFilePath) {
-                pdfWidget = pdf.content;
-              }
-            });
+            const pdfWidget = pdfTracker.find(
+              pdf => pdf.context.path === pdfFilePath
+            );
             if (!pdfWidget) {
               return;
             }
             // Scroll the pdf. SyncTex seems unreliable in the x coordinate,
             // so just use the other parts.
-            pdfWidget.position = { ...edit, x: 0 };
+            pdfWidget.content.position = { ...edit, x: 0 };
           });
         }
       },
       isEnabled: hasEditorWidget,
       isVisible: () => {
         let widget = editorTracker.currentWidget;
-        return widget && Private.previews.has(widget.context.path);
+        return !!widget && Private.previews.has(widget.context.path);
       },
       label: 'Scroll PDF to Cursor'
     })
@@ -609,8 +618,8 @@ function activatePDFJS(
     const types = app.docRegistry.getFileTypesForPath(widget.context.path);
 
     if (types.length > 0) {
-      widget.title.iconClass = types[0].iconClass;
-      widget.title.iconLabel = types[0].iconLabel;
+      widget.title.iconClass = types[0].iconClass || '';
+      widget.title.iconLabel = types[0].iconLabel || '';
     }
   });
 
