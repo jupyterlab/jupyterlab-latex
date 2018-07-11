@@ -35,15 +35,7 @@
   overflow: auto;
   position: absolute;
   width: 100%;
-  height: calc(100% - var(--jp-private-pdfjs-toolbar-height));
-}
-
-.jp-PDFJS-toolbar {
-  padding: 2px;
-  height: var(--jp-private-pdfjs-toolbar-height);
-  box-shadow: var(--jp-toolbar-box-shadow);
-  background: var(--jp-toolbar-background);
-  z-index: 1;
+  height: 100%;
 }
 
 .jp-PreviousIcon {

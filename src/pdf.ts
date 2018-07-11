@@ -14,7 +14,7 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  Widget, PanelLayout
+  Widget
 } from '@phosphor/widgets';
 
 import {
@@ -100,15 +100,8 @@ declare const PDFJS: any;
 export
 class PDFJSViewer extends Widget {
   constructor(context: DocumentRegistry.Context) {
-    super();
-
-    const layout = this.layout = new PanelLayout();
-    this._viewer = new Widget({ node: Private.createNode() });
-    this._pdfViewer = new PDFJS.PDFViewer({ container: this._viewer.node });
-    this._toolbar = Private.createToolbar(this._pdfViewer);
-
-    layout.addWidget(this._toolbar);
-    layout.addWidget(this._viewer);
+    super({ node: Private.createNode() });
+    this.viewer = new PDFJS.PDFViewer({ container: this.node });
 
     this.context = context;
     this._onTitleChanged();
@@ -132,6 +125,11 @@ class PDFJSViewer extends Widget {
   readonly context: DocumentRegistry.Context;
 
   /**
+   * The underlying PDFJS viewer/
+   */
+  readonly viewer: any;
+
+  /**
    * A promise that resolves when the pdf viewer is ready.
    */
   get ready(): Promise<void> {
@@ -143,7 +141,7 @@ class PDFJSViewer extends Widget {
    */
   get position(): PDFJSViewer.IPosition {
     return {
-      page: this._pdfViewer.currentPageNumber,
+      page: this.viewer.currentPageNumber,
       x: 0,
       y: 0
     };
@@ -155,8 +153,8 @@ class PDFJSViewer extends Widget {
   set position(pos: PDFJSViewer.IPosition) {
     // Clamp the page number.
     const pageNumber = Math.max(
-      Math.min(pos.page, this._pdfViewer.pagesCount + 1), 1);
-    const page = this._pdfViewer.getPageView(pageNumber - 1);
+      Math.min(pos.page, this.viewer.pagesCount + 1), 1);
+    const page = this.viewer.getPageView(pageNumber - 1);
 
     // Flip the y position for PDFJS, including a margin so
     // that it is not at the exact top of the screen.
@@ -166,14 +164,14 @@ class PDFJSViewer extends Widget {
     // Scroll page into view using a very undocumented
     // set of options. This particular set scrolls it to
     // an x,y position on a given page, with a given scale value.
-    this._pdfViewer.scrollPageIntoView({
+    this.viewer.scrollPageIntoView({
       pageNumber,
       destArray: [
         pageNumber,
         { name: 'XYZ' },
         pos.x,
         yPos,
-        this._pdfViewer.currentScaleValue
+        this.viewer.currentScaleValue
       ]
     });
   }
@@ -220,8 +218,8 @@ class PDFJSViewer extends Widget {
 
       // Try to keep the scale and scroll position.
       if (this._hasRendered && this.isVisible) {
-        scale = this._pdfViewer.currentScale || scale;
-        scrollTop = this._viewer.node.scrollTop;
+        scale = this.viewer.currentScale || scale;
+        scrollTop = this.node.scrollTop;
       }
 
       const cleanup = () => {
@@ -239,17 +237,17 @@ class PDFJSViewer extends Widget {
 
       PDFJS.getDocument(this._objectUrl).then((pdfDocument: any) => {
         this._pdfDocument = pdfDocument;
-        this._pdfViewer.setDocument(pdfDocument);
-        this._pdfViewer.firstPagePromise.then(() => {
+        this.viewer.setDocument(pdfDocument);
+        this.viewer.firstPagePromise.then(() => {
           if (this.isVisible) {
-            this._pdfViewer.currentScaleValue = scale;
+            this.viewer.currentScaleValue = scale;
           }
           this._hasRendered = true;
           resolve(void 0);
         });
-        this._pdfViewer.pagesPromise.then(() => {
+        this.viewer.pagesPromise.then(() => {
           if (this.isVisible) {
-            this._viewer.node.scrollTop = scrollTop;
+            this.node.scrollTop = scrollTop;
           }
           cleanup();
         });
@@ -261,7 +259,7 @@ class PDFJSViewer extends Widget {
    * Handle DOM events for the widget.
    */
   handleEvent(event: Event): void {
-    if (!this._pdfViewer) {
+    if (!this.viewer) {
       return;
     }
     switch (event.type) {
@@ -298,8 +296,8 @@ class PDFJSViewer extends Widget {
   private _clientToPDFPosition(x: number, y: number): PDFJSViewer.IPosition | undefined {
     let page: any;
     let pageNumber = 0;
-    for (; pageNumber < this._pdfViewer.pagesCount; pageNumber++) {
-      const pageView = this._pdfViewer.getPageView(pageNumber);
+    for (; pageNumber < this.viewer.pagesCount; pageNumber++) {
+      const pageView = this.viewer.getPageView(pageNumber);
       // If the page is not rendered (as happens when it is
       // scrolled out of view), then the textLayer div doesn't
       // exist, and we can safely skip it.
@@ -333,14 +331,14 @@ class PDFJSViewer extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
-    this._viewer.node.addEventListener('click', this);
+    this.node.addEventListener('click', this);
   }
 
   /**
    * Handle `before-detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
-    let node = this._viewer.node;
+    let node = this.node;
     node.removeEventListener('click', this);
   }
 
@@ -349,7 +347,7 @@ class PDFJSViewer extends Widget {
    */
   fit(): void {
     if (this.isVisible) {
-      this._pdfViewer.currentScaleValue = 'page-width';
+      this.viewer.currentScaleValue = 'page-width';
     }
   }
 
@@ -367,11 +365,8 @@ class PDFJSViewer extends Widget {
 
   private _ready = new PromiseDelegate<void>();
   private _objectUrl = '';
-  private _pdfViewer: any;
   private _pdfDocument: any;
   private _positionRequested = new Signal<this, PDFJSViewer.IPosition>(this);
-  private _viewer: Widget;
-  private _toolbar: Toolbar<Widget>;
   private _hasRendered = false;
 }
 
@@ -382,7 +377,7 @@ class PDFJSViewer extends Widget {
 export class PDFJSDocumentWidget extends DocumentWidget<PDFJSViewer> implements IDocumentWidget<PDFJSViewer> {
   constructor(context: DocumentRegistry.Context) {
     const content = new PDFJSViewer(context);
-    const toolbar = Private.createToolbar(content);
+    const toolbar = Private.createToolbar(content.viewer);
     const reveal = content.ready;
     super({ content, context, reveal, toolbar });
   }
