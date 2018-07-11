@@ -23,7 +23,7 @@ import {
 } from '@jupyterlab/docmanager';
 
 import {
-  DocumentRegistry
+  DocumentRegistry, IDocumentWidget
 } from '@jupyterlab/docregistry';
 
 import {
@@ -47,7 +47,7 @@ import {
 } from './error';
 
 import {
-  PDFJSViewer, PDFJSViewerFactory
+  PDFJSDocumentWidget, PDFJSViewer, PDFJSViewerFactory
 } from './pdf';
 
 import '../style/index.css';
@@ -57,7 +57,7 @@ import '../style/index.css';
  * A class that tracks editor widgets.
  */
 export
-interface IPDFJSTracker extends IInstanceTracker<PDFJSViewer> {}
+interface IPDFJSTracker extends IInstanceTracker<IDocumentWidget<PDFJSViewer>> {}
 
 
 /* tslint:disable */
@@ -216,7 +216,7 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
 
   // Given an fileEditor widget that hosts
   // a .tex document, open a LaTeX preview for it.
-  const openPreview = (widget: DocumentRegistry.IReadyWidget) => {
+  const openPreview = (widget: IDocumentWidget) => {
     // If we can't find the document context, bail.
     let texContext = manager.contextForWidget(widget);
     if (!texContext) {
@@ -244,7 +244,7 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
         pdfWidget = manager.openOrReveal(pdfFilePath, 'PDFJS', undefined,
           {'mode': 'split-right'});
       }
-      (pdfWidget as PDFJSViewer).positionRequested.connect(reverseSearch);
+      (pdfWidget as PDFJSDocumentWidget).content.positionRequested.connect(reverseSearch);
       pdfContext = manager.contextForWidget(pdfWidget);
       pdfContext.disposed.connect(cleanupPreviews);
     };
@@ -256,7 +256,7 @@ function activateLatexPlugin(app: JupyterLab, manager: IDocumentManager, editorT
         .then((view: ISynctexViewOptions) => {
           // SyncTex line is one-based, so subtract 1.
           const cursor = { line: view.line - 1, column: 0 };
-          (widget as FileEditor).editor.setCursorPosition(cursor);
+          (widget as IDocumentWidget<FileEditor>).content.editor.setCursorPosition(cursor);
         });
     };
 
@@ -412,7 +412,7 @@ function addSynctexCommands(app: JupyterLab, editorTracker: IEditorTracker, pdfT
       let widget = pdfTracker.currentWidget;
       if (widget) {
         // Get the page number.
-        const pos = widget.position;
+        const pos = widget.content.position;
 
         // Request the synctex position for the PDF
         return synctexEditRequest(widget.context.path, pos, serverSettings)
@@ -424,7 +424,7 @@ function addSynctexCommands(app: JupyterLab, editorTracker: IEditorTracker, pdfT
           const texFilePath = PathExt.join(dirName, baseName + '.tex');
           editorTracker.forEach(editor => {
             if (editor.context.path === texFilePath) {
-              editorWidget = editor;
+              editorWidget = editor.content;
             }
           });
           if (!editorWidget) {
@@ -453,7 +453,7 @@ function addSynctexCommands(app: JupyterLab, editorTracker: IEditorTracker, pdfT
       let widget = editorTracker.currentWidget;
       if (widget) {
         // Get the cursor position.
-        let pos = widget.editor.getCursorPosition();
+        let pos = widget.content.editor.getCursorPosition();
         // SyncTex uses one-based indexing.
         pos = { line: pos.line + 1, column: pos.column + 1 };
 
@@ -467,7 +467,7 @@ function addSynctexCommands(app: JupyterLab, editorTracker: IEditorTracker, pdfT
           const pdfFilePath = PathExt.join(dirName, baseName + '.pdf');
           pdfTracker.forEach(pdf => {
             if (pdf.context.path === pdfFilePath) {
-              pdfWidget = pdf;
+              pdfWidget = pdf.content;
             }
           });
           if (!pdfWidget) {
@@ -543,7 +543,7 @@ function activatePDFJS(app: JupyterLab, restorer: ILayoutRestorer): IPDFJSTracke
     fileTypes: FILE_TYPES,
     readOnly: true
   });
-  const tracker = new InstanceTracker<PDFJSViewer>({ namespace });
+  const tracker = new InstanceTracker<IDocumentWidget<PDFJSViewer>>({ namespace });
 
   // Handle state restoration.
   restorer.restore(tracker, {

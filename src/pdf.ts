@@ -31,7 +31,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  ABCWidgetFactory, DocumentRegistry
+  ABCWidgetFactory, DocumentRegistry, DocumentWidget, IDocumentWidget
 } from '@jupyterlab/docregistry';
 
 import 'pdfjs-dist/webpack';
@@ -98,7 +98,7 @@ declare const PDFJS: any;
  * A class for rendering a PDF document.
  */
 export
-class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
+class PDFJSViewer extends Widget {
   constructor(context: DocumentRegistry.Context) {
     super();
 
@@ -375,16 +375,29 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
   private _hasRendered = false;
 }
 
+
+/**
+ * A document widget for PDFJS content widgets.
+ */
+export class PDFJSDocumentWidget extends DocumentWidget<PDFJSViewer> implements IDocumentWidget<PDFJSViewer> {
+  constructor(context: DocumentRegistry.Context) {
+    const content = new PDFJSViewer(context);
+    const toolbar = Private.createToolbar(content);
+    const reveal = content.ready;
+    super({ content, context, reveal, toolbar });
+  }
+}
+
 /**
  * A widget factory for images.
  */
 export
-class PDFJSViewerFactory extends ABCWidgetFactory<PDFJSViewer, DocumentRegistry.IModel> {
+class PDFJSViewerFactory extends ABCWidgetFactory<IDocumentWidget<PDFJSViewer>, DocumentRegistry.IModel> {
   /**
    * Create a new widget given a context.
    */
-  protected createNewWidget(context: DocumentRegistry.IContext<DocumentRegistry.IModel>): PDFJSViewer {
-    return new PDFJSViewer(context);
+  protected createNewWidget(context: DocumentRegistry.IContext<DocumentRegistry.IModel>): IDocumentWidget<PDFJSViewer> {
+    return new PDFJSDocumentWidget(context);
   }
 }
 
