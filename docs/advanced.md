@@ -38,6 +38,7 @@ It can take three values: `"restricted"` (default) to allow only commands
 considered safe to be executed, `"allow"` to allow all commands, and `"disallow"`
 to disallow all commands.
 For example, to force your LaTeX distribution to run any command, use:
+
 ```python
 c.LatexConfig.shell_escape = "allow"
 ```
@@ -47,20 +48,23 @@ c.LatexConfig.shell_escape = "allow"
 You can install from source in order to develop the extension.
 
 From the `jupyterlab-latex` directory, enter the following into your terminal:
+
 ```bash
 pip install -e .
 ```
+
 This installs the server extension.
 
 If you are running Notebook 5.2 or earlier, enable the server extension by running
+
 ```bash
 jupyter serverextension enable --sys-prefix jupyterlab_latex
 ```
 
 Then, to install the lab extension, run
+
 ```bash
 jlpm install
 jlpm run build
 jupyter labextension install .
 ```
-
