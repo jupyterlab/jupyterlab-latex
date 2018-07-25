@@ -2,12 +2,14 @@
   "compilerOptions": {
     "declaration": true,
     "noImplicitAny": true,
+    "strictNullChecks": true,
+    "skipLibCheck": true,
     "noEmitOnError": true,
     "noUnusedLocals": true,
-    "lib": ["ES5", "DOM", "ES2015.Iterable", "ES2015.Promise", "ES2015.Collection"],
+    "lib": ["DOM", "ES6"],
     "module": "commonjs",
     "moduleResolution": "node",
-    "target": "ES5",
+    "target": "ES6",
     "outDir": "./lib",
     "jsx": "react"
   },

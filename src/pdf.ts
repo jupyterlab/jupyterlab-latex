@@ -1,37 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  PromiseDelegate
-} from '@phosphor/coreutils';
+import { PromiseDelegate } from '@phosphor/coreutils';
+
+import { ElementExt } from '@phosphor/domutils';
+
+import { Message } from '@phosphor/messaging';
+
+import { Widget } from '@phosphor/widgets';
+
+import { Toolbar, ToolbarButton } from '@jupyterlab/apputils';
+
+import { PathExt } from '@jupyterlab/coreutils';
+
+import { ISignal, Signal } from '@phosphor/signaling';
 
 import {
-  ElementExt
-} from '@phosphor/domutils';
-
-import {
-  Message
-} from '@phosphor/messaging';
-
-import {
-  Widget, PanelLayout
-} from '@phosphor/widgets';
-
-import {
-  Toolbar, ToolbarButton
-} from '@jupyterlab/apputils';
-
-import {
-  PathExt
-} from '@jupyterlab/coreutils';
-
-import {
-  ISignal,
-  Signal
-} from '@phosphor/signaling';
-
-import {
-  ABCWidgetFactory, DocumentRegistry
+  ABCWidgetFactory,
+  DocumentRegistry,
+  DocumentWidget,
+  IDocumentWidget
 } from '@jupyterlab/docregistry';
 
 import 'pdfjs-dist/webpack';
@@ -40,24 +28,20 @@ import 'pdfjs-dist/web/pdf_viewer';
 import '../style/index.css';
 import 'pdfjs-dist/web/pdf_viewer.css';
 
-
 /**
  * The MIME type for PDF.
  */
-export
-const MIME_TYPE = 'application/pdf';
+export const MIME_TYPE = 'application/pdf';
 
 /**
  * The CSS class for the viewer defined by PDFJS.
  */
-export
-const PDF_CLASS = 'pdfViewer';
+export const PDF_CLASS = 'pdfViewer';
 
 /**
  * The CSS class for our PDF container.
  */
-export
-const PDF_CONTAINER_CLASS = 'jp-PDFJSContainer';
+export const PDF_CONTAINER_CLASS = 'jp-PDFJSContainer';
 
 /**
  * A boolean indicating whether the platform is Mac.
@@ -67,26 +51,22 @@ const IS_MAC = !!navigator.platform.match(/Mac/i);
 /**
  * The step in scaling factors for zooming the PDF viewer.
  */
-export
-const SCALE_DELTA = 1.1;
+export const SCALE_DELTA = 1.1;
 
 /**
  * The maximum scaling factor for zooming the PDF viewer.
  */
-export
-const MAX_SCALE = 10.0;
+export const MAX_SCALE = 10.0;
 
 /**
  * The minimum scaling factor for zooming the PDF viewer.
  */
-export
-const MIN_SCALE = 0.25;
+export const MIN_SCALE = 0.25;
 
 /**
  * Include a margin for scrolling the PDF.
  */
-export
-const MARGIN = 72; // 72 dpi
+export const MARGIN = 72; // 72 dpi
 
 /**
  * PDFJS adds a global object to the page called `PDFJS`.
@@ -97,22 +77,17 @@ declare const PDFJS: any;
 /**
  * A class for rendering a PDF document.
  */
-export
-class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
+export class PDFJSViewer extends Widget {
   constructor(context: DocumentRegistry.Context) {
-    super();
-
-    const layout = this.layout = new PanelLayout();
-    this._viewer = new Widget({ node: Private.createNode() });
-    this._pdfViewer = new PDFJS.PDFViewer({ container: this._viewer.node });
-    this._toolbar = Private.createToolbar(this._pdfViewer);
-
-    layout.addWidget(this._toolbar);
-    layout.addWidget(this._viewer);
+    super({ node: Private.createNode() });
+    this.viewer = new PDFJS.PDFViewer({ container: this.node });
 
     this.context = context;
     this._onTitleChanged();
-    context.pathChanged.connect(this._onTitleChanged, this);
+    context.pathChanged.connect(
+      this._onTitleChanged,
+      this
+    );
 
     context.ready.then(() => {
       if (this.isDisposed) {
@@ -121,8 +96,14 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
       this._render().then(() => {
         this._ready.resolve(void 0);
       });
-      context.model.contentChanged.connect(this.update, this);
-      context.fileChanged.connect(this.update, this);
+      context.model.contentChanged.connect(
+        this.update,
+        this
+      );
+      context.fileChanged.connect(
+        this.update,
+        this
+      );
     });
   }
 
@@ -130,6 +111,11 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
    * The pdfjs widget's context.
    */
   readonly context: DocumentRegistry.Context;
+
+  /**
+   * The underlying PDFJS viewer/
+   */
+  readonly viewer: any;
 
   /**
    * A promise that resolves when the pdf viewer is ready.
@@ -143,7 +129,7 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
    */
   get position(): PDFJSViewer.IPosition {
     return {
-      page: this._pdfViewer.currentPageNumber,
+      page: this.viewer.currentPageNumber,
       x: 0,
       y: 0
     };
@@ -155,8 +141,10 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
   set position(pos: PDFJSViewer.IPosition) {
     // Clamp the page number.
     const pageNumber = Math.max(
-      Math.min(pos.page, this._pdfViewer.pagesCount + 1), 1);
-    const page = this._pdfViewer.getPageView(pageNumber - 1);
+      Math.min(pos.page, this.viewer.pagesCount + 1),
+      1
+    );
+    const page = this.viewer.getPageView(pageNumber - 1);
 
     // Flip the y position for PDFJS, including a margin so
     // that it is not at the exact top of the screen.
@@ -166,14 +154,14 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
     // Scroll page into view using a very undocumented
     // set of options. This particular set scrolls it to
     // an x,y position on a given page, with a given scale value.
-    this._pdfViewer.scrollPageIntoView({
+    this.viewer.scrollPageIntoView({
       pageNumber,
       destArray: [
         pageNumber,
         { name: 'XYZ' },
         pos.x,
         yPos,
-        this._pdfViewer.currentScaleValue
+        this.viewer.currentScaleValue
       ]
     });
   }
@@ -184,7 +172,9 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
   dispose() {
     try {
       URL.revokeObjectURL(this._objectUrl);
-    } catch (error) { /* no-op */ }
+    } catch (error) {
+      /* no-op */
+    }
     super.dispose();
   }
 
@@ -207,7 +197,7 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
       let data = this.context.model.toString();
       // If there is no data, do nothing.
       if (!data) {
-        resolve (void 0);
+        resolve(void 0);
       }
       const blob = Private.b64toBlob(data, MIME_TYPE);
 
@@ -220,8 +210,8 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
 
       // Try to keep the scale and scroll position.
       if (this._hasRendered && this.isVisible) {
-        scale = this._pdfViewer.currentScale || scale;
-        scrollTop = this._viewer.node.scrollTop;
+        scale = this.viewer.currentScale || scale;
+        scrollTop = this.node.scrollTop;
       }
 
       const cleanup = () => {
@@ -233,27 +223,31 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
         if (oldUrl) {
           try {
             URL.revokeObjectURL(oldUrl);
-          } catch (error) { /* no-op */ }
+          } catch (error) {
+            /* no-op */
+          }
         }
       };
 
-      PDFJS.getDocument(this._objectUrl).then((pdfDocument: any) => {
-        this._pdfDocument = pdfDocument;
-        this._pdfViewer.setDocument(pdfDocument);
-        this._pdfViewer.firstPagePromise.then(() => {
-          if (this.isVisible) {
-            this._pdfViewer.currentScaleValue = scale;
-          }
-          this._hasRendered = true;
-          resolve(void 0);
-        });
-        this._pdfViewer.pagesPromise.then(() => {
-          if (this.isVisible) {
-            this._viewer.node.scrollTop = scrollTop;
-          }
-          cleanup();
-        });
-      }).catch(cleanup);
+      PDFJS.getDocument(this._objectUrl)
+        .then((pdfDocument: any) => {
+          this._pdfDocument = pdfDocument;
+          this.viewer.setDocument(pdfDocument);
+          this.viewer.firstPagePromise.then(() => {
+            if (this.isVisible) {
+              this.viewer.currentScaleValue = scale;
+            }
+            this._hasRendered = true;
+            resolve(void 0);
+          });
+          this.viewer.pagesPromise.then(() => {
+            if (this.isVisible) {
+              this.node.scrollTop = scrollTop;
+            }
+            cleanup();
+          });
+        })
+        .catch(cleanup);
     });
   }
 
@@ -261,7 +255,7 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
    * Handle DOM events for the widget.
    */
   handleEvent(event: Event): void {
-    if (!this._pdfViewer) {
+    if (!this.viewer) {
       return;
     }
     switch (event.type) {
@@ -276,9 +270,9 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
   private _handleClick(evt: MouseEvent): void {
     // If it is a normal click, return without doing anything.
     const shiftAccel = (evt: MouseEvent): boolean => {
-      return evt.shiftKey ?
-        IS_MAC && evt.metaKey || !IS_MAC && evt.ctrlKey :
-        false;
+      return evt.shiftKey
+        ? (IS_MAC && evt.metaKey) || (!IS_MAC && evt.ctrlKey)
+        : false;
     };
     if (!shiftAccel(evt)) {
       return;
@@ -295,11 +289,14 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
     this._positionRequested.emit(pos);
   }
 
-  private _clientToPDFPosition(x: number, y: number): PDFJSViewer.IPosition | undefined {
+  private _clientToPDFPosition(
+    x: number,
+    y: number
+  ): PDFJSViewer.IPosition | undefined {
     let page: any;
     let pageNumber = 0;
-    for (; pageNumber < this._pdfViewer.pagesCount; pageNumber++) {
-      const pageView = this._pdfViewer.getPageView(pageNumber);
+    for (; pageNumber < this.viewer.pagesCount; pageNumber++) {
+      const pageView = this.viewer.getPageView(pageNumber);
       // If the page is not rendered (as happens when it is
       // scrolled out of view), then the textLayer div doesn't
       // exist, and we can safely skip it.
@@ -319,7 +316,7 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
     const boundingRect = pageDiv.getBoundingClientRect();
     const localX = x - boundingRect.left;
     const localY = y - boundingRect.top;
-    const viewport = page.viewport.clone({dontFlip: true});
+    const viewport = page.viewport.clone({ dontFlip: true });
     const [pdfX, pdfY] = viewport.convertToPdfPoint(localX, localY);
     return {
       page: pageNumber + 1,
@@ -333,14 +330,14 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
    */
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
-    this._viewer.node.addEventListener('click', this);
+    this.node.addEventListener('click', this);
   }
 
   /**
    * Handle `before-detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
-    let node = this._viewer.node;
+    let node = this.node;
     node.removeEventListener('click', this);
   }
 
@@ -349,7 +346,7 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
    */
   fit(): void {
     if (this.isVisible) {
-      this._pdfViewer.currentScaleValue = 'page-width';
+      this.viewer.currentScaleValue = 'page-width';
     }
   }
 
@@ -363,42 +360,52 @@ class PDFJSViewer extends Widget implements DocumentRegistry.IReadyWidget {
     this._render();
   }
 
-
-
   private _ready = new PromiseDelegate<void>();
   private _objectUrl = '';
-  private _pdfViewer: any;
   private _pdfDocument: any;
   private _positionRequested = new Signal<this, PDFJSViewer.IPosition>(this);
-  private _viewer: Widget;
-  private _toolbar: Toolbar<Widget>;
   private _hasRendered = false;
+}
+
+/**
+ * A document widget for PDFJS content widgets.
+ */
+export class PDFJSDocumentWidget extends DocumentWidget<PDFJSViewer>
+  implements IDocumentWidget<PDFJSViewer> {
+  constructor(context: DocumentRegistry.Context) {
+    const content = new PDFJSViewer(context);
+    const toolbar = Private.createToolbar(content.viewer);
+    const reveal = content.ready;
+    super({ content, context, reveal, toolbar });
+  }
 }
 
 /**
  * A widget factory for images.
  */
-export
-class PDFJSViewerFactory extends ABCWidgetFactory<PDFJSViewer, DocumentRegistry.IModel> {
+export class PDFJSViewerFactory extends ABCWidgetFactory<
+  IDocumentWidget<PDFJSViewer>,
+  DocumentRegistry.IModel
+> {
   /**
    * Create a new widget given a context.
    */
-  protected createNewWidget(context: DocumentRegistry.IContext<DocumentRegistry.IModel>): PDFJSViewer {
-    return new PDFJSViewer(context);
+  protected createNewWidget(
+    context: DocumentRegistry.IContext<DocumentRegistry.IModel>
+  ): IDocumentWidget<PDFJSViewer> {
+    return new PDFJSDocumentWidget(context);
   }
 }
 
 /**
  * A namespace for PDFJSViewer statics.
  */
-export
-namespace PDFJSViewer {
+export namespace PDFJSViewer {
   /**
    * The options for a SyncTeX edit command,
    * mapping the pdf position to an editor position.
    */
-  export
-  interface IPosition {
+  export interface IPosition {
     /**
      * The page of the pdf.
      */
@@ -425,8 +432,7 @@ namespace Private {
   /**
    * Create the node for the PDF widget.
    */
-  export
-  function createNode(): HTMLElement {
+  export function createNode(): HTMLElement {
     let node = document.createElement('div');
     node.className = PDF_CONTAINER_CLASS;
     let pdf = document.createElement('div');
@@ -439,66 +445,84 @@ namespace Private {
   /**
    * Create the toolbar for the PDF viewer.
    */
-  export
-  function createToolbar(pdfViewer: any): Toolbar<ToolbarButton> {
+  export function createToolbar(pdfViewer: any): Toolbar<ToolbarButton> {
     const toolbar = new Toolbar();
 
     toolbar.addClass('jp-Toolbar');
     toolbar.addClass('jp-PDFJS-toolbar');
 
-    toolbar.addItem('previous', new ToolbarButton({
-      className: 'jp-PreviousIcon',
-      onClick: () => {
-        pdfViewer.currentPageNumber =
-          Math.max(pdfViewer.currentPageNumber - 1, 1);
-      },
-      tooltip: 'Previous Page'
-    }));
-    toolbar.addItem('next', new ToolbarButton({
-      className: 'jp-NextIcon',
-      onClick: () => {
-        pdfViewer.currentPageNumber =
-          Math.min(pdfViewer.currentPageNumber + 1, pdfViewer.pagesCount);
-      },
-      tooltip: 'Next Page'
-    }));
+    toolbar.addItem(
+      'previous',
+      new ToolbarButton({
+        className: 'jp-PreviousIcon',
+        onClick: () => {
+          pdfViewer.currentPageNumber = Math.max(
+            pdfViewer.currentPageNumber - 1,
+            1
+          );
+        },
+        tooltip: 'Previous Page'
+      })
+    );
+    toolbar.addItem(
+      'next',
+      new ToolbarButton({
+        className: 'jp-NextIcon',
+        onClick: () => {
+          pdfViewer.currentPageNumber = Math.min(
+            pdfViewer.currentPageNumber + 1,
+            pdfViewer.pagesCount
+          );
+        },
+        tooltip: 'Next Page'
+      })
+    );
 
     toolbar.addItem('spacer', Toolbar.createSpacerItem());
 
-    toolbar.addItem('zoomOut', new ToolbarButton({
-      className: 'jp-ZoomOutIcon',
-      onClick: () => {
-        let newScale = pdfViewer.currentScale;
+    toolbar.addItem(
+      'zoomOut',
+      new ToolbarButton({
+        className: 'jp-ZoomOutIcon',
+        onClick: () => {
+          let newScale = pdfViewer.currentScale;
 
-        newScale = (newScale / SCALE_DELTA).toFixed(2);
-        newScale = Math.floor(newScale * 10) / 10;
-        newScale = Math.max(MIN_SCALE, newScale);
+          newScale = (newScale / SCALE_DELTA).toFixed(2);
+          newScale = Math.floor(newScale * 10) / 10;
+          newScale = Math.max(MIN_SCALE, newScale);
 
-        pdfViewer.currentScale = newScale;
-      },
-      tooltip: 'Zoom Out'
-    }));
-    toolbar.addItem('zoomIn', new ToolbarButton({
-      className: 'jp-ZoomInIcon',
-      onClick: () => {
-        let newScale = pdfViewer.currentScale;
+          pdfViewer.currentScale = newScale;
+        },
+        tooltip: 'Zoom Out'
+      })
+    );
+    toolbar.addItem(
+      'zoomIn',
+      new ToolbarButton({
+        className: 'jp-ZoomInIcon',
+        onClick: () => {
+          let newScale = pdfViewer.currentScale;
 
-        newScale = (newScale * SCALE_DELTA).toFixed(2);
-        newScale = Math.ceil(newScale * 10) / 10;
-        newScale = Math.min(MAX_SCALE, newScale);
+          newScale = (newScale * SCALE_DELTA).toFixed(2);
+          newScale = Math.ceil(newScale * 10) / 10;
+          newScale = Math.min(MAX_SCALE, newScale);
 
-        pdfViewer.currentScale = newScale;
-      },
-      tooltip: 'Zoom In'
-    }));
+          pdfViewer.currentScale = newScale;
+        },
+        tooltip: 'Zoom In'
+      })
+    );
 
-    toolbar.addItem('fit', new ToolbarButton({
-      className: 'jp-FitIcon',
-      onClick: () => {
-        pdfViewer.currentScaleValue = 'page-width';
-      },
-      tooltip: 'Fit to Page Width'
-    }));
+    toolbar.addItem(
+      'fit',
+      new ToolbarButton({
+        className: 'jp-FitIcon',
+        onClick: () => {
+          pdfViewer.currentScaleValue = 'page-width';
+        },
+        tooltip: 'Fit to Page Width'
+      })
+    );
 
     return toolbar;
   }
@@ -516,8 +540,11 @@ namespace Private {
    *
    * @returns a Blob for the data.
    */
-  export
-  function b64toBlob(b64Data: string, contentType: string = '', sliceSize: number = 512): Blob {
+  export function b64toBlob(
+    b64Data: string,
+    contentType: string = '',
+    sliceSize: number = 512
+  ): Blob {
     const byteCharacters = atob(b64Data);
     let byteArrays: Uint8Array[] = [];
 
@@ -532,7 +559,7 @@ namespace Private {
       byteArrays.push(byteArray);
     }
 
-    let blob = new Blob(byteArrays, {type: contentType});
+    let blob = new Blob(byteArrays, { type: contentType });
     return blob;
   }
 }

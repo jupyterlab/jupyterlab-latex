@@ -1,13 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  Message
-} from '@phosphor/messaging';
+import { Message } from '@phosphor/messaging';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -19,8 +15,7 @@ const LATEX_ERROR_CONTAINER = 'jp-LatexErrorContainer';
  * A widget which hosts the error logs from LaTeX
  * when document compilation fails.
  */
-export
-class ErrorPanel extends Widget {
+export class ErrorPanel extends Widget {
   /**
    * Construct the error panel.
    */
@@ -30,7 +25,9 @@ class ErrorPanel extends Widget {
   }
 
   set text(value: string) {
-    ReactDOM.render(<LatexError text={value}/>, this.node, () => {this.update(); });
+    ReactDOM.render(<LatexError text={value} />, this.node, () => {
+      this.update();
+    });
   }
 
   /**
@@ -49,16 +46,13 @@ class ErrorPanel extends Widget {
   }
 }
 
-export
-interface ILatexProps extends React.Props<LatexError> {
+export interface ILatexProps extends React.Props<LatexError> {
   text: string;
 }
 
-export
-class LatexError extends React.Component<ILatexProps, {}> {
-
+export class LatexError extends React.Component<ILatexProps, {}> {
   render() {
-    return(
+    return (
       <pre className={LATEX_ERROR_CONTAINER}>
         <code>{this.props.text}</code>
       </pre>
