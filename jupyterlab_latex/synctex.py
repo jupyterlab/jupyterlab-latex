@@ -76,7 +76,6 @@ class LatexSynctexHandler(APIHandler):
 
         """
         c = LatexConfig(config=self.config)
-        data = f'-i {pos["page"]}:{pos["x"]}:{pos["y"]}:{pdf_name+".pdf"}'
 
         cmd = (
             c.synctex_command,
@@ -104,14 +103,16 @@ class LatexSynctexHandler(APIHandler):
 
         """
         c = LatexConfig(config=self.config)
+        pdf_path = os.path.join(self.notebook_dir, tex_name+".pdf")
+        tex_path = os.path.join(self.notebook_dir, tex_name+".tex")
 
         cmd = (
             c.synctex_command,
             'view',
             '-i',
-            f'{pos["line"]}:{pos["column"]}:{tex_name+".tex"}',
+            f'{pos["line"]}:{pos["column"]}:{tex_path}',
             '-o',
-            f'{tex_name+".pdf"}'
+            f'{pdf_path}'
             )
 
         return cmd
