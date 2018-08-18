@@ -209,14 +209,15 @@ def parse_synctex_response(response, pos):
 
     """
     fields = ["line", "column", "page", "x", "y"]
-    match = re.search(r'SyncTeX result begin\n(.*?)\nSyncTeX result end',
+    match = re.search(r'SyncTeX result begin\r?\n(.*?)\nSyncTeX result end',
             response, flags=re.DOTALL)
     if match is None:
         raise Exception(f'Unable to parse SyncTeX response: {response}')
     lines = match.group(1).lower().replace(' ', '').split('\n')
     result = {}
     for l in lines:
-        key, value = l.split(":")
+        components = l.split(":")
+        key, value = components[0], ":".join(components[1:])
         if key in fields:
             result[key] = value
             fields.remove(key)
