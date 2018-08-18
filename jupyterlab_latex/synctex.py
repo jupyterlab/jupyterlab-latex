@@ -76,7 +76,6 @@ class LatexSynctexHandler(APIHandler):
 
         """
         c = LatexConfig(config=self.config)
-        data = f'-i {pos["page"]}:{pos["x"]}:{pos["y"]}:{pdf_name+".pdf"}'
 
         cmd = (
             c.synctex_command,
@@ -104,14 +103,16 @@ class LatexSynctexHandler(APIHandler):
 
         """
         c = LatexConfig(config=self.config)
+        pdf_path = os.path.join(self.notebook_dir, tex_name+".pdf")
+        tex_path = os.path.join(self.notebook_dir, tex_name+".tex")
 
         cmd = (
             c.synctex_command,
             'view',
             '-i',
-            f'{pos["line"]}:{pos["column"]}:{tex_name+".tex"}',
+            f'{pos["line"]}:{pos["column"]}:{tex_path}',
             '-o',
-            f'{tex_name+".pdf"}'
+            f'{pdf_path}'
             )
 
         return cmd
@@ -208,14 +209,15 @@ def parse_synctex_response(response, pos):
 
     """
     fields = ["line", "column", "page", "x", "y"]
-    match = re.search(r'SyncTeX result begin\n(.*?)\nSyncTeX result end',
+    match = re.search(r'SyncTeX result begin\r?\n(.*?)\nSyncTeX result end',
             response, flags=re.DOTALL)
     if match is None:
-        raise Exception('Unable to parse SyncTeX response')
+        raise Exception(f'Unable to parse SyncTeX response: {response}')
     lines = match.group(1).lower().replace(' ', '').split('\n')
     result = {}
     for l in lines:
-        key, value = l.split(":")
+        components = l.split(":")
+        key, value = components[0], ":".join(components[1:])
         if key in fields:
             result[key] = value
             fields.remove(key)
