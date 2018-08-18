@@ -38,22 +38,42 @@
   height: 100%;
 }
 
-.jp-PreviousIcon {
-  background-image: url(previous.svg);
+[data-theme-light='true'] .jp-PreviousIcon {
+  background-image: url(previous_light.svg);
 }
 
-.jp-NextIcon {
-  background-image: url(next.svg);
+[data-theme-light='true'] .jp-NextIcon {
+  background-image: url(next_light.svg);
 }
 
-.jp-ZoomInIcon {
-  background-image: url(zoom_in.svg);
+[data-theme-light='true'] .jp-ZoomInIcon {
+  background-image: url(zoom_in_light.svg);
 }
 
-.jp-ZoomOutIcon {
-  background-image: url(zoom_out.svg);
+[data-theme-light='true'] .jp-ZoomOutIcon {
+  background-image: url(zoom_out_light.svg);
 }
 
-.jp-FitIcon {
-  background-image: url(fit.svg);
+[data-theme-light='true'] .jp-FitIcon {
+  background-image: url(fit_light.svg);
+}
+
+[data-theme-light='false'] .jp-PreviousIcon {
+  background-image: url(previous_dark.svg);
+}
+
+[data-theme-light='false'] .jp-NextIcon {
+  background-image: url(next_dark.svg);
+}
+
+[data-theme-light='false'] .jp-ZoomInIcon {
+  background-image: url(zoom_in_dark.svg);
+}
+
+[data-theme-light='false'] .jp-ZoomOutIcon {
+  background-image: url(zoom_out_dark.svg);
+}
+
+[data-theme-light='false'] .jp-FitIcon {
+  background-image: url(fit_dark.svg);
 }

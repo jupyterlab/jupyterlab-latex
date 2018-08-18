@@ -454,7 +454,7 @@ namespace Private {
     toolbar.addItem(
       'previous',
       new ToolbarButton({
-        className: 'jp-PreviousIcon',
+        iconClassName: 'jp-PreviousIcon jp-Icon jp-Icon-16',
         onClick: () => {
           pdfViewer.currentPageNumber = Math.max(
             pdfViewer.currentPageNumber - 1,
@@ -467,7 +467,7 @@ namespace Private {
     toolbar.addItem(
       'next',
       new ToolbarButton({
-        className: 'jp-NextIcon',
+        iconClassName: 'jp-NextIcon jp-Icon jp-Icon-16',
         onClick: () => {
           pdfViewer.currentPageNumber = Math.min(
             pdfViewer.currentPageNumber + 1,
@@ -483,7 +483,7 @@ namespace Private {
     toolbar.addItem(
       'zoomOut',
       new ToolbarButton({
-        className: 'jp-ZoomOutIcon',
+        iconClassName: 'jp-ZoomOutIcon jp-Icon jp-Icon-16',
         onClick: () => {
           let newScale = pdfViewer.currentScale;
 
@@ -499,7 +499,7 @@ namespace Private {
     toolbar.addItem(
       'zoomIn',
       new ToolbarButton({
-        className: 'jp-ZoomInIcon',
+        iconClassName: 'jp-ZoomInIcon jp-Icon jp-Icon-16',
         onClick: () => {
           let newScale = pdfViewer.currentScale;
 
@@ -516,7 +516,7 @@ namespace Private {
     toolbar.addItem(
       'fit',
       new ToolbarButton({
-        className: 'jp-FitIcon',
+        iconClassName: 'jp-FitIcon jp-Icon jp-Icon-16',
         onClick: () => {
           pdfViewer.currentScaleValue = 'page-width';
         },
