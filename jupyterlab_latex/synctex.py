@@ -211,7 +211,7 @@ def parse_synctex_response(response, pos):
     match = re.search(r'SyncTeX result begin\n(.*?)\nSyncTeX result end',
             response, flags=re.DOTALL)
     if match is None:
-        raise Exception('Unable to parse SyncTeX response')
+        raise Exception(f'Unable to parse SyncTeX response: {response}')
     lines = match.group(1).lower().replace(' ', '').split('\n')
     result = {}
     for l in lines:
