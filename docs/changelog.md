@@ -1,4 +1,12 @@
-# Changelog for `jupyterlab-latex`
+# Changelog for `jupyterlab_latex`
+
+- **0.4.1**:
+
+  - Allow SyncTeX to work on windows by using absolute file paths.
+
+- **0.4.0**:
+
+  - Allow SyncTeX to work on windows by using absolute file paths.
 
 - **0.3.1**:
 
