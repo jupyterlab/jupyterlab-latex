@@ -4,6 +4,8 @@ import json, re, os
 
 from tornado import gen, web
 
+from pathlib import Path
+
 from notebook.base.handlers import APIHandler
 
 from .config import LatexConfig
@@ -170,7 +172,9 @@ class LatexSynctexHandler(APIHandler):
             A JSON object containing the mapped position.
         """
         # Parse the path into the base name and extension of the file
-        full_file_path = os.path.join(self.notebook_dir, path.strip('/'))
+        relative_file_path = str(Path(path.strip('/')))
+        relative_base_path = os.path.splitext(relative_file_path)[0]
+        full_file_path = os.path.join(self.notebook_dir, relative_file_path)
         workdir = os.path.dirname(full_file_path)
         base_name, ext = os.path.splitext(os.path.basename(full_file_path))
 
@@ -185,7 +189,7 @@ class LatexSynctexHandler(APIHandler):
             out = (f"The file `{ext}` does not end with .tex of .pdf. "
                     "You can only run SyncTex on a file ending with .tex or .pdf.")
         else:
-            cmd, pos = self.build_synctex_cmd(base_name, ext)
+            cmd, pos = self.build_synctex_cmd(relative_base_path, ext)
 
             out = yield self.run_synctex(cmd)
             out = json.dumps(parse_synctex_response(out, pos))
