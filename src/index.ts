@@ -330,7 +330,9 @@ function activateLatexPlugin(
     // Run an initial latexRequest so that the appropriate files exist,
     // then open them.
     onFileChanged().then(() => {
-      findOpenOrRevealPDF();
+	  if (!errorPanel) {
+		findOpenOrRevealPDF();
+	  }
     });
 
     const cleanupPreviews = () => {
