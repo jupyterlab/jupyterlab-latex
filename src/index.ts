@@ -241,7 +241,6 @@ function activateLatexPlugin(
     let pdfContext: DocumentRegistry.IContext<DocumentRegistry.IModel>;
     let errorPanel: ErrorPanel | null = null;
     let pending = false;
-	let disableOpenOrReveal = false;
 
     const findOpenOrRevealPDF = () => {
       let pdfWidget = manager.findWidget(pdfFilePath);
@@ -315,7 +314,6 @@ function activateLatexPlugin(
             errorPanel.close();
           }
           pending = false;
-		  disableOpenOrReveal = false;
         })
         .catch(err => {
           // If there was an error, show the error panel
@@ -324,7 +322,6 @@ function activateLatexPlugin(
             errorPanelInit(err);
           }
           pending = false;
-		  disableOpenOrReveal = true;
         });
     };
 
@@ -333,7 +330,7 @@ function activateLatexPlugin(
     // Run an initial latexRequest so that the appropriate files exist,
     // then open them.
     onFileChanged().then(() => {
-	  if (!disableOpenOrReveal) {
+	  if (!errorPanel) {
 		findOpenOrRevealPDF();
 	  }
     });
