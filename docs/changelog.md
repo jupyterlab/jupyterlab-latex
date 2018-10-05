@@ -1,5 +1,9 @@
 # Changelog for `jupyterlab_latex`
 
+- **0.6.0**:
+
+  - Fixed a bug where the PDF would try to open if the initial build failed.
+
 - **0.4.1**:
 
   - Allow SyncTeX to work on windows by using absolute file paths.
