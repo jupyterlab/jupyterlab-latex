@@ -28,6 +28,8 @@ import 'pdfjs-dist/web/pdf_viewer';
 import '../style/index.css';
 import 'pdfjs-dist/web/pdf_viewer.css';
 
+import { PageNumberWidget } from './pagenumber';
+
 /**
  * The MIME type for PDF.
  */
@@ -233,11 +235,36 @@ export class PDFJSViewer extends Widget {
         .then((pdfDocument: any) => {
           this._pdfDocument = pdfDocument;
           this.viewer.setDocument(pdfDocument);
+          pdfDocument.getPageLabels().then((labels: string[]) => {
+            if (!labels) {
+              return;
+            }
+            let i = 0,
+              numLabels = labels.length;
+            if (numLabels !== this.viewer.pagesCount) {
+              console.error(
+                'The number of Page Labels does not match ' +
+                  'the number of pages in the document.'
+              );
+              return;
+            }
+            // Ignore page labels that correspond to standard page numbering.
+            while (i < numLabels && labels[i] === (i + 1).toString()) {
+              i++;
+            }
+            if (i === numLabels) {
+              return;
+            }
+
+            this.viewer.setPageLabels(labels);
+            this.viewer.eventBus.dispatch('pagelabels');
+          });
           this.viewer.firstPagePromise.then(() => {
             if (this.isVisible) {
               this.viewer.currentScaleValue = scale;
             }
             this._hasRendered = true;
+            this.viewer.eventBus.dispatch('firstpage');
             resolve(void 0);
           });
           this.viewer.pagesPromise.then(() => {
@@ -477,6 +504,8 @@ namespace Private {
         tooltip: 'Next Page'
       })
     );
+
+    toolbar.addItem('PageNumber', new PageNumberWidget({ viewer: pdfViewer }));
 
     toolbar.addItem('spacer', Toolbar.createSpacerItem());
 
