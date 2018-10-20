@@ -115,6 +115,8 @@ class LatexBuildHandler(APIHandler):
                 full_latex_sequence,
                 full_latex_sequence,
                 ]
+        else:
+            command_sequence += [full_latex_sequence]
 
         return command_sequence
 
