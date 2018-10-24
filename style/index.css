@@ -47,6 +47,7 @@
 .jp-PDFJSPageNumber input {
   border: 1px solid var(--jp-border-color0);
   background-color: var(--jp-input-background);
+  color: var(--jp-ui-font-color0);
   padding: 0 6px;
   text-align: right;
   width: 8ch;
