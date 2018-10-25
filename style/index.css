@@ -38,6 +38,31 @@
   height: 100%;
 }
 
+.jp-PDFJSPageNumber {
+  display: flex;
+  align-items: center;
+  padding: 0 6px;
+}
+
+.jp-PDFJSPageNumber input {
+  border: 1px solid var(--jp-border-color0);
+  background-color: var(--jp-input-background);
+  color: var(--jp-ui-font-color0);
+  padding: 0 6px;
+  text-align: right;
+  width: 8ch;
+}
+
+.jp-PDFJSPageNumber input:hover {
+  background-color: var(--jp-input-hover-background);
+}
+
+.jp-PDFJSPageNumber input:focus {
+  background-color: var(--jp-input-active-background);
+  border: 1px solid var(--jp-input-active-border-color);
+  box-shadow: var(--jp-input-box-shadow);
+}
+
 [data-theme-light='true'] .jp-PreviousIcon {
   background-image: url(previous_light.svg);
 }
