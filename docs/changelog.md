@@ -1,5 +1,9 @@
 # Changelog for `jupyterlab_latex`
 
+- **0.6.1**:
+
+  - Added a new page component allowing the user to navigate PDFs by page label.
+
 - **0.6.0**:
 
   - Fixed a bug where the PDF would try to open if the initial build failed.

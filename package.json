@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/latex",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "JupyterLab extension for running LaTeX",
   "author": "M Pacer & Ian Rose",
   "files": [
@@ -66,7 +66,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/mpacer/jupyterlab-latex.git"
+    "url": "https://github.com/jupyterlab/jupyterlab-latex.git"
   },
   "resolutions": {
     "@types/react": "~16.4.13"
@@ -79,7 +79,7 @@
   },
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/mpacer/jupyterlab-latex/issues"
+    "url": "https://github.com/jupyterlab/jupyterlab-latex/issues"
   },
-  "homepage": "https://github.com/mpacer/jupyterlab-latex"
+  "homepage": "https://github.com/jupyterlab/jupyterlab-latex"
 }
