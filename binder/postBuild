@@ -1,3 +1,3 @@
 #!/bin/bash
 
-jupyter labextension install @jupyterlab/latex@0.3.1
+jupyter labextension install @jupyterlab/latex@0.6.1
