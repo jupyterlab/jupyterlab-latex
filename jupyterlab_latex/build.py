@@ -33,6 +33,7 @@ def latex_cleanup(workdir='.', whitelist=None, greylist=None):
     """
     orig_work_dir = os.getcwd()
     os.chdir(os.path.abspath(workdir))
+    cleanup_setting = True # ...cleanup from plugin.json...
 
     keep_files = set()
     for fp in greylist:
@@ -47,9 +48,10 @@ def latex_cleanup(workdir='.', whitelist=None, greylist=None):
                                   set(whitelist if whitelist else [])
                                   )
     yield
-    after = set(glob.glob("*"))
-    for fn in set(after-keep_files):
-        os.remove(fn)
+    if cleanup_setting:
+        after = set(glob.glob("*"))
+        for fn in set(after-keep_files):
+            os.remove(fn)
     os.chdir(orig_work_dir)
 
 
@@ -108,6 +110,7 @@ class LatexBuildHandler(APIHandler):
             )
 
         command_sequence = [full_latex_sequence]
+        run_times = 1 #...runtimes from plugin.json...
 
         if run_bibtex:
             command_sequence += [
@@ -115,8 +118,8 @@ class LatexBuildHandler(APIHandler):
                 full_latex_sequence,
                 full_latex_sequence,
                 ]
-        else:
-            command_sequence += [full_latex_sequence]
+        elif run_times:
+            command_sequence += [full_latex_sequence]*(run_times-1)
 
         return command_sequence
 
