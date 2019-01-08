@@ -23,5 +23,5 @@ class LatexConfig(Configurable):
         'to disallow all shell escapes')
     run_times = Integer(default_value=1, config=True,
         help='How many times to compile the ".tex" files.')
-    cleanup_setting = Bool(default_value=True, config=True,
+    cleanup = Bool(default_value=True, config=True,
         help='Whether to clean up ".out/.aux" files or not.')
