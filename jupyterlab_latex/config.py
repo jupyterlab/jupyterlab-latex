@@ -1,6 +1,6 @@
 """ JupyterLab LaTex : live LaTeX editing for JupyterLab """
 
-from traitlets import Unicode, CaselessStrEnum
+from traitlets import Unicode, CaselessStrEnum, Integer, Bool
 from traitlets.config import Configurable
 
 class LatexConfig(Configurable):
@@ -21,3 +21,7 @@ class LatexConfig(Configurable):
         'Can be "restricted", for restricted shell escapes, '+\
         '"allow", to allow all shell escapes, or "disallow", '+\
         'to disallow all shell escapes')
+    run_times = Integer(default_value=1, config=True,
+        help='How many times to compile the ".tex" files.')
+    cleanup = Bool(default_value=True, config=True,
+        help='Whether to clean up ".out/.aux" files or not.')

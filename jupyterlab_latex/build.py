@@ -11,7 +11,7 @@ from .config import LatexConfig
 from .util import run_command
 
 @contextmanager
-def latex_cleanup(workdir='.', whitelist=None, greylist=None):
+def latex_cleanup(cleanup=True, workdir='.', whitelist=None, greylist=None):
     """Context manager for changing directory and removing files when done.
 
     By default it works in the current directory, and removes all files that
@@ -47,9 +47,10 @@ def latex_cleanup(workdir='.', whitelist=None, greylist=None):
                                   set(whitelist if whitelist else [])
                                   )
     yield
-    after = set(glob.glob("*"))
-    for fn in set(after-keep_files):
-        os.remove(fn)
+    if cleanup:
+        after = set(glob.glob("*"))
+        for fn in set(after-keep_files):
+            os.remove(fn)
     os.chdir(orig_work_dir)
 
 
@@ -115,6 +116,8 @@ class LatexBuildHandler(APIHandler):
                 full_latex_sequence,
                 full_latex_sequence,
                 ]
+        else:
+            command_sequence = command_sequence * c.run_times
 
         return command_sequence
 
@@ -174,6 +177,7 @@ class LatexBuildHandler(APIHandler):
         # Parse the path into the base name and extension of the file
         tex_file_path = os.path.join(self.notebook_dir, path.strip('/'))
         tex_base_name, ext = os.path.splitext(os.path.basename(tex_file_path))
+        c = LatexConfig(config=self.config)
 
         if not os.path.exists(tex_file_path):
             self.set_status(403)
@@ -184,6 +188,7 @@ class LatexBuildHandler(APIHandler):
                     "You can only run LaTeX on a file ending with .tex.")
         else:
             with latex_cleanup(
+                cleanup=c.cleanup,
                 workdir=os.path.dirname(tex_file_path),
                 whitelist=[tex_base_name+'.pdf', tex_base_name+'.synctex.gz'],
                 greylist=[tex_base_name+'.aux']
