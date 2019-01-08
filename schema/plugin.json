@@ -9,19 +9,6 @@
       "title": "SyncTeX",
       "description": "Whether to use SyncTeX for linking document views",
       "default": true
-    },
-    "cleanup": {
-      "type": "boolean",
-      "title": "Clean up",
-      "description": "Whether to clean up the .out/.aux or not",
-      "default": true
-    },
-    "runtimes": {
-      "type": "integer",
-      "title": "Run multiple times",
-      "description": "Specify how many times to run",
-      "minimum": 1,
-      "default": 1
     }
   },
   "additionalProperties": false,
