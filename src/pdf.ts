@@ -22,11 +22,7 @@ import {
   IDocumentWidget
 } from '@jupyterlab/docregistry';
 
-import 'pdfjs-dist/webpack';
-import 'pdfjs-dist/web/pdf_viewer';
-
 import '../style/index.css';
-import 'pdfjs-dist/web/pdf_viewer.css';
 
 import { PageNumberWidget } from './pagenumber';
 
@@ -82,7 +78,9 @@ declare const PDFJS: any;
 export class PDFJSViewer extends Widget {
   constructor(context: DocumentRegistry.Context) {
     super({ node: Private.createNode() });
-    this.viewer = new PDFJS.PDFViewer({ container: this.node });
+    Private.ensurePDFJS().then(() => {
+      this._viewer = new PDFJS.PDFViewer({ container: this.node });
+    });
 
     this.context = context;
     this._onTitleChanged();
@@ -117,7 +115,9 @@ export class PDFJSViewer extends Widget {
   /**
    * The underlying PDFJS viewer/
    */
-  readonly viewer: any;
+  get viewer(): any | undefined {
+    return this._viewer;
+  }
 
   /**
    * A promise that resolves when the pdf viewer is ready.
@@ -130,8 +130,9 @@ export class PDFJSViewer extends Widget {
    * Get the scroll position.
    */
   get position(): PDFJSViewer.IPosition {
+    const page = this.viewer ? this.viewer.currentPageNumber : 0;
     return {
-      page: this.viewer.currentPageNumber,
+      page,
       x: 0,
       y: 0
     };
@@ -141,12 +142,15 @@ export class PDFJSViewer extends Widget {
    * Set the scroll position.
    */
   set position(pos: PDFJSViewer.IPosition) {
+    if (!this._viewer) {
+      return;
+    }
     // Clamp the page number.
     const pageNumber = Math.max(
-      Math.min(pos.page, this.viewer.pagesCount + 1),
+      Math.min(pos.page, this._viewer.pagesCount + 1),
       1
     );
-    const page = this.viewer.getPageView(pageNumber - 1);
+    const page = this._viewer.getPageView(pageNumber - 1);
 
     // Flip the y position for PDFJS, including a margin so
     // that it is not at the exact top of the screen.
@@ -156,14 +160,14 @@ export class PDFJSViewer extends Widget {
     // Scroll page into view using a very undocumented
     // set of options. This particular set scrolls it to
     // an x,y position on a given page, with a given scale value.
-    this.viewer.scrollPageIntoView({
+    this._viewer.scrollPageIntoView({
       pageNumber,
       destArray: [
         pageNumber,
         { name: 'XYZ' },
         pos.x,
         yPos,
-        this.viewer.currentScaleValue
+        this._viewer.currentScaleValue
       ]
     });
   }
@@ -194,8 +198,12 @@ export class PDFJSViewer extends Widget {
   /**
    * Render PDF into this widget's node.
    */
-  private _render(): Promise<void> {
+  private async _render(): Promise<void> {
+    await Private.pdfjsLoaded;
     return new Promise<void>(resolve => {
+      if (!this._viewer) {
+        return;
+      }
       let data = this.context.model.toString();
       // If there is no data, do nothing.
       if (!data) {
@@ -212,7 +220,7 @@ export class PDFJSViewer extends Widget {
 
       // Try to keep the scale and scroll position.
       if (this._hasRendered && this.isVisible) {
-        scale = this.viewer.currentScale || scale;
+        scale = this._viewer.currentScale || scale;
         scrollTop = this.node.scrollTop;
       }
 
@@ -234,14 +242,14 @@ export class PDFJSViewer extends Widget {
       PDFJS.getDocument(this._objectUrl)
         .then((pdfDocument: any) => {
           this._pdfDocument = pdfDocument;
-          this.viewer.setDocument(pdfDocument);
+          this._viewer!.setDocument(pdfDocument);
           pdfDocument.getPageLabels().then((labels: string[]) => {
             if (!labels) {
               return;
             }
-            let i = 0,
-              numLabels = labels.length;
-            if (numLabels !== this.viewer.pagesCount) {
+            let i = 0;
+            const numLabels = labels.length;
+            if (numLabels !== this._viewer!.pagesCount) {
               console.error(
                 'The number of Page Labels does not match ' +
                   'the number of pages in the document.'
@@ -256,18 +264,18 @@ export class PDFJSViewer extends Widget {
               return;
             }
 
-            this.viewer.setPageLabels(labels);
-            this.viewer.eventBus.dispatch('pagelabels');
+            this._viewer!.setPageLabels(labels);
+            this._viewer!.eventBus.dispatch('pagelabels');
           });
-          this.viewer.firstPagePromise.then(() => {
+          this._viewer!.firstPagePromise.then(() => {
             if (this.isVisible) {
-              this.viewer.currentScaleValue = scale;
+              this._viewer!.currentScaleValue = scale;
             }
             this._hasRendered = true;
-            this.viewer.eventBus.dispatch('firstpage');
+            this._viewer!.eventBus.dispatch('firstpage');
             resolve(void 0);
           });
-          this.viewer.pagesPromise.then(() => {
+          this._viewer!.pagesPromise.then(() => {
             if (this.isVisible) {
               this.node.scrollTop = scrollTop;
             }
@@ -320,10 +328,13 @@ export class PDFJSViewer extends Widget {
     x: number,
     y: number
   ): PDFJSViewer.IPosition | undefined {
+    if (!this._viewer) {
+      return undefined;
+    }
     let page: any;
     let pageNumber = 0;
-    for (; pageNumber < this.viewer.pagesCount; pageNumber++) {
-      const pageView = this.viewer.getPageView(pageNumber);
+    for (; pageNumber < this._viewer.pagesCount; pageNumber++) {
+      const pageView = this._viewer.getPageView(pageNumber);
       // If the page is not rendered (as happens when it is
       // scrolled out of view), then the textLayer div doesn't
       // exist, and we can safely skip it.
@@ -372,8 +383,11 @@ export class PDFJSViewer extends Widget {
    * Fit the PDF to the widget width.
    */
   fit(): void {
+    if (!this._viewer) {
+      return;
+    }
     if (this.isVisible) {
-      this.viewer.currentScaleValue = 'page-width';
+      this._viewer.currentScaleValue = 'page-width';
     }
   }
 
@@ -387,6 +401,7 @@ export class PDFJSViewer extends Widget {
     this._render();
   }
 
+  private _viewer: { [x: string]: any } | undefined;
   private _ready = new PromiseDelegate<void>();
   private _objectUrl = '';
   private _pdfDocument: any;
@@ -401,7 +416,7 @@ export class PDFJSDocumentWidget extends DocumentWidget<PDFJSViewer>
   implements IDocumentWidget<PDFJSViewer> {
   constructor(context: DocumentRegistry.Context) {
     const content = new PDFJSViewer(context);
-    const toolbar = Private.createToolbar(content.viewer);
+    const toolbar = Private.createToolbar(content);
     const reveal = content.ready;
     super({ content, context, reveal, toolbar });
   }
@@ -472,7 +487,7 @@ namespace Private {
   /**
    * Create the toolbar for the PDF viewer.
    */
-  export function createToolbar(pdfViewer: any): Toolbar<ToolbarButton> {
+  export function createToolbar(content: PDFJSViewer): Toolbar<ToolbarButton> {
     const toolbar = new Toolbar();
 
     toolbar.addClass('jp-Toolbar');
@@ -483,8 +498,11 @@ namespace Private {
       new ToolbarButton({
         iconClassName: 'jp-PreviousIcon jp-Icon jp-Icon-16',
         onClick: () => {
-          pdfViewer.currentPageNumber = Math.max(
-            pdfViewer.currentPageNumber - 1,
+          if (!content.viewer) {
+            return;
+          }
+          content.viewer.currentPageNumber = Math.max(
+            content.viewer.currentPageNumber - 1,
             1
           );
         },
@@ -496,16 +514,19 @@ namespace Private {
       new ToolbarButton({
         iconClassName: 'jp-NextIcon jp-Icon jp-Icon-16',
         onClick: () => {
-          pdfViewer.currentPageNumber = Math.min(
-            pdfViewer.currentPageNumber + 1,
-            pdfViewer.pagesCount
+          if (!content.viewer) {
+            return;
+          }
+          content.viewer.currentPageNumber = Math.min(
+            content.viewer.currentPageNumber + 1,
+            content.viewer.pagesCount
           );
         },
         tooltip: 'Next Page'
       })
     );
 
-    toolbar.addItem('PageNumber', new PageNumberWidget({ viewer: pdfViewer }));
+    toolbar.addItem('PageNumber', new PageNumberWidget({ widget: content }));
 
     toolbar.addItem('spacer', Toolbar.createSpacerItem());
 
@@ -514,13 +535,16 @@ namespace Private {
       new ToolbarButton({
         iconClassName: 'jp-ZoomOutIcon jp-Icon jp-Icon-16',
         onClick: () => {
-          let newScale = pdfViewer.currentScale;
+          if (!content.viewer) {
+            return;
+          }
+          let newScale = content.viewer.currentScale;
 
           newScale = (newScale / SCALE_DELTA).toFixed(2);
           newScale = Math.floor(newScale * 10) / 10;
           newScale = Math.max(MIN_SCALE, newScale);
 
-          pdfViewer.currentScale = newScale;
+          content.viewer.currentScale = newScale;
         },
         tooltip: 'Zoom Out'
       })
@@ -530,13 +554,16 @@ namespace Private {
       new ToolbarButton({
         iconClassName: 'jp-ZoomInIcon jp-Icon jp-Icon-16',
         onClick: () => {
-          let newScale = pdfViewer.currentScale;
+          if (!content.viewer) {
+            return;
+          }
+          let newScale = content.viewer.currentScale;
 
           newScale = (newScale * SCALE_DELTA).toFixed(2);
           newScale = Math.ceil(newScale * 10) / 10;
           newScale = Math.min(MAX_SCALE, newScale);
 
-          pdfViewer.currentScale = newScale;
+          content.viewer.currentScale = newScale;
         },
         tooltip: 'Zoom In'
       })
@@ -547,7 +574,10 @@ namespace Private {
       new ToolbarButton({
         iconClassName: 'jp-FitIcon jp-Icon jp-Icon-16',
         onClick: () => {
-          pdfViewer.currentScaleValue = 'page-width';
+          if (!content.viewer) {
+            return;
+          }
+          content.viewer.currentScaleValue = 'page-width';
         },
         tooltip: 'Fit to Page Width'
       })
@@ -590,5 +620,30 @@ namespace Private {
 
     let blob = new Blob(byteArrays, { type: contentType });
     return blob;
+  }
+
+  export let pdfjsLoaded: Promise<void>;
+
+  export function ensurePDFJS(): Promise<void> {
+    pdfjsLoaded = new Promise<void>((resolve, reject) => {
+      (require as any).ensure(
+        [
+          'pdfjs-dist/webpack',
+          'pdfjs-dist/web/pdf_viewer',
+          'pdfjs-dist/web/pdf_viewer.css'
+        ],
+        (require: NodeRequire) => {
+          require('pdfjs-dist/webpack');
+          require('pdfjs-dist/web/pdf_viewer');
+          require('pdfjs-dist/web/pdf_viewer.css');
+          resolve(void 0);
+        },
+        (error: any) => {
+          console.error(error);
+        },
+        'pdfjs'
+      );
+    });
+    return pdfjsLoaded;
   }
 }

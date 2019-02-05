@@ -1,5 +1,7 @@
 import { ReactWidget } from '@jupyterlab/apputils';
 
+import { PDFJSViewer } from './pdf';
+
 import * as React from 'react';
 
 /**
@@ -19,7 +21,7 @@ class PageNumberComponent extends React.Component<
    * Start listening PDF viewer events.
    */
   componentDidMount() {
-    const { eventBus } = this.props.viewer;
+    const { eventBus } = this.props.widget.viewer;
     eventBus.on('firstpage', this.handlePageDataChange);
     eventBus.on('pagechanging', this.handlePageDataChange);
     eventBus.on('pagelabels', this.handlePageDataChange);
@@ -29,7 +31,7 @@ class PageNumberComponent extends React.Component<
    * Stop listening PDF viewer events.
    */
   componentWillUnmount() {
-    const { eventBus } = this.props.viewer;
+    const { eventBus } = this.props.widget.viewer;
     eventBus.off('firstpage', this.handlePageDataChange);
     eventBus.off('pagechanging', this.handlePageDataChange);
     eventBus.off('pagelabels', this.handlePageDataChange);
@@ -75,8 +77,8 @@ class PageNumberComponent extends React.Component<
    * Update the state when page data change.
    */
   handlePageDataChange = () => {
-    const { viewer } = this.props;
-    const { currentPageLabel, currentPageNumber, pagesCount } = viewer;
+    const { widget } = this.props;
+    const { currentPageLabel, currentPageNumber, pagesCount } = widget.viewer;
 
     this.setState({
       currentPageLabel,
@@ -90,8 +92,8 @@ class PageNumberComponent extends React.Component<
    * Change current page.
    */
   setCurrentPage(pageLabel: string) {
-    const { viewer } = this.props;
-    viewer.currentPageLabel = pageLabel;
+    const { widget } = this.props;
+    widget.viewer.currentPageLabel = pageLabel;
     // Reset user input.
     this.setState({ userInput: null });
   }
@@ -142,7 +144,7 @@ export namespace PageNumberComponent {
     /**
      * The PDF viewer.
      */
-    viewer: any;
+    widget: PDFJSViewer;
   }
 
   /**
