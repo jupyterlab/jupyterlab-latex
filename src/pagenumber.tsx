@@ -21,20 +21,26 @@ class PageNumberComponent extends React.Component<
    * Start listening PDF viewer events.
    */
   componentDidMount() {
-    const { eventBus } = this.props.widget.viewer;
-    eventBus.on('firstpage', this.handlePageDataChange);
-    eventBus.on('pagechanging', this.handlePageDataChange);
-    eventBus.on('pagelabels', this.handlePageDataChange);
+    this.props.widget.ready.then(() => {
+      // Viewer will be available after the `ready` promise resolves.
+      const { eventBus } = this.props.widget.viewer;
+      eventBus.on('firstpage', this.handlePageDataChange);
+      eventBus.on('pagechanging', this.handlePageDataChange);
+      eventBus.on('pagelabels', this.handlePageDataChange);
+    });
   }
 
   /**
    * Stop listening PDF viewer events.
    */
   componentWillUnmount() {
-    const { eventBus } = this.props.widget.viewer;
-    eventBus.off('firstpage', this.handlePageDataChange);
-    eventBus.off('pagechanging', this.handlePageDataChange);
-    eventBus.off('pagelabels', this.handlePageDataChange);
+    this.props.widget.ready.then(() => {
+      // Viewer will be available after the `ready` promise resolves.
+      const { eventBus } = this.props.widget.viewer;
+      eventBus.off('firstpage', this.handlePageDataChange);
+      eventBus.off('pagechanging', this.handlePageDataChange);
+      eventBus.off('pagelabels', this.handlePageDataChange);
+    });
   }
 
   /**
@@ -78,6 +84,9 @@ class PageNumberComponent extends React.Component<
    */
   handlePageDataChange = () => {
     const { widget } = this.props;
+    if (!widget.viewer) {
+      return;
+    }
     const { currentPageLabel, currentPageNumber, pagesCount } = widget.viewer;
 
     this.setState({
@@ -93,6 +102,9 @@ class PageNumberComponent extends React.Component<
    */
   setCurrentPage(pageLabel: string) {
     const { widget } = this.props;
+    if (!widget.viewer) {
+      return;
+    }
     widget.viewer.currentPageLabel = pageLabel;
     // Reset user input.
     this.setState({ userInput: null });
