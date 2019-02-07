@@ -1,47 +1,15 @@
-import { ReactElementWidget } from '@jupyterlab/apputils';
+import { ReactWidget } from '@jupyterlab/apputils';
 
 import * as React from 'react';
 
 /**
- * React properties for page number component.
- */
-interface IProps {
-  /**
-   * The PDF viewer.
-   */
-  viewer: any;
-}
-
-/**
- * React state for page number component.
- */
-interface IState {
-  /**
-   * The label of the current page.
-   */
-  currentPageLabel?: string;
-
-  /**
-   * The index of the current page in the document.
-   */
-  currentPageNumber: number;
-
-  /**
-   * The number of pages of the document.
-   */
-  pagesCount: number;
-
-  /**
-   * The string inserted by user in the input element.
-   */
-  userInput: string | null;
-}
-
-/**
  * Page number React component.
  */
-class PageNumberComponent extends React.Component<IProps, IState> {
-  public state: IState = {
+class PageNumberComponent extends React.Component<
+  PageNumberComponent.IProps,
+  PageNumberComponent.IState
+> {
+  public state: PageNumberComponent.IState = {
     currentPageNumber: 0,
     pagesCount: 0,
     userInput: null
@@ -164,10 +132,57 @@ class PageNumberComponent extends React.Component<IProps, IState> {
 }
 
 /**
+ * A namespace for PageNumberComponent statics.
+ */
+export namespace PageNumberComponent {
+  /**
+   * React properties for page number component.
+   */
+  export interface IProps {
+    /**
+     * The PDF viewer.
+     */
+    viewer: any;
+  }
+
+  /**
+   * React state for page number component.
+   */
+  export interface IState {
+    /**
+     * The label of the current page.
+     */
+    currentPageLabel?: string;
+
+    /**
+     * The index of the current page in the document.
+     */
+    currentPageNumber: number;
+
+    /**
+     * The number of pages of the document.
+     */
+    pagesCount: number;
+
+    /**
+     * The string inserted by user in the input element.
+     */
+    userInput: string | null;
+  }
+}
+
+/**
  * Phosphor Widget version of PageNumberComponent.
  */
-export class PageNumberWidget extends ReactElementWidget {
-  constructor(props: IProps) {
-    super(<PageNumberComponent {...props} />);
+export class PageNumberWidget extends ReactWidget {
+  constructor(props: PageNumberComponent.IProps) {
+    super();
+    this._props = props;
   }
+
+  render() {
+    return <PageNumberComponent {...this._props} />;
+  }
+
+  private _props: PageNumberComponent.IProps;
 }
