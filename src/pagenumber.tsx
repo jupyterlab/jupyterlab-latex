@@ -27,6 +27,7 @@ class PageNumberComponent extends React.Component<
       eventBus.on('firstpage', this.handlePageDataChange);
       eventBus.on('pagechanging', this.handlePageDataChange);
       eventBus.on('pagelabels', this.handlePageDataChange);
+      this.handlePageDataChange();
     });
   }
 
