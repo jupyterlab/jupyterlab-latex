@@ -47,12 +47,11 @@
     "@phosphor/domutils": "^1.1.2",
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/widgets": "^1.6.0",
-    "pdfjs-dist": "2.0.104",
+    "pdfjs-dist": "2.0.943",
     "react": "~16.4.2",
     "react-dom": "~16.4.2"
   },
   "devDependencies": {
-    "@types/pdfjs-dist": "^0.1.0",
     "@types/react": "~16.4.13",
     "@types/react-dom": "~16.0.7",
     "husky": "^0.14.3",

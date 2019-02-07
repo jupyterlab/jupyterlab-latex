@@ -67,19 +67,13 @@ export const MIN_SCALE = 0.25;
 export const MARGIN = 72; // 72 dpi
 
 /**
- * PDFJS adds a global object to the page called `PDFJS`.
- * Declare a reference to that.
- */
-declare const PDFJS: any;
-
-/**
  * A class for rendering a PDF document.
  */
 export class PDFJSViewer extends Widget {
   constructor(context: DocumentRegistry.Context) {
     super({ node: Private.createNode() });
-    Private.ensurePDFJS().then(() => {
-      this._viewer = new PDFJS.PDFViewer({ container: this.node });
+    Private.ensurePDFJS().then(pdfjsLib => {
+      this._viewer = new pdfjsLib.PDFViewer({ container: this.node });
     });
 
     this.context = context;
@@ -199,7 +193,7 @@ export class PDFJSViewer extends Widget {
    * Render PDF into this widget's node.
    */
   private async _render(): Promise<void> {
-    await Private.pdfjsLoaded;
+    const pdfjsLib = await Private.pdfjsLoaded;
     return new Promise<void>(resolve => {
       if (!this._viewer) {
         return;
@@ -239,7 +233,8 @@ export class PDFJSViewer extends Widget {
         }
       };
 
-      PDFJS.getDocument(this._objectUrl)
+      pdfjsLib
+        .getDocument(this._objectUrl)
         .then((pdfDocument: any) => {
           this._pdfDocument = pdfDocument;
           this._viewer!.setDocument(pdfDocument);
@@ -622,10 +617,10 @@ namespace Private {
     return blob;
   }
 
-  export let pdfjsLoaded: Promise<void>;
+  export let pdfjsLoaded: Promise<any>;
 
-  export function ensurePDFJS(): Promise<void> {
-    pdfjsLoaded = new Promise<void>((resolve, reject) => {
+  export function ensurePDFJS(): Promise<any> {
+    pdfjsLoaded = new Promise<any>((resolve, reject) => {
       (require as any).ensure(
         [
           'pdfjs-dist/webpack',
@@ -633,10 +628,12 @@ namespace Private {
           'pdfjs-dist/web/pdf_viewer.css'
         ],
         (require: NodeRequire) => {
-          require('pdfjs-dist/webpack');
-          require('pdfjs-dist/web/pdf_viewer');
+          // Get the base library and the viewer library,
+          // return them as one module object.
+          const lib = require('pdfjs-dist/webpack');
+          const viewer = require('pdfjs-dist/web/pdf_viewer');
           require('pdfjs-dist/web/pdf_viewer.css');
-          resolve(void 0);
+          resolve({ ...lib, ...viewer });
         },
         (error: any) => {
           console.error(error);
