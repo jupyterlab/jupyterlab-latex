@@ -2,9 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  ILabShell,
   ILayoutRestorer,
-  JupyterLab,
-  JupyterLabPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -87,13 +88,14 @@ type ISynctexViewOptions = CodeEditor.IPosition;
 type ISynctexEditOptions = PDFJSViewer.IPosition;
 
 /**
- * The JupyterLab plugin for the LaTeX extension.
+ * The JupyterFrontEnd plugin for the LaTeX extension.
  */
-const latexPlugin: JupyterLabPlugin<void> = {
+const latexPlugin: JupyterFrontEndPlugin<void> = {
   id: latexPluginId,
   requires: [
     IDocumentManager,
     IEditorTracker,
+    ILabShell,
     ILayoutRestorer,
     IPDFJSTracker,
     ISettingRegistry,
@@ -199,9 +201,10 @@ function synctexViewRequest(
  * Activate the file browser.
  */
 function activateLatexPlugin(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   manager: IDocumentManager,
   editorTracker: IEditorTracker,
+  shell: ILabShell,
   restorer: ILayoutRestorer,
   pdfTracker: IPDFJSTracker,
   settingRegistry: ISettingRegistry,
@@ -293,7 +296,7 @@ function activateLatexPlugin(
         errorPanel = null;
       });
       // Add the error panel to the main area.
-      app.shell.addToMainArea(errorPanel, {
+      shell.add(errorPanel, 'main', {
         ref: widget.id,
         mode: 'split-bottom'
       });
@@ -330,9 +333,9 @@ function activateLatexPlugin(
     // Run an initial latexRequest so that the appropriate files exist,
     // then open them.
     onFileChanged().then(() => {
-	  if (!errorPanel) {
-		findOpenOrRevealPDF();
-	  }
+      if (!errorPanel) {
+        findOpenOrRevealPDF();
+      }
     });
 
     const cleanupPreviews = () => {
@@ -427,7 +430,7 @@ function activateLatexPlugin(
  * Add commands, keyboard shortcuts, and menu items for SyncTeX-related things.
  */
 function addSynctexCommands(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   editorTracker: IEditorTracker,
   pdfTracker: IPDFJSTracker,
   serverSettings: ServerConnection.ISettings
@@ -578,7 +581,7 @@ const FACTORY = 'PDFJS';
 /**
  * The pdf file handler extension.
  */
-const pdfjsPlugin: JupyterLabPlugin<IPDFJSTracker> = {
+const pdfjsPlugin: JupyterFrontEndPlugin<IPDFJSTracker> = {
   activate: activatePDFJS,
   id: '@jupyterlab/pdfjs-extension:plugin',
   requires: [ILayoutRestorer],
@@ -587,7 +590,7 @@ const pdfjsPlugin: JupyterLabPlugin<IPDFJSTracker> = {
 };
 
 function activatePDFJS(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   restorer: ILayoutRestorer
 ): IPDFJSTracker {
   const namespace = 'pdfjs-widget';
@@ -631,7 +634,7 @@ function activatePDFJS(
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [latexPlugin, pdfjsPlugin];
+const plugins: JupyterFrontEndPlugin<any>[] = [latexPlugin, pdfjsPlugin];
 export default plugins;
 
 /**
