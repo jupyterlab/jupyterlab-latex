@@ -620,27 +620,13 @@ namespace Private {
   export let pdfjsLoaded: Promise<any>;
 
   export function ensurePDFJS(): Promise<any> {
-    pdfjsLoaded = new Promise<any>((resolve, reject) => {
-      (require as any).ensure(
-        [
-          'pdfjs-dist/webpack',
-          'pdfjs-dist/web/pdf_viewer',
-          'pdfjs-dist/web/pdf_viewer.css'
-        ],
-        (require: NodeRequire) => {
-          // Get the base library and the viewer library,
-          // return them as one module object.
-          const lib = require('pdfjs-dist/webpack');
-          const viewer = require('pdfjs-dist/web/pdf_viewer');
-          require('pdfjs-dist/web/pdf_viewer.css');
-          resolve({ ...lib, ...viewer });
-        },
-        (error: any) => {
-          console.error(error);
-        },
-        'pdfjs'
-      );
-    });
+    pdfjsLoaded = Promise.all([
+      import(/* webpackChunkName: "pdfjs" */ /* webpackMode: "lazy" */ 'pdfjs-dist/webpack' as any),
+      import(/* webpackChunkName: "pdfjs" */ /* webpackMode: "lazy" */ 'pdfjs-dist/web/pdf_viewer' as any),
+      import(/* webpackChunkName: "pdfjs" */ /* webpackMode: "lazy" */ 'pdfjs-dist/web/pdf_viewer.css' as any)
+    ])
+      .then(([lib, viewer]) => ({ ...lib, ...viewer }))
+      .catch(err => console.error(err));
     return pdfjsLoaded;
   }
 }
