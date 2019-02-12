@@ -7,7 +7,7 @@
     "noEmitOnError": true,
     "noUnusedLocals": true,
     "lib": ["DOM", "ES6"],
-    "module": "commonjs",
+    "module": "esnext",
     "moduleResolution": "node",
     "target": "ES6",
     "outDir": "./lib",
