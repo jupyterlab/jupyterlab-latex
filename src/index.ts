@@ -9,8 +9,8 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  IInstanceTracker,
-  InstanceTracker,
+  IWidgetTracker,
+  WidgetTracker,
   showErrorMessage
 } from '@jupyterlab/apputils';
 
@@ -45,7 +45,7 @@ import '../style/index.css';
  * A class that tracks editor widgets.
  */
 export interface IPDFJSTracker
-  extends IInstanceTracker<IDocumentWidget<PDFJSViewer>> {}
+  extends IWidgetTracker<IDocumentWidget<PDFJSViewer>> {}
 
 /* tslint:disable */
 /**
@@ -600,7 +600,7 @@ function activatePDFJS(
     fileTypes: FILE_TYPES,
     readOnly: true
   });
-  const tracker = new InstanceTracker<IDocumentWidget<PDFJSViewer>>({
+  const tracker = new WidgetTracker<IDocumentWidget<PDFJSViewer>>({
     namespace
   });
 

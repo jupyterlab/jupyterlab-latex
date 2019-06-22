@@ -63,42 +63,42 @@
   box-shadow: var(--jp-input-box-shadow);
 }
 
-[data-theme-light='true'] .jp-PreviousIcon {
+[data-jp-theme-light='true'] .jp-PreviousIcon {
   background-image: url(previous_light.svg);
 }
 
-[data-theme-light='true'] .jp-NextIcon {
+[data-jp-theme-light='true'] .jp-NextIcon {
   background-image: url(next_light.svg);
 }
 
-[data-theme-light='true'] .jp-ZoomInIcon {
+[data-jp-theme-light='true'] .jp-ZoomInIcon {
   background-image: url(zoom_in_light.svg);
 }
 
-[data-theme-light='true'] .jp-ZoomOutIcon {
+[data-jp-theme-light='true'] .jp-ZoomOutIcon {
   background-image: url(zoom_out_light.svg);
 }
 
-[data-theme-light='true'] .jp-FitIcon {
+[data-jp-theme-light='true'] .jp-FitIcon {
   background-image: url(fit_light.svg);
 }
 
-[data-theme-light='false'] .jp-PreviousIcon {
+[data-jp-theme-light='false'] .jp-PreviousIcon {
   background-image: url(previous_dark.svg);
 }
 
-[data-theme-light='false'] .jp-NextIcon {
+[data-jp-theme-light='false'] .jp-NextIcon {
   background-image: url(next_dark.svg);
 }
 
-[data-theme-light='false'] .jp-ZoomInIcon {
+[data-jp-theme-light='false'] .jp-ZoomInIcon {
   background-image: url(zoom_in_dark.svg);
 }
 
-[data-theme-light='false'] .jp-ZoomOutIcon {
+[data-jp-theme-light='false'] .jp-ZoomOutIcon {
   background-image: url(zoom_out_dark.svg);
 }
 
-[data-theme-light='false'] .jp-FitIcon {
+[data-jp-theme-light='false'] .jp-FitIcon {
   background-image: url(fit_dark.svg);
 }
