@@ -83,7 +83,7 @@ class LatexSynctexHandler(APIHandler):
             c.synctex_command,
             'edit',
             '-o',
-            f'{pos["page"]}:{pos["x"]}:{pos["y"]}:{pdf_name+".pdf"}'
+            f'{pos["page"]}:{pos["x"]}:{pos["y"]}:{self.notebook_dir}/{pdf_name+".pdf"}'
             )
 
         return cmd
