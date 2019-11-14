@@ -8,7 +8,7 @@ In the forward direction, it takes a line and column from the `.tex` file,
 and maps it to a page in the PDF, as well as an (x,y) position on the page.
 In the reverse direction, it takes a page and an (x,y) position, and maps
 it onto a line and column of the `.tex` document.
-To reveal the page of the PDF correspoding to the cursor in the text editor,
+To reveal the page of the PDF corresponding to the cursor in the text editor,
 right-click in the editor and select "Show ".
 To reveal the location in the text editor corresponding to a page of the PDF,
 right click on the PDF and select "Scroll PDF to Cursor"
@@ -26,22 +26,6 @@ in the JupyterLab advanced settings editor.
 The extension defaults to running `synctex` for establishing the mapping.
 You can configure this command by setting `c.LatexConfig.synctex_command`
 in your `jupyter_notebook_config.py` file.
-
-## Security and customizing shell escapes
-
-LaTeX files have the ability to run arbitrary code by triggering external
-shell commands. This is a security risk, and so most LaTeX distributions
-restrict the commands that you can run in the shell.
-
-You can customize the behavior by setting the `LatexConfig.shell_escape` value.
-It can take three values: `"restricted"` (default) to allow only commands
-considered safe to be executed, `"allow"` to allow all commands, and `"disallow"`
-to disallow all commands.
-For example, to force your LaTeX distribution to run any command, use:
-
-```python
-c.LatexConfig.shell_escape = "allow"
-```
 
 ## Installing from source
 
