@@ -8,7 +8,7 @@ In the forward direction, it takes a line and column from the `.tex` file,
 and maps it to a page in the PDF, as well as an (x,y) position on the page.
 In the reverse direction, it takes a page and an (x,y) position, and maps
 it onto a line and column of the `.tex` document.
-To reveal the page of the PDF correspoding to the cursor in the text editor,
+To reveal the page of the PDF corresponding to the cursor in the text editor,
 right-click in the editor and select "Show ".
 To reveal the location in the text editor corresponding to a page of the PDF,
 right click on the PDF and select "Scroll PDF to Cursor"
