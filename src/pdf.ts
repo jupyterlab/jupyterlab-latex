@@ -1,19 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PromiseDelegate } from '@phosphor/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
-import { ElementExt } from '@phosphor/domutils';
+import { ElementExt } from '@lumino/domutils';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { Toolbar, ToolbarButton } from '@jupyterlab/apputils';
 
 import { PathExt } from '@jupyterlab/coreutils';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import {
   ABCWidgetFactory,
@@ -78,10 +78,7 @@ export class PDFJSViewer extends Widget {
 
     this.context = context;
     this._onTitleChanged();
-    context.pathChanged.connect(
-      this._onTitleChanged,
-      this
-    );
+    context.pathChanged.connect(this._onTitleChanged, this);
 
     context.ready.then(() => {
       if (this.isDisposed) {
@@ -90,14 +87,8 @@ export class PDFJSViewer extends Widget {
       this._render().then(() => {
         this._ready.resolve(void 0);
       });
-      context.model.contentChanged.connect(
-        this.update,
-        this
-      );
-      context.fileChanged.connect(
-        this.update,
-        this
-      );
+      context.model.contentChanged.connect(this.update, this);
+      context.fileChanged.connect(this.update, this);
     });
   }
 
@@ -491,7 +482,7 @@ namespace Private {
     toolbar.addItem(
       'previous',
       new ToolbarButton({
-        iconClassName: 'jp-PreviousIcon jp-Icon jp-Icon-16',
+        iconClass: 'jp-PreviousIcon jp-Icon jp-Icon-16',
         onClick: () => {
           if (!content.viewer) {
             return;
@@ -507,7 +498,7 @@ namespace Private {
     toolbar.addItem(
       'next',
       new ToolbarButton({
-        iconClassName: 'jp-NextIcon jp-Icon jp-Icon-16',
+        iconClass: 'jp-NextIcon jp-Icon jp-Icon-16',
         onClick: () => {
           if (!content.viewer) {
             return;
@@ -528,7 +519,7 @@ namespace Private {
     toolbar.addItem(
       'zoomOut',
       new ToolbarButton({
-        iconClassName: 'jp-ZoomOutIcon jp-Icon jp-Icon-16',
+        iconClass: 'jp-ZoomOutIcon jp-Icon jp-Icon-16',
         onClick: () => {
           if (!content.viewer) {
             return;
@@ -547,7 +538,7 @@ namespace Private {
     toolbar.addItem(
       'zoomIn',
       new ToolbarButton({
-        iconClassName: 'jp-ZoomInIcon jp-Icon jp-Icon-16',
+        iconClass: 'jp-ZoomInIcon jp-Icon jp-Icon-16',
         onClick: () => {
           if (!content.viewer) {
             return;
@@ -567,7 +558,7 @@ namespace Private {
     toolbar.addItem(
       'fit',
       new ToolbarButton({
-        iconClassName: 'jp-FitIcon jp-Icon jp-Icon-16',
+        iconClass: 'jp-FitIcon jp-Icon jp-Icon-16',
         onClick: () => {
           if (!content.viewer) {
             return;
@@ -621,9 +612,15 @@ namespace Private {
 
   export function ensurePDFJS(): Promise<any> {
     pdfjsLoaded = Promise.all([
-      import(/* webpackChunkName: "pdfjs" */ /* webpackMode: "lazy" */ 'pdfjs-dist/webpack' as any),
-      import(/* webpackChunkName: "pdfjs" */ /* webpackMode: "lazy" */ 'pdfjs-dist/web/pdf_viewer' as any),
-      import(/* webpackChunkName: "pdfjs" */ /* webpackMode: "lazy" */ 'pdfjs-dist/web/pdf_viewer.css' as any)
+      import(
+        /* webpackChunkName: "pdfjs" */ /* webpackMode: "lazy" */ 'pdfjs-dist/webpack' as any
+      ),
+      import(
+        /* webpackChunkName: "pdfjs" */ /* webpackMode: "lazy" */ 'pdfjs-dist/web/pdf_viewer' as any
+      ),
+      import(
+        /* webpackChunkName: "pdfjs" */ /* webpackMode: "lazy" */ 'pdfjs-dist/web/pdf_viewer.css' as any
+      )
     ])
       .then(([lib, viewer]) => ({ ...lib, ...viewer }))
       .catch(err => console.error(err));

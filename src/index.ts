@@ -16,12 +16,7 @@ import {
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import {
-  IStateDB,
-  PathExt,
-  ISettingRegistry,
-  URLExt
-} from '@jupyterlab/coreutils';
+import { PathExt, URLExt } from '@jupyterlab/coreutils';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
@@ -31,9 +26,13 @@ import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 
 import { ServerConnection } from '@jupyterlab/services';
 
-import { ReadonlyJSONObject, Token } from '@phosphor/coreutils';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
-import { DisposableSet } from '@phosphor/disposable';
+import { IStateDB } from '@jupyterlab/statedb';
+
+import { ReadonlyJSONObject, Token } from '@lumino/coreutils';
+
+import { DisposableSet } from '@lumino/disposable';
 
 import { ErrorPanel } from './error';
 
