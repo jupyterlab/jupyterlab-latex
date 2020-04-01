@@ -2,6 +2,7 @@
 
 import glob, json, re, os
 from contextlib import contextmanager
+import shutil
 
 from tornado import gen, web
 
@@ -50,7 +51,10 @@ def latex_cleanup(cleanup=True, workdir='.', whitelist=None, greylist=None):
     if cleanup:
         after = set(glob.glob("*"))
         for fn in set(after-keep_files):
-            os.remove(fn)
+            if not os.path.isdir(fn):
+                os.remove(fn)
+            else:
+                shutil.rmtree(fn)
     os.chdir(orig_work_dir)
 
 
