@@ -569,6 +569,20 @@ namespace Private {
       })
     );
 
+    toolbar.addItem(
+      'download',
+      new ToolbarButton({
+        iconClass: 'jp-DownloadIcon jp-Icon jp-Icon-16',
+        onClick: () => {
+          if (!content.viewer) {
+            return;
+          }
+          content.context.download();
+        },
+        tooltip: 'Download'
+      })
+    );
+
     return toolbar;
   }
 
