@@ -83,6 +83,10 @@
   background-image: url(fit_light.svg);
 }
 
+[data-jp-theme-light='true'] .jp-DownloadIcon {
+  background-image: url(download_light.svg);
+}
+
 [data-jp-theme-light='false'] .jp-PreviousIcon {
   background-image: url(previous_dark.svg);
 }
@@ -101,4 +105,8 @@
 
 [data-jp-theme-light='false'] .jp-FitIcon {
   background-image: url(fit_dark.svg);
+}
+
+[data-jp-theme-light='false'] .jp-DownloadIcon {
+  background-image: url(download_dark.svg);
 }
