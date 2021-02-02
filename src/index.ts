@@ -38,6 +38,18 @@ import { ErrorPanel } from './error';
 
 import { PDFJSDocumentWidget, PDFJSViewer, PDFJSViewerFactory } from './pdf';
 
+import { ILauncher } from '@jupyterlab/launcher';
+
+import { LabIcon } from '@jupyterlab/ui-components';
+
+import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
+
+import { ICommandPalette } from '@jupyterlab/apputils';
+
+import { IMainMenu } from '@jupyterlab/mainmenu';
+
+import latexIconStr from '../style/latex.svg';
+
 import '../style/index.css';
 
 /**
@@ -72,6 +84,11 @@ namespace CommandIDs {
    * Reveal in the pdf a position from the editor using SyncTeX.
    */
   export const synctexView = 'latex:synctex-view';
+
+  /**
+   * Create new latex file
+   */
+  export const createNew = 'latex:create-new-latex-file';
 }
 
 /**
@@ -92,6 +109,7 @@ type ISynctexEditOptions = PDFJSViewer.IPosition;
 const latexPlugin: JupyterFrontEndPlugin<void> = {
   id: latexPluginId,
   requires: [
+    IFileBrowserFactory,
     IDocumentManager,
     IEditorTracker,
     ILabShell,
@@ -100,6 +118,7 @@ const latexPlugin: JupyterFrontEndPlugin<void> = {
     ISettingRegistry,
     IStateDB
   ],
+  optional: [ILauncher, IMainMenu, ICommandPalette],
   activate: activateLatexPlugin,
   autoStart: true
 };
@@ -201,16 +220,25 @@ function synctexViewRequest(
  */
 function activateLatexPlugin(
   app: JupyterFrontEnd,
+  browserFactory: IFileBrowserFactory,
   manager: IDocumentManager,
   editorTracker: IEditorTracker,
   shell: ILabShell,
   restorer: ILayoutRestorer,
   pdfTracker: IPDFJSTracker,
   settingRegistry: ISettingRegistry,
-  state: IStateDB
+  state: IStateDB,
+  launcher: ILauncher | null,
+  menu: IMainMenu | null,
+  palette: ICommandPalette | null
 ): void {
   const { commands } = app;
   const id = 'jupyterlab-latex';
+
+  const icon = new LabIcon({
+    name: 'launcher:latex-icon',
+    svgstr: latexIconStr
+  });
 
   let synctex = true;
 
@@ -417,12 +445,59 @@ function activateLatexPlugin(
     label: 'Show LaTeX Preview'
   });
 
+  const command = CommandIDs.createNew;
+  const command_latex_preview = CommandIDs.openLatexPreview;
+  commands.addCommand(command, {
+    label: args => (args['isPalette'] ? 'New LaTeX File' : 'LaTeX File'),
+    caption: 'Create a new LaTeX file',
+    icon: args => (args['isPalette'] ? undefined : icon),
+    execute: async args => {
+      // Get the directory in which the LaTeX file must be created;
+      // otherwise take the current filebrowser directory
+      const cwd = args['cwd'] || browserFactory.defaultBrowser.model.path;
+
+      // Create a new untitled LaTeX file
+      const model = await commands.execute('docmanager:new-untitled', {
+        path: cwd,
+        type: 'file',
+        ext: 'tex'
+      });
+
+      // Open the newly created file with the 'Editor'
+      return commands.execute('docmanager:open', {
+        path: model.path,
+        factory: FACTORY_EDITOR
+      });
+    }
+  });
+
   app.contextMenu.addItem({
-    command: CommandIDs.openLatexPreview,
+    command: command_latex_preview,
     selector: '.jp-FileEditor'
   });
 
-  return;
+  // Add the command to the launcher
+  if (launcher) {
+    launcher.add({
+      command,
+      category: LAUNCHER_CATEGORY,
+      rank: 1
+    });
+  }
+
+  // Add the command to the palette
+  if (palette) {
+    palette.addItem({
+      command: command,
+      args: { isPalette: true },
+      category: PALETTE_CATEGORY
+    });
+  }
+
+  // Add the command to the menu
+  if (menu) {
+    menu.fileMenu.newMenu.addGroup([{ command }], 30);
+  }
 }
 
 /**
@@ -576,6 +651,9 @@ const FILE_TYPES = ['PDF'];
  * The name of the factory that creates pdf widgets.
  */
 const FACTORY = 'PDFJS';
+const FACTORY_EDITOR = 'Editor';
+const LAUNCHER_CATEGORY = 'Other';
+const PALETTE_CATEGORY = 'LaTeX Editor';
 
 /**
  * The pdf file handler extension.
