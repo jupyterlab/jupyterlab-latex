@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/latex",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "JupyterLab extension for running LaTeX",
   "keywords": [
     "jupyter",
@@ -30,8 +30,9 @@
   "directories": {
     "lib": "lib/"
   },
+  "main": "lib/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && jupyter labextension build --development True .",
     "build:test": "cd test && ./build-tests.sh",
     "clean": "rimraf lib",
     "precommit": "lint-staged",
