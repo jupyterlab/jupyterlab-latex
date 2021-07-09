@@ -54,13 +54,7 @@ jobs:
 
         jupyter serverextension list 2>&1 | grep -ie "jupyterlab_latex.*OK"
 
+        jlpm install
+        jlpm run build
+
         # jupyter labextension list 2>&1 | grep -ie "@jupyterlab/latex.*OK"
-        # python -m jupyterlab.browser_check
-
-        # check-manifest -v
-
-        # pip install build
-        # python -m build --sdist
-        # cp dist/*.tar.gz myextension.tar.gz
-        # pip uninstall -y myextension jupyterlab
-        # rm -rf myextension
