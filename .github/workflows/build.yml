@@ -51,7 +51,7 @@ jobs:
         set -eux
         # jlpm
         # jlpm run eslint:check
-        python -m pip install .
+        python -m pip install -e .
 
         jupyter serverextension enable --sys-prefix jupyterlab_latex
         jupyter server extension list
