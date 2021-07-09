@@ -50,49 +50,18 @@ jobs:
       run: |
         set -eux
         jlpm
-        jlpm run eslint:check
+        # jlpm run eslint:check
         python -m pip install .
 
         jupyter server extension list 2>&1 | grep -ie "jupyterlab_latex.*OK"
 
         jupyter labextension list 2>&1 | grep -ie "@jupyterlab/latex.*OK"
-        python -m jupyterlab.browser_check
+        # python -m jupyterlab.browser_check
 
-        check-manifest -v
+        # check-manifest -v
 
-        pip install build
-        python -m build --sdist
-        cp dist/*.tar.gz myextension.tar.gz
-        pip uninstall -y myextension jupyterlab
-        rm -rf myextension
-
-    - uses: actions/upload-artifact@v2
-      with:
-        name: myextension-sdist
-        path: myextension.tar.gz
-
-  test_isolated:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-    - name: Install Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.8'
-        architecture: 'x64'
-    - uses: actions/download-artifact@v2
-      with:
-        name: myextension-sdist
-    - name: Install and Test
-      run: |
-        set -eux
-        # Remove NodeJS, twice to take care of system and locally installed node versions.
-        sudo rm -rf $(which node)
-        sudo rm -rf $(which node)
-        pip install myextension.tar.gz
-        pip install jupyterlab
-        jupyter labextension list 2>&1 | grep -ie "@jupyterlab/latex.*OK"
-        python -m jupyterlab.browser_check --no-chrome-test
+        # pip install build
+        # python -m build --sdist
+        # cp dist/*.tar.gz myextension.tar.gz
+        # pip uninstall -y myextension jupyterlab
+        # rm -rf myextension
