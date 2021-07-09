@@ -53,6 +53,7 @@ jobs:
         # jlpm run eslint:check
         python -m pip install .
 
+        jupyter serverextension enable --sys-prefix jupyterlab_latex
         jupyter server extension list 2>&1 | grep -ie "jupyterlab_latex.*OK"
 
         jupyter labextension list 2>&1 | grep -ie "@jupyterlab/latex.*OK"
