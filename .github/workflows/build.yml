@@ -49,13 +49,10 @@ jobs:
     - name: Build the extension
       run: |
         set -eux
-        # jlpm
-        # jlpm run eslint:check
-        python -m pip install -e .
-
+        python -m pip install .
         jupyter serverextension enable --sys-prefix jupyterlab_latex
-        jupyter server extension list
-        # jupyter server extension list 2>&1 | grep -ie "jupyterlab_latex.*OK"
+
+        jupyter serverextension list 2>&1 | grep -ie "jupyterlab_latex.*OK"
 
         # jupyter labextension list 2>&1 | grep -ie "@jupyterlab/latex.*OK"
         # python -m jupyterlab.browser_check
