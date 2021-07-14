@@ -45,12 +45,14 @@ jobs:
           yarn-
     
     - name: Install dependencies
-      run: jlpm install
+      run: |
+        jlpm install
     - name: Install the extension
       run: |
         set -eux
         python -m pip install -e .
+    - name: Integration test
+      run: |
         jupyter serverextension enable --sys-prefix jupyterlab_latex
-
         jupyter serverextension list 2>&1 | grep -ie "jupyterlab_latex.*OK"
         jupyter labextension list 2>&1 | grep -ie "@jupyterlab/latex.*OK"
