@@ -17,7 +17,10 @@
     "url": "https://github.com/jupyterlab/jupyterlab-latex.git"
   },
   "license": "BSD-3-Clause",
-  "author": "M Pacer & Ian Rose",
+  "author": {
+    "name": "Jupyter Development Team",
+    "email": "jupyter@googlegroups.com"
+  },
   "files": [
     "lib/*/*d.ts",
     "lib/*/*.js",
@@ -44,6 +47,7 @@
     "precommit": "lint-staged",
     "prettier": "prettier --write '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
     "test": "cd test && ./run-tests.sh",
+    "install:extension": "jlpm run build",
     "watch": "tsc -w"
   },
   "lint-staged": {
