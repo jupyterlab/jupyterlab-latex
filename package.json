@@ -47,7 +47,7 @@
     "precommit": "lint-staged",
     "prettier": "prettier --write '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
     "test": "cd test && ./run-tests.sh",
-    "install:extension": "jupyter labextension develop --overwrite .",
+    "install:extension": "jlpm run build",
     "watch": "tsc -w"
   },
   "lint-staged": {
