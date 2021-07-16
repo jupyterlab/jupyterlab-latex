@@ -626,18 +626,10 @@ namespace Private {
 
   export function ensurePDFJS(): Promise<any> {
     pdfjsLoaded = Promise.all([
-      import(
-        /* webpackChunkName: "pdfjs" */ /* webpackMode: "lazy" */ 'pdfjs-dist/build/pdf.min.js' as any
-      ),
-      import(
-        /* webpackChunkName: "pdfjs" */ /* webpackMode: "lazy" */ 'pdfjs-dist/build/pdf.worker.entry' as any
-      ),
-      import(
-        /* webpackChunkName: "pdfjs" */ /* webpackMode: "lazy" */ 'pdfjs-dist/web/pdf_viewer' as any
-      ),
-      import(
-        /* webpackChunkName: "pdfjs" */ /* webpackMode: "lazy" */ 'pdfjs-dist/web/pdf_viewer.css' as any
-      )
+      import('pdfjs-dist/build/pdf.min.js' as any),
+      import('pdfjs-dist/build/pdf.worker.entry' as any),
+      import('pdfjs-dist/web/pdf_viewer' as any),
+      import('pdfjs-dist/web/pdf_viewer.css' as any)
     ])
       .then(([lib, worker, viewer]) => ({ ...lib, ...worker, ...viewer }))
       .catch(err => console.error(err));
