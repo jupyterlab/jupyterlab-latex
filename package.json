@@ -106,6 +106,13 @@
   "jupyterlab": {
     "extension": "lib/index.js",
     "schemaDir": "schema",
+    "sharedPackages": {
+      "pdfjs-dist": {
+        "bundled": true,
+        "singleton": true,
+        "strictVersion": true
+      }
+    },
     "outputDir": "jupyterlab_latex/labextension"
   },
   "styleModule": "style/index.js"
