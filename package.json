@@ -106,8 +106,7 @@
   "jupyterlab": {
     "extension": "lib/index.js",
     "schemaDir": "schema",
-    "outputDir": "jupyterlab_latex/labextension",
-    "webpackConfig": "./webpack.config.js"
+    "outputDir": "jupyterlab_latex/labextension"
   },
   "styleModule": "style/index.js"
 }
