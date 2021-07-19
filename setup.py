@@ -5,6 +5,20 @@ import json
 from pathlib import Path
 
 import setuptools
+try:
+    from jupyter_packaging import (
+        wrap_installers,
+        npm_builder,
+        get_data_files
+    )
+    try:
+        import jupyterlab
+    except ImportError as e:
+        print("`jupyterlab` is missing. Install it with pip or conda.")
+        raise e
+except ImportError as e:
+    print("`jupyter-packaging` is missing. Install it with pip or conda.")
+    raise e
 
 HERE = Path(__file__).parent.resolve()
 
@@ -36,11 +50,16 @@ long_description = (HERE / "README.md").read_text()
 # Get the package info from package.json
 pkg_json = json.loads((HERE / "package.json").read_bytes())
 
+post_develop = npm_builder(
+    build_cmd="install:extension", source_dir="src", build_dir=lab_path
+)
+
 setup_dict = dict(
     name=name,
     version=pkg_json["version"],
     description=pkg_json["description"],
     packages=setuptools.find_packages(),
+    data_files=get_data_files(data_files_spec),
     author=pkg_json["author"]["name"],
     author_email=pkg_json["author"]["email"],
     url=pkg_json["homepage"],
@@ -68,21 +87,8 @@ setup_dict = dict(
         'notebook',
         'jupyter_server>=1.6,<2'
     ],
+    cmdclass=wrap_installers(post_develop=post_develop, ensured_targets=ensured_targets)
 )
-
-try:
-    from jupyter_packaging import (
-        wrap_installers,
-        npm_builder,
-        get_data_files
-    )
-    post_develop = npm_builder(
-        build_cmd="install:extension", source_dir="src", build_dir=lab_path
-    )
-    setup_dict['cmdclass'] = wrap_installers(post_develop=post_develop, ensured_targets=ensured_targets)
-    setup_dict['data_files'] = get_data_files(data_files_spec)
-except ImportError as e:
-    pass
 
 if __name__ == "__main__":
     setuptools.setup(**setup_dict)
