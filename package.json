@@ -46,7 +46,6 @@
     "clean:all": "jlpm clean:lib && jlpm clean:labextension",
     "precommit": "lint-staged",
     "prettier": "prettier --write '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
-    "test": "cd test && ./run-tests.sh",
     "install:extension": "jlpm build",
     "watch": "tsc -w"
   },
