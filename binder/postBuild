@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -eux
+
+jlpm --ignore-optional
+jlpm build
+python -m pip install -e . --no-deps --ignore-installed --no-build-isolation
+jupyter labextension develop --overwrite .
+
+jupyter labextension list

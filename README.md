@@ -1,6 +1,14 @@
 # JupyterLab LaTeX
 
-![Github Actions Status](https://github.com/jupyterlab/jupyterlab-latex/actions/workflows/build.yml/badge.svg)[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-latex.git/master?urlpath=lab%2Ftree%2Fsample.tex)
+|       build       |              stable              |              latest              |
+| :---------------: | :------------------------------: | :------------------------------: |
+| [![ci-badge]][ci] | [![binder-badge]][binder-stable] | [![binder-badge]][binder-latest] |
+
+[ci-badge]: https://github.com/jupyterlab/jupyterlab-latex/actions/workflows/build.yml/badge.svg
+[ci]: https://github.com/jupyterlab/jupyterlab-latex/actions/workflows/build.yml?query=branch%3Amaster
+[binder-badge]: https://mybinder.org/badge_logo.svg
+[binder-stable]: https://mybinder.org/v2/gh/jupyterlab/jupyterlab-latex.git/3.0.0?urlpath=lab%2Ftree%2Fsample.tex
+[binder-latest]: https://mybinder.org/v2/gh/jupyterlab/jupyterlab-latex.git/master?urlpath=lab%2Ftree%2Fsample.tex
 
 An extension for JupyterLab which allows for live-editing of LaTeX documents.
 
@@ -18,7 +26,7 @@ For more advanced usage documentation, see [here](docs/advanced.md).
 ## Requirements
 
 - JupyterLab >= 3.0
-  - older versions are supported in previous releases available on PyPi and npm, check [releases](https://github.com/jupyterlab/jupyterlab-latex/releases)
+  - older versions are supported in previous releases available on PyPI and npm, check [releases](https://github.com/jupyterlab/jupyterlab-latex/releases)
 - Python >= 3.6
 - An application that can compile `.tex` files to PDF (e.g., `pdflatex`, `xelatex`; use `pdflatex.exe` on Windows with MiKTeX). This application must be available as a command in the same environment as the notebook server.
 - An application that can process `.bib` files for producing bibliographies. As with the LaTeX command, this must be available in the same environment as the notebook server.
