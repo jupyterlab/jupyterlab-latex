@@ -1,5 +1,7 @@
 .ipynb_checkpoints/
 *.bundle.*
+*.gz
+*.pdf
 dist/
 jupyterlab_latex.egg-info/
 jupyterlab_latex/__pycache__/
