@@ -37,18 +37,28 @@ From the `jupyterlab-latex` directory, enter the following into your terminal:
 pip install -e .
 ```
 
-This installs the server extension.
-
-If you are running Notebook 5.2 or earlier, enable the server extension by running
+Link your development version of the extension with JupyterLab
 
 ```bash
-jupyter serverextension enable --sys-prefix jupyterlab_latex
+jupyter labextension develop . --overwrite{% if cookiecutter.has_server_extension.lower().startswith('y') %}
 ```
 
-Then, to install the lab extension, run
+Server extension must be manually installed in develop mode
 
 ```bash
-jlpm install
+jupyter server extension enable {{ cookiecutter.python_name }}{% endif %}
+```
+
+Rebuild extension Typescript source after making changes
+
+```bash
 jlpm run build
-jupyter labextension install .
 ```
+
+You can build a Python wheel for testing the distribution
+
+```bash
+python setup.py sdist bdist_wheel
+```
+
+The wheel and the source archive will be created in `dist/` directory.
