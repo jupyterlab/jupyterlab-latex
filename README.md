@@ -17,7 +17,8 @@ For more advanced usage documentation, see [here](docs/advanced.md).
 
 ## Requirements
 
-- JupyterLab >= 3.0 (older source extension is available on PyPi and npm)
+- JupyterLab >= 3.0
+  - older versions are supported in previous releases available on PyPi and npm, check [releases](https://github.com/jupyterlab/jupyterlab-latex/releases)
 - Python >= 3.6
 - An application that can compile `.tex` files to PDF (e.g., `pdflatex`, `xelatex`; use `pdflatex.exe` on Windows with MiKTeX). This application must be available as a command in the same environment as the notebook server.
 - An application that can process `.bib` files for producing bibliographies. As with the LaTeX command, this must be available in the same environment as the notebook server.
