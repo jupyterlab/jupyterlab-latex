@@ -1,3 +1,4 @@
+.ipynb_checkpoints/
 *.bundle.*
 dist/
 jupyterlab_latex.egg-info/
