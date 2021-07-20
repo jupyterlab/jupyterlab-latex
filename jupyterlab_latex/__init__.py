@@ -4,21 +4,16 @@ import json
 from pathlib import Path
 from notebook.utils import url_path_join
 
-from ._version import __version__
+from ._version import __version__, __js__
 from .build import LatexBuildHandler
 from .synctex import LatexSynctexHandler
 
 path_regex = r'(?P<path>(?:(?:/[^/]+)+|/?))'
 
-HERE = Path(__file__).parent.resolve()
-
-with (HERE / "labextension" / "package.json").open() as fid:
-    data = json.load(fid)
-
 def _jupyter_labextension_paths():
     return [{
         "src": "labextension",
-        "dest": data["name"]
+        "dest": __js__["name"]
     }]
 
 def _jupyter_server_extension_points():
