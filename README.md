@@ -17,7 +17,7 @@ For more advanced usage documentation, see [here](docs/advanced.md).
 
 ## Requirements
 
-- JupyterLab >= 3.0
+- JupyterLab >= 3.0 (older source extension is available on PyPi and npm)
 - Python >= 3.6
 - An application that can compile `.tex` files to PDF (e.g., `pdflatex`, `xelatex`; use `pdflatex.exe` on Windows with MiKTeX). This application must be available as a command in the same environment as the notebook server.
 - An application that can process `.bib` files for producing bibliographies. As with the LaTeX command, this must be available in the same environment as the notebook server.
@@ -32,6 +32,34 @@ To install the extension, run the following in your terminal:
 
 ```bash
 pip install jupyterlab_latex
+```
+
+### Check installation
+
+To ensure that extension is properly installed, you could check server and lab extensions:
+
+```bash
+jupyter server extension list
+```
+
+and see the block like this in the output
+
+```
+jupyterlab_latex enabled
+    - Validating jupyterlab_latex...
+      jupyterlab_latex 3.1.0 OK
+```
+
+then
+
+```bash
+jupyter labextension list
+```
+
+and see the block like this in the output
+
+```
+@jupyterlab/latex v3.1.0 enabled OK (python, jupyterlab-latex)
 ```
 
 ## Customization
