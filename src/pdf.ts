@@ -24,6 +24,15 @@ import {
 
 import '../style/index.css';
 
+import {
+  downloadIcon,
+  fitIcon,
+  nextIcon,
+  previousIcon,
+  zoomInIcon,
+  zoomOutIcon
+} from './style/icons';
+
 import { PageNumberWidget } from './pagenumber';
 
 /**
@@ -484,7 +493,7 @@ namespace Private {
     toolbar.addItem(
       'previous',
       new ToolbarButton({
-        iconClass: 'jp-PreviousIcon jp-Icon jp-Icon-16',
+        icon: previousIcon,
         onClick: () => {
           if (!content.viewer) {
             return;
@@ -500,7 +509,7 @@ namespace Private {
     toolbar.addItem(
       'next',
       new ToolbarButton({
-        iconClass: 'jp-NextIcon jp-Icon jp-Icon-16',
+        icon: nextIcon,
         onClick: () => {
           if (!content.viewer) {
             return;
@@ -521,7 +530,7 @@ namespace Private {
     toolbar.addItem(
       'zoomOut',
       new ToolbarButton({
-        iconClass: 'jp-ZoomOutIcon jp-Icon jp-Icon-16',
+        icon: zoomOutIcon,
         onClick: () => {
           if (!content.viewer) {
             return;
@@ -540,7 +549,7 @@ namespace Private {
     toolbar.addItem(
       'zoomIn',
       new ToolbarButton({
-        iconClass: 'jp-ZoomInIcon jp-Icon jp-Icon-16',
+        icon: zoomInIcon,
         onClick: () => {
           if (!content.viewer) {
             return;
@@ -560,7 +569,7 @@ namespace Private {
     toolbar.addItem(
       'fit',
       new ToolbarButton({
-        iconClass: 'jp-FitIcon jp-Icon jp-Icon-16',
+        icon: fitIcon,
         onClick: () => {
           if (!content.viewer) {
             return;
@@ -574,7 +583,7 @@ namespace Private {
     toolbar.addItem(
       'download',
       new ToolbarButton({
-        iconClass: 'jp-DownloadIcon jp-Icon jp-Icon-16',
+        icon: downloadIcon,
         onClick: () => {
           if (!content.viewer) {
             return;
