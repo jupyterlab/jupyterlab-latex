@@ -1,16 +1,2 @@
 #!/usr/bin/env bash
-set -eux
-
-jlpm --ignore-optional
-jlpm build
-
-python -m pip install -e . --no-deps --ignore-installed --no-build-isolation
-
-jupyter serverextension enable --sys-prefix --py jupyterlab_latex
-jupyter serverextension list
-
-jupyter server extension enable --sys-prefix --py jupyterlab_latex
-jupyter server extension list
-
-jupyter labextension develop --overwrite .
-jupyter labextension list
+python -m pip install .
