@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-python -m pip install -e . --no-deps --ignore-installed --no-build-isolation
+python -m pip install .
