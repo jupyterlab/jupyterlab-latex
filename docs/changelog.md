@@ -3,6 +3,7 @@
 - **3.1.0**:
 
   - Switch to prebuilt (federated) extension model
+  - Fix bug with icons visibility in the dark theme
 
 - **3.0.0**:
 
