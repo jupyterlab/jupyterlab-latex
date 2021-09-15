@@ -1,2 +1,4 @@
-node_modules
-**/lib
+**/lib/
+dist/
+jupyterlab_latex/labextension/
+node_modules/

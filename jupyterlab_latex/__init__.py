@@ -1,17 +1,32 @@
 """ JupyterLab LaTex : live LaTeX editing for JupyterLab """
+from ._version import __version__, __js__
 
-from notebook.utils import url_path_join
-
-from ._version import __version__
-from .build import LatexBuildHandler
-from .synctex import LatexSynctexHandler
+__all__ = [
+    "__js__",
+    "__version__",
+    "_jupyter_labextension_paths",
+    "_jupyter_server_extension_paths",
+    "_jupyter_server_extension_points",
+    "_load_jupyter_server_extension",
+    "load_jupyter_server_extension",
+]
 
 path_regex = r'(?P<path>(?:(?:/[^/]+)+|/?))'
 
-def _jupyter_server_extension_paths():
+
+
+def _jupyter_labextension_paths():
+    return [{
+        "src": "labextension",
+        "dest": __js__["name"]
+    }]
+
+def _jupyter_server_extension_points():
     return [{
         'module': 'jupyterlab_latex'
     }]
+
+_jupyter_server_extension_paths = _jupyter_server_extension_points
 
 def load_jupyter_server_extension(nb_server_app):
     """
@@ -20,6 +35,11 @@ def load_jupyter_server_extension(nb_server_app):
     Args:
         nb_server_app (NotebookApp): handle to the Notebook webserver instance.
     """
+    from notebook.utils import url_path_join
+
+    from .build import LatexBuildHandler
+    from .synctex import LatexSynctexHandler
+
     web_app = nb_server_app.web_app
     # Prepend the base_url so that it works in a jupyterhub setting
     base_url = web_app.settings['base_url']
@@ -36,3 +56,5 @@ def load_jupyter_server_extension(nb_server_app):
                  {"notebook_dir": nb_server_app.notebook_dir}
                  )]
     web_app.add_handlers('.*$', handlers)
+
+_load_jupyter_server_extension = load_jupyter_server_extension

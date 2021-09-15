@@ -1,5 +1,24 @@
 # Changelog for `jupyterlab_latex`
 
+- **3.1.0**:
+
+  - Switch to prebuilt (federated) extension model
+  - Fix bug with icons visibility in the dark theme
+
+- **3.0.0**:
+
+  - Update to JupyterLab 3.0
+  - Add LaTeX file menu
+  - Add download PDF button
+
+- **v2.0.0**:
+
+  - Update to JupyterLab 2.0
+
+- **v1.0.0**:
+
+  - Update to JupyterLab 1.0
+
 - **0.6.1**:
 
   - Added a new page component allowing the user to navigate PDFs by page label.

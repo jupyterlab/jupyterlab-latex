@@ -1,6 +1,14 @@
 # JupyterLab LaTeX
 
-[![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-latex/master?urlpath=lab%2Ftree%2Fsample.tex)
+|       build       |              stable              |              latest              |
+| :---------------: | :------------------------------: | :------------------------------: |
+| [![ci-badge]][ci] | [![binder-badge]][binder-stable] | [![binder-badge]][binder-latest] |
+
+[ci-badge]: https://github.com/jupyterlab/jupyterlab-latex/actions/workflows/build.yml/badge.svg
+[ci]: https://github.com/jupyterlab/jupyterlab-latex/actions/workflows/build.yml?query=branch/master
+[binder-badge]: https://mybinder.org/badge_logo.svg
+[binder-stable]: https://mybinder.org/v2/gh/jupyterlab/jupyterlab-latex.git/3.0.0?urlpath=lab/tree/sample.tex
+[binder-latest]: https://mybinder.org/v2/gh/jupyterlab/jupyterlab-latex.git/master?urlpath=lab/tree/sample.tex
 
 An extension for JupyterLab which allows for live-editing of LaTeX documents.
 
@@ -17,7 +25,8 @@ For more advanced usage documentation, see [here](docs/advanced.md).
 
 ## Requirements
 
-- JupyterLab 1.0
+- JupyterLab >= 3.0
+  - older versions are supported in previous releases available on PyPI and npm, check [releases](https://github.com/jupyterlab/jupyterlab-latex/releases)
 - Python >= 3.6
 - An application that can compile `.tex` files to PDF (e.g., `pdflatex`, `xelatex`; use `pdflatex.exe` on Windows with MiKTeX). This application must be available as a command in the same environment as the notebook server.
 - An application that can process `.bib` files for producing bibliographies. As with the LaTeX command, this must be available in the same environment as the notebook server.
@@ -26,24 +35,40 @@ For more advanced usage documentation, see [here](docs/advanced.md).
 
 This extension includes both a notebook server extension (which interfaces with the LaTeX compiler)
 and a lab extension (which provides the UI for the LaTeX preview).
-In order to use it, you must enable both of them.
+The Python package named `jupyterlab_latex` provides both of them as a prebuilt extension.
 
-To install the server extension, run the following in your terminal:
+To install the extension, run the following in your terminal:
 
 ```bash
 pip install jupyterlab_latex
 ```
 
-If you are running Notebook 5.2 or earlier, enable the server extension by running
+### Check installation
+
+To ensure that extension is properly installed, you could check server and lab extensions:
 
 ```bash
-jupyter serverextension enable --sys-prefix jupyterlab_latex
+jupyter server extension list
 ```
 
-To install the lab extension, run
+and see the block like this in the output
+
+```
+jupyterlab_latex enabled
+    - Validating jupyterlab_latex...
+      jupyterlab_latex 3.1.0 OK
+```
+
+then
 
 ```bash
-jupyter labextension install @jupyterlab/latex
+jupyter labextension list
+```
+
+and see the block like this in the output
+
+```
+@jupyterlab/latex v3.1.0 enabled OK (python, jupyterlab-latex)
 ```
 
 ## Customization

@@ -24,6 +24,15 @@ import {
 
 import '../style/index.css';
 
+import {
+  downloadIcon,
+  fitIcon,
+  nextIcon,
+  previousIcon,
+  zoomInIcon,
+  zoomOutIcon
+} from './style/icons';
+
 import { PageNumberWidget } from './pagenumber';
 
 /**
@@ -72,7 +81,8 @@ export const MARGIN = 72; // 72 dpi
 export class PDFJSViewer extends Widget {
   constructor(context: DocumentRegistry.Context) {
     super({ node: Private.createNode() });
-    Private.ensurePDFJS().then(pdfjsLib => {
+    this._pdfjsLoaded = Private.ensurePDFJS().then(pdfjsLib => {
+      this._getDocument = pdfjsLib.getDocument;
       this._viewer = new pdfjsLib.PDFViewer({ container: this.node });
     });
 
@@ -184,7 +194,7 @@ export class PDFJSViewer extends Widget {
    * Render PDF into this widget's node.
    */
   private async _render(): Promise<void> {
-    const pdfjsLib = await Private.pdfjsLoaded;
+    await this._pdfjsLoaded;
     return new Promise<void>(resolve => {
       if (!this._viewer) {
         return;
@@ -224,8 +234,7 @@ export class PDFJSViewer extends Widget {
         }
       };
 
-      pdfjsLib
-        .getDocument(this._objectUrl)
+      this._getDocument(this._objectUrl)
         .then((pdfDocument: any) => {
           this._pdfDocument = pdfDocument;
           this._viewer!.setDocument(pdfDocument);
@@ -387,6 +396,8 @@ export class PDFJSViewer extends Widget {
     this._render();
   }
 
+  private _pdfjsLoaded: Promise<any>;
+  private _getDocument: any;
   private _viewer: { [x: string]: any } | undefined;
   private _ready = new PromiseDelegate<void>();
   private _objectUrl = '';
@@ -482,7 +493,7 @@ namespace Private {
     toolbar.addItem(
       'previous',
       new ToolbarButton({
-        iconClass: 'jp-PreviousIcon jp-Icon jp-Icon-16',
+        icon: previousIcon,
         onClick: () => {
           if (!content.viewer) {
             return;
@@ -498,7 +509,7 @@ namespace Private {
     toolbar.addItem(
       'next',
       new ToolbarButton({
-        iconClass: 'jp-NextIcon jp-Icon jp-Icon-16',
+        icon: nextIcon,
         onClick: () => {
           if (!content.viewer) {
             return;
@@ -519,7 +530,7 @@ namespace Private {
     toolbar.addItem(
       'zoomOut',
       new ToolbarButton({
-        iconClass: 'jp-ZoomOutIcon jp-Icon jp-Icon-16',
+        icon: zoomOutIcon,
         onClick: () => {
           if (!content.viewer) {
             return;
@@ -538,7 +549,7 @@ namespace Private {
     toolbar.addItem(
       'zoomIn',
       new ToolbarButton({
-        iconClass: 'jp-ZoomInIcon jp-Icon jp-Icon-16',
+        icon: zoomInIcon,
         onClick: () => {
           if (!content.viewer) {
             return;
@@ -558,7 +569,7 @@ namespace Private {
     toolbar.addItem(
       'fit',
       new ToolbarButton({
-        iconClass: 'jp-FitIcon jp-Icon jp-Icon-16',
+        icon: fitIcon,
         onClick: () => {
           if (!content.viewer) {
             return;
@@ -572,7 +583,7 @@ namespace Private {
     toolbar.addItem(
       'download',
       new ToolbarButton({
-        iconClass: 'jp-DownloadIcon jp-Icon jp-Icon-16',
+        icon: downloadIcon,
         onClick: () => {
           if (!content.viewer) {
             return;
@@ -622,22 +633,20 @@ namespace Private {
     return blob;
   }
 
-  export let pdfjsLoaded: Promise<any>;
+  export async function ensurePDFJS(): Promise<any> {
+    let lib, viewer;
+    try {
+      lib = await import('pdfjs-dist/build/pdf.min.js' as any);
+      await import('pdfjs-dist/build/pdf.worker.entry' as any);
+      viewer = await import('pdfjs-dist/web/pdf_viewer' as any);
+      await import('pdfjs-dist/web/pdf_viewer.css' as any);
+    } catch (err) {
+      console.error(err);
+    }
 
-  export function ensurePDFJS(): Promise<any> {
-    pdfjsLoaded = Promise.all([
-      import(
-        /* webpackChunkName: "pdfjs" */ /* webpackMode: "lazy" */ 'pdfjs-dist/webpack' as any
-      ),
-      import(
-        /* webpackChunkName: "pdfjs" */ /* webpackMode: "lazy" */ 'pdfjs-dist/web/pdf_viewer' as any
-      ),
-      import(
-        /* webpackChunkName: "pdfjs" */ /* webpackMode: "lazy" */ 'pdfjs-dist/web/pdf_viewer.css' as any
-      )
-    ])
-      .then(([lib, viewer]) => ({ ...lib, ...viewer }))
-      .catch(err => console.error(err));
-    return pdfjsLoaded;
+    return {
+      ...(({ getDocument }) => ({ getDocument }))(lib),
+      ...(({ PDFViewer }) => ({ PDFViewer }))(viewer)
+    };
   }
 }

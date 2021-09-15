@@ -1,8 +1,12 @@
+.ipynb_checkpoints/
 *.bundle.*
+*.gz
+*.pdf
 dist/
 jupyterlab_latex.egg-info/
 jupyterlab_latex/__pycache__/
+jupyterlab_latex/labextension/
 lib/
-test/build/*
 node_modules/
 npm-debug.log
+test/build/*

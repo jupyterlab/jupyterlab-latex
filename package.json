@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/latex",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "JupyterLab extension for running LaTeX",
   "keywords": [
     "jupyter",
@@ -17,7 +17,10 @@
     "url": "https://github.com/jupyterlab/jupyterlab-latex.git"
   },
   "license": "BSD-3-Clause",
-  "author": "M Pacer & Ian Rose",
+  "author": {
+    "name": "Jupyter Development Team",
+    "email": "jupyter@googlegroups.com"
+  },
   "files": [
     "lib/*/*d.ts",
     "lib/*/*.js",
@@ -30,13 +33,20 @@
   "directories": {
     "lib": "lib/"
   },
+  "main": "lib/index.js",
   "scripts": {
-    "build": "tsc",
-    "build:test": "cd test && ./build-tests.sh",
-    "clean": "rimraf lib",
+    "build": "jlpm build:lib && jlpm build:labextension:dev",
+    "build:prod": "jlpm clean && jlpm build:lib && jlpm build:labextension",
+    "build:labextension": "jupyter labextension build .",
+    "build:labextension:dev": "jupyter labextension build --development True .",
+    "build:lib": "tsc",
+    "clean": "jlpm clean:lib",
+    "clean:lib": "rimraf lib tsconfig.tsbuildinfo",
+    "clean:labextension": "rimraf jupyterlab-latex/labextension",
+    "clean:all": "jlpm clean:lib && jlpm clean:labextension",
     "precommit": "lint-staged",
     "prettier": "prettier --write '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
-    "test": "cd test && ./run-tests.sh",
+    "install:extension": "jlpm build",
     "watch": "tsc -w"
   },
   "lint-staged": {
@@ -95,6 +105,13 @@
   "jupyterlab": {
     "extension": "lib/index.js",
     "schemaDir": "schema",
+    "sharedPackages": {
+      "pdfjs-dist": {
+        "bundled": true,
+        "singleton": true,
+        "strictVersion": true
+      }
+    },
     "outputDir": "jupyterlab_latex/labextension"
   },
   "styleModule": "style/index.js"
