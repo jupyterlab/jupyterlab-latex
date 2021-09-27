@@ -7,7 +7,7 @@
 [ci-badge]: https://github.com/jupyterlab/jupyterlab-latex/actions/workflows/build.yml/badge.svg
 [ci]: https://github.com/jupyterlab/jupyterlab-latex/actions/workflows/build.yml?query=branch/master
 [binder-badge]: https://mybinder.org/badge_logo.svg
-[binder-stable]: https://mybinder.org/v2/gh/jupyterlab/jupyterlab-latex.git/3.0.0?urlpath=lab/tree/sample.tex
+[binder-stable]: https://mybinder.org/v2/gh/jupyterlab/jupyterlab-latex.git/3.1.0?urlpath=lab/tree/sample.tex
 [binder-latest]: https://mybinder.org/v2/gh/jupyterlab/jupyterlab-latex.git/master?urlpath=lab/tree/sample.tex
 
 An extension for JupyterLab which allows for live-editing of LaTeX documents.
