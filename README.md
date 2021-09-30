@@ -89,6 +89,13 @@ by setting
 c.LatexConfig.bib_command = '<custom_bib_command>'
 ```
 
+To render references (`\ref{...}`), such as equation or chapter numbers, you would
+need to compile in multiple passes by setting
+
+```python
+c.LatexConfig.run_times = 2
+```
+
 ### Security and customizing shell escapes
 
 LaTeX files have the ability to run arbitrary code by triggering external
