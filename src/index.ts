@@ -51,6 +51,7 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 import latexIconStr from '../style/latex.svg';
 
 import '../style/index.css';
+import { Menu } from '@lumino/widgets';
 
 /**
  * A class that tracks editor widgets.
@@ -497,6 +498,7 @@ function activateLatexPlugin(
   // Add the command to the menu
   if (menu) {
     menu.fileMenu.newMenu.addGroup([{ command }], 30);
+    addLatexMenu(app, editorTracker, menu)
   }
 }
 
@@ -640,6 +642,116 @@ function addSynctexCommands(
   );
 
   return disposables;
+}
+
+function addLatexMenu(
+  app: JupyterFrontEnd,
+  editorTracker: IEditorTracker,
+  mainMenu: IMainMenu): void {
+
+  const constantMenu = new Menu({commands: app.commands})
+  constantMenu.title.label = 'Constants'
+
+  const constants = new Map<string, string>()
+  constants.set('Pi', '\\pi')
+  constants.set('Euler–Mascheroni constant', '\\gamma')
+  constants.set('Golden Ratio', '\\phi')
+  
+  constants.forEach((value: string, key: string) => {
+    let commandName = 'latex:' + key.replace(" ", "-").toLowerCase()
+    app.commands.addCommand(commandName, {
+      label: key,
+      caption: value,
+      execute: async args => {
+        let widget = editorTracker.currentWidget
+        if (widget && PathExt.extname(widget.context.path) === '.tex') {
+          let editor = widget.content.editor
+          if (editor.replaceSelection) {
+            editor.replaceSelection(value)
+          }
+          
+        }
+      }
+    })
+  
+    constantMenu.addItem({
+      command: commandName,
+      args: {},
+    })
+  })
+
+  const symbolMenu = new Menu({commands: app.commands})
+  symbolMenu.title.label = 'Symbols'
+
+  const symbols = new Map<string, string>()
+  // Less than symbols
+  symbols.set('Not Less Than', '\\nless')
+  symbols.set('Less Than or Equal', '\\leq')
+  symbols.set('Not Less Than or Equal', '\\nleq')
+  // Greater than symbols
+  symbols.set('Not Greater Than', '\\ngtr')
+  symbols.set('Greater Than or Equal', '\\geq')
+  symbols.set('Not Greater Than or Equal', '\\ngeq')
+  // Subset
+  symbols.set('Proper Subset', '\\subset')
+  symbols.set('Not Proper Subset', '\\not\\subset')
+  symbols.set('Subset', '\\subseteq')
+  symbols.set('Not Subset', '\\nsubseteq')
+  // Superset
+  symbols.set('Proper Superset', '\\supset')
+  symbols.set('Not Proper Superset', '\\not\\supset')
+  symbols.set('Superset', '\\supseteq')
+  symbols.set('Not Superset', '\\nsupseteq')
+  // Additional Set Notation
+  symbols.set('Member Of', '\\in')
+  symbols.set('Not Member Of', '\\notin')
+  symbols.set('Has Member', '\\ni')
+  symbols.set('Union', '\\cup')
+  symbols.set('Intersection', '\\cap')
+  // Logic
+  symbols.set('There Exists', '\\ni')
+  symbols.set('For All', '\\ni')
+  symbols.set('Logical Not', '\\neg')
+  symbols.set('Logical And', '\\land')
+  symbols.set('Logical Or', '\\lor')
+  
+  symbols.forEach((value: string, key: string) => {
+    let commandName = 'latex:' + key.replace(" ", "-").toLowerCase()
+    app.commands.addCommand(commandName, {
+      label: key,
+      caption: value,
+      execute: async args => {
+        let widget = editorTracker.currentWidget
+        if (widget && PathExt.extname(widget.context.path) === '.tex') {
+          let editor = widget.content.editor
+          if (editor.replaceSelection) {
+            editor.replaceSelection(value)
+          }
+          
+        }
+      }
+    })
+  
+    symbolMenu.addItem({
+      command: commandName,
+      args: {},
+    })
+  })
+
+  const menu = new Menu({commands: app.commands})
+  menu.title.label = "LaTeX"
+  menu.addItem({
+    submenu: constantMenu,
+    type: 'submenu',
+    args: {},
+  })
+  menu.addItem({
+    submenu: symbolMenu,
+    type: 'submenu',
+    args: {},
+  })
+
+  mainMenu.addMenu(menu, { rank: 100})
 }
 
 /**
