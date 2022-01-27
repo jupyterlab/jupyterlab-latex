@@ -1,9 +1,9 @@
 # Changelog for `jupyterlab_latex`
 
-- **3.1.0**:
+- **3.1.1**:
 
-  - Bump dependencies
-  - Minimum supported JupyterLab is 3.2.8
+  - Bump JS dependencies
+  - Minimum supported JupyterLab is 3.2.0
 
 - **3.1.0**:
 
