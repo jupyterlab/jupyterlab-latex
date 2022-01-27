@@ -2,6 +2,11 @@
 
 - **3.1.0**:
 
+  - Bump dependencies
+  - Minimum supported JupyterLab is 3.2.8
+
+- **3.1.0**:
+
   - Switch to prebuilt (federated) extension model
   - Fix bug with icons visibility in the dark theme
 
