@@ -52,6 +52,11 @@ import latexIconStr from '../style/latex.svg';
 
 import '../style/index.css';
 
+import { NotebookPanel, INotebookModel } from '@jupyterlab/notebook';
+
+import { ToolbarButton } from '@jupyterlab/apputils';
+import { IDisposable, DisposableDelegate } from '@lumino/disposable';
+
 /**
  * A class that tracks editor widgets.
  */
@@ -106,6 +111,41 @@ type ISynctexEditOptions = PDFJSViewer.IPosition;
 /**
  * The JupyterFrontEnd plugin for the LaTeX extension.
  */
+
+export class EditorButtonExtension
+  implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
+  /**
+   * Create a new extension for the notebook panel widget.
+   * Create a new extension for the editor panel widget.
+   *
+   * @param panel Notebook panel
+   * @param context Notebook context
+   * @param panel Editor panel
+   * @param context Editor context
+   * @returns Disposable on the added button
+   */
+  createNew(
+    panel: NotebookPanel,
+    context: DocumentRegistry.IContext<INotebookModel>
+  ): IDisposable {
+    const testCommand = () => {
+      console.log('TESTING BUTTON');
+    };
+    const button = new ToolbarButton({
+      className: 'run-test-command',
+      label: 'Test Command',
+      onClick: testCommand,
+      tooltip: 'Test Command'
+    });
+    if (context.path.endsWith('.tex')) {
+      panel.toolbar.insertItem(10, 'clearOutputs', button);
+    }
+    return new DisposableDelegate(() => {
+      button.dispose();
+    });
+  }
+}
+
 const latexPlugin: JupyterFrontEndPlugin<void> = {
   id: latexPluginId,
   requires: [
@@ -234,7 +274,7 @@ function activateLatexPlugin(
 ): void {
   const { commands } = app;
   const id = 'jupyterlab-latex';
-
+  app.docRegistry.addWidgetExtension('Editor', new EditorButtonExtension());
   const icon = new LabIcon({
     name: 'launcher:latex-icon',
     svgstr: latexIconStr
