@@ -128,6 +128,7 @@ JupyterLab LabTeX is a document generator extension for JupyterLab which allows 
 * LaTeX Editor toolbar buttons are now only visible for .TEX files 
 
 ### Known Issues 
+
 N/A 
 --- 
 
