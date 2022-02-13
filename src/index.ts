@@ -50,6 +50,8 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import latexIconStr from '../style/latex.svg';
 
+import { InputDialog } from '@jupyterlab/apputils';
+
 import '../style/index.css';
 
 import { NotebookPanel, INotebookModel } from '@jupyterlab/notebook';
@@ -393,15 +395,6 @@ function activateLatexPlugin(
   class EditorButtonExtension
     implements
       DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
-    /**
-     * Create a new extension for the editor panel widget.
-     *
-     * @param panel Notebook panel
-     * @param context Notebook context
-     * @param panel Editor panel
-     * @param context Editor context
-     * @returns Disposable on the added button
-     */
     createNew(
       panel: NotebookPanel,
       context: DocumentRegistry.IContext<INotebookModel>
@@ -409,17 +402,68 @@ function activateLatexPlugin(
       const execOpenLataxPreview = () => {
         commands.execute(CommandIDs.openLatexPreview);
       };
-      const button = new ToolbarButton({
+      const insertSubscript = () => {
+        InputDialog.getText({ title: 'Provide Desired Subscript' }).then(
+          value => {
+            if (value.value) {
+              let widget = editorTracker.currentWidget;
+              if (widget) {
+                let editor = widget.content.editor;
+                if (editor.replaceSelection) {
+                  editor.replaceSelection('_{' + value.value + '}');
+                }
+              }
+            }
+          }
+        );
+      };
+
+      const insertSuperscript = () => {
+        InputDialog.getText({ title: 'Provide Desired Superscript' }).then(
+          value => {
+            if (value.value) {
+              let widget = editorTracker.currentWidget;
+              if (widget) {
+                let editor = widget.content.editor;
+                if (editor.replaceSelection) {
+                  editor.replaceSelection('^{' + value.value + '}');
+                }
+              }
+            }
+          }
+        );
+      };
+
+      const previewButton = new ToolbarButton({
         className: 'run-latexPreview-command',
         label: 'Preview',
         onClick: execOpenLataxPreview,
         tooltip: 'Click to preview your LaTeX document'
       });
+
+      const subscriptButton = new ToolbarButton({
+        className: 'insert-subscript',
+        label: 'Xᵧ',
+        onClick: insertSubscript,
+        tooltip: 'Click to open subscript input dialog'
+      });
+
+      const superscriptButton = new ToolbarButton({
+        className: 'insert-superscript',
+        label: 'X\u02B8',
+        onClick: insertSuperscript,
+        tooltip: 'Click to open superscript input dialog'
+      });
+
       if (context.path.endsWith('.tex')) {
-        panel.toolbar.insertItem(10, 'Preview', button);
+        panel.toolbar.insertItem(10, 'Preview', previewButton);
+        panel.toolbar.insertItem(10, 'sub', subscriptButton);
+        panel.toolbar.insertItem(10, 'super', superscriptButton);
       }
       return new DisposableDelegate(() => {
-        button.dispose();
+        previewButton.dispose();
+        subscriptButton.dispose();
+        superscriptButton.dispose();
       });
     }
   }
