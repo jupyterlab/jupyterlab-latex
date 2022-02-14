@@ -655,7 +655,7 @@ function addLatexMenu(
   const constants = new Map<string, string>()
   constants.set('Pi', '\\pi')
   constants.set('Euler–Mascheroni constant', '\\gamma')
-  constants.set('Golden Ratio', '\\phi')
+  constants.set('Golden Ratio', '\\varphi')
   
   constants.forEach((value: string, key: string) => {
     let commandName = 'latex:' + key.replace(" ", "-").toLowerCase()
