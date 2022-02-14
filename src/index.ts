@@ -434,6 +434,22 @@ function activateLatexPlugin(
         );
       };
 
+      const insertFraction = () => {
+        InputDialog.getText({
+          title: 'Provide Desired Fraction: Denominator, Numerator'
+        }).then(value => {
+          if (value.value) {
+            let widget = editorTracker.currentWidget;
+            if (widget) {
+              let editor = widget.content.editor;
+              if (editor.replaceSelection) {
+                editor.replaceSelection('^{' + value.value + '}');
+              }
+            }
+          }
+        });
+      };
+
       const previewButton = new ToolbarButton({
         className: 'run-latexPreview-command',
         label: 'Preview',
@@ -455,15 +471,24 @@ function activateLatexPlugin(
         tooltip: 'Click to open superscript input dialog'
       });
 
+      const fractionButton = new ToolbarButton({
+        className: 'insert-fraction',
+        label: 'X/Y',
+        onClick: insertFraction,
+        tooltip: 'Click to open fraction input dialog'
+      });
+
       if (context.path.endsWith('.tex')) {
         panel.toolbar.insertItem(10, 'Preview', previewButton);
         panel.toolbar.insertItem(10, 'sub', subscriptButton);
         panel.toolbar.insertItem(10, 'super', superscriptButton);
+        panel.toolbar.insertItem(10, 'fraction', fractionButton);
       }
       return new DisposableDelegate(() => {
         previewButton.dispose();
         subscriptButton.dispose();
         superscriptButton.dispose();
+        fractionButton.dispose();
       });
     }
   }
