@@ -26,6 +26,8 @@ import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 
 import { ServerConnection } from '@jupyterlab/services';
 
+import { InputDialog } from '@jupyterlab/apputils';
+
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { IStateDB } from '@jupyterlab/statedb';
@@ -738,6 +740,32 @@ function addLatexMenu(
     })
   })
 
+  app.commands.addCommand('latex:create-table', {
+    label: 'Create Table',
+    caption: 'Open a window to create a LaTeX table',
+    execute: async args => {
+      let rowResult = await InputDialog.getNumber({
+          title: 'How many rows?',
+        })
+      if (rowResult.button.accept) {
+        let colResult = await InputDialog.getNumber({
+          title: 'How many columns?',
+        })
+        if (colResult.button.accept) {
+          let widget = editorTracker.currentWidget
+          if (widget && PathExt.extname(widget.context.path) === '.tex') {
+            let editor = widget.content.editor
+            if (editor.replaceSelection) {
+              if (rowResult.value && colResult.value) {
+                editor.replaceSelection(generateTable(rowResult.value, colResult.value))
+              }
+            }
+          }
+        }
+      }
+    }
+  })
+
   const menu = new Menu({commands: app.commands})
   menu.title.label = "LaTeX"
   menu.addItem({
@@ -751,7 +779,37 @@ function addLatexMenu(
     args: {},
   })
 
+  menu.addItem({
+    type: 'command',
+    command: 'latex:create-table',
+  })
+
   mainMenu.addMenu(menu, { rank: 100})
+}
+
+function generateTable(rowNum: number, colNum: number): string
+{
+  let columnConfig = 'c|'
+
+  let rowText = ''
+  for (let i = 1; i <= rowNum * colNum; i++) {
+    if ((i % colNum) == 0) {
+      rowText += `cell${i} \\\\`
+      if (i != rowNum * colNum) {
+        rowText += '\n\\hline\n'
+      }
+    } else {
+      rowText += `cell${i} & `
+    }
+  }
+
+  return `\\begin{center}
+          \\begin{tabular}{ |${columnConfig.repeat(colNum)} } 
+          \\hline
+          ${rowText}
+          \\hline
+          \\end{tabular}
+          \\end{center}`.replace(/^ +/gm, '')
 }
 
 /**
