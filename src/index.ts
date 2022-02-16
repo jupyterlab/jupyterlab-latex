@@ -437,19 +437,22 @@ function activateLatexPlugin(
       const insertFraction = () => {
         InputDialog.getText({
           title:
-            'Provide Desired Fraction: Numerator, Denominator ' +
-            '\n' +
-            'EX: 1,2'
+            'Provide Desired Fraction: Numerator, Denominator\nEX: 1,2 -> \u00BD '
         }).then(value => {
           if (value.value) {
             let widget = editorTracker.currentWidget;
-            let string = value.value;
-            console.log(string);
-            if (widget) {
+            let inputString = value.value;
+            let inputArgs = inputString.split(',');
+            console.log(inputArgs);
+            if (widget && inputArgs.length == 2) {
               let editor = widget.content.editor;
               if (editor.replaceSelection) {
                 editor.replaceSelection(
-                  '\\frac{' + string[0] + '}{' + string[2] + '}'
+                  '\\frac{' +
+                    inputArgs[0].trim() +
+                    '}{' +
+                    inputArgs[1].trim() +
+                    '}'
                 );
               }
             }
