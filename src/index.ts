@@ -436,14 +436,21 @@ function activateLatexPlugin(
 
       const insertFraction = () => {
         InputDialog.getText({
-          title: 'Provide Desired Fraction: Denominator, Numerator'
+          title:
+            'Provide Desired Fraction: Numerator, Denominator ' +
+            '\n' +
+            'EX: 1,2'
         }).then(value => {
           if (value.value) {
             let widget = editorTracker.currentWidget;
+            let string = value.value;
+            console.log(string);
             if (widget) {
               let editor = widget.content.editor;
               if (editor.replaceSelection) {
-                editor.replaceSelection('^{' + value.value + '}');
+                editor.replaceSelection(
+                  '\\frac{' + string[0] + '}{' + string[2] + '}'
+                );
               }
             }
           }
