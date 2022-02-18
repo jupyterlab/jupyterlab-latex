@@ -115,6 +115,28 @@ JupyterLab LabTeX is a document generator extension for JupyterLab which allows 
 
 # Release Notes
 
+---
+
+## Version 0.2.0
+
+### New Features
+
+- Equation Buttons
+
+- Table Creation GUI
+
+- Preview Button
+
+- Filtered Error Messages
+
+### Bug Fixes
+
+N/A
+
+### Known Issues
+
+- Unicode characters for Symbol/Constant Menu do not display correctly
+
 ## Version 0.1.0
 
 ### New Features
