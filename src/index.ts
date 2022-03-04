@@ -52,8 +52,15 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import latexIconStr from '../style/latex.svg';
 
+import { InputDialog } from '@jupyterlab/apputils';
+
 import '../style/index.css';
 import { Menu } from '@lumino/widgets';
+
+import { NotebookPanel, INotebookModel } from '@jupyterlab/notebook';
+
+import { ToolbarButton } from '@jupyterlab/apputils';
+import { IDisposable, DisposableDelegate } from '@lumino/disposable';
 
 /**
  * A class that tracks editor widgets.
@@ -109,6 +116,7 @@ type ISynctexEditOptions = PDFJSViewer.IPosition;
 /**
  * The JupyterFrontEnd plugin for the LaTeX extension.
  */
+
 const latexPlugin: JupyterFrontEndPlugin<void> = {
   id: latexPluginId,
   requires: [
@@ -237,12 +245,10 @@ function activateLatexPlugin(
 ): void {
   const { commands } = app;
   const id = 'jupyterlab-latex';
-
   const icon = new LabIcon({
     name: 'launcher:latex-icon',
     svgstr: latexIconStr
   });
-
   let synctex = true;
 
   // Settings for the notebook server.
@@ -388,6 +394,119 @@ function activateLatexPlugin(
     Private.previews.add(texContext.path);
     state.save(id, { paths: Array.from(Private.previews) });
   };
+
+  class EditorButtonExtension
+    implements
+      DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
+    createNew(
+      panel: NotebookPanel,
+      context: DocumentRegistry.IContext<INotebookModel>
+    ): IDisposable {
+      const execOpenLataxPreview = () => {
+        commands.execute(CommandIDs.openLatexPreview);
+      };
+      const insertSubscript = () => {
+        InputDialog.getText({ title: 'Provide Desired Subscript' }).then(
+          value => {
+            if (value.value) {
+              let widget = editorTracker.currentWidget;
+              if (widget) {
+                let editor = widget.content.editor;
+                if (editor.replaceSelection) {
+                  editor.replaceSelection('_{' + value.value + '}');
+                }
+              }
+            }
+          }
+        );
+      };
+
+      const insertSuperscript = () => {
+        InputDialog.getText({ title: 'Provide Desired Superscript' }).then(
+          value => {
+            if (value.value) {
+              let widget = editorTracker.currentWidget;
+              if (widget) {
+                let editor = widget.content.editor;
+                if (editor.replaceSelection) {
+                  editor.replaceSelection('^{' + value.value + '}');
+                }
+              }
+            }
+          }
+        );
+      };
+
+      const insertFraction = () => {
+        InputDialog.getText({
+          title:
+            'Provide Desired Fraction: Numerator, Denominator\nEX: 1,2 -> \u00BD '
+        }).then(value => {
+          if (value.value) {
+            let widget = editorTracker.currentWidget;
+            let inputString = value.value;
+            let inputArgs = inputString.split(',');
+            console.log(inputArgs);
+            if (widget && inputArgs.length == 2) {
+              let editor = widget.content.editor;
+              if (editor.replaceSelection) {
+                editor.replaceSelection(
+                  '\\frac{' +
+                    inputArgs[0].trim() +
+                    '}{' +
+                    inputArgs[1].trim() +
+                    '}'
+                );
+              }
+            }
+          }
+        });
+      };
+
+      const previewButton = new ToolbarButton({
+        className: 'run-latexPreview-command',
+        label: 'Preview',
+        onClick: execOpenLataxPreview,
+        tooltip: 'Click to preview your LaTeX document'
+      });
+
+      const subscriptButton = new ToolbarButton({
+        className: 'insert-subscript',
+        label: 'Xᵧ',
+        onClick: insertSubscript,
+        tooltip: 'Click to open subscript input dialog'
+      });
+
+      const superscriptButton = new ToolbarButton({
+        className: 'insert-superscript',
+        label: 'X\u02B8',
+        onClick: insertSuperscript,
+        tooltip: 'Click to open superscript input dialog'
+      });
+
+      const fractionButton = new ToolbarButton({
+        className: 'insert-fraction',
+        label: 'X/Y',
+        onClick: insertFraction,
+        tooltip: 'Click to open fraction input dialog'
+      });
+
+      if (context.path.endsWith('.tex')) {
+        panel.toolbar.insertItem(10, 'Preview', previewButton);
+        panel.toolbar.insertItem(10, 'sub', subscriptButton);
+        panel.toolbar.insertItem(10, 'super', superscriptButton);
+        panel.toolbar.insertItem(10, 'fraction', fractionButton);
+      }
+      return new DisposableDelegate(() => {
+        previewButton.dispose();
+        subscriptButton.dispose();
+        superscriptButton.dispose();
+        fractionButton.dispose();
+      });
+    }
+  }
+
+  app.docRegistry.addWidgetExtension('Editor', new EditorButtonExtension());
 
   // If there are any active previews in the statedb,
   // activate them upon initialization.
