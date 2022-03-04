@@ -26,8 +26,6 @@ import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 
 import { ServerConnection } from '@jupyterlab/services';
 
-import { InputDialog } from '@jupyterlab/apputils';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { IStateDB } from '@jupyterlab/statedb';
@@ -619,7 +617,7 @@ function activateLatexPlugin(
   // Add the command to the menu
   if (menu) {
     menu.fileMenu.newMenu.addGroup([{ command }], 30);
-    addLatexMenu(app, editorTracker, menu)
+    addLatexMenu(app, editorTracker, menu);
   }
 }
 
@@ -768,157 +766,156 @@ function addSynctexCommands(
 function addLatexMenu(
   app: JupyterFrontEnd,
   editorTracker: IEditorTracker,
-  mainMenu: IMainMenu): void {
+  mainMenu: IMainMenu
+): void {
+  const constantMenu = new Menu({ commands: app.commands });
+  constantMenu.title.label = 'Constants';
 
-  const constantMenu = new Menu({commands: app.commands})
-  constantMenu.title.label = 'Constants'
+  const constants = new Map<string, string>();
+  constants.set('Pi', '\\pi');
+  constants.set('Euler–Mascheroni constant', '\\gamma');
+  constants.set('Golden Ratio', '\\varphi');
 
-  const constants = new Map<string, string>()
-  constants.set('Pi', '\\pi')
-  constants.set('Euler–Mascheroni constant', '\\gamma')
-  constants.set('Golden Ratio', '\\varphi')
-  
   constants.forEach((value: string, key: string) => {
-    let commandName = 'latex:' + key.replace(" ", "-").toLowerCase()
+    let commandName = 'latex:' + key.replace(' ', '-').toLowerCase();
     app.commands.addCommand(commandName, {
       label: key,
       caption: value,
       execute: async args => {
-        let widget = editorTracker.currentWidget
+        let widget = editorTracker.currentWidget;
         if (widget && PathExt.extname(widget.context.path) === '.tex') {
-          let editor = widget.content.editor
+          let editor = widget.content.editor;
           if (editor.replaceSelection) {
-            editor.replaceSelection(value)
+            editor.replaceSelection(value);
           }
-          
         }
       }
-    })
-  
+    });
+
     constantMenu.addItem({
       command: commandName,
-      args: {},
-    })
-  })
+      args: {}
+    });
+  });
 
-  const symbolMenu = new Menu({commands: app.commands})
-  symbolMenu.title.label = 'Symbols'
+  const symbolMenu = new Menu({ commands: app.commands });
+  symbolMenu.title.label = 'Symbols';
 
-  const symbols = new Map<string, string>()
+  const symbols = new Map<string, string>();
   // Less than symbols
-  symbols.set('Not Less Than', '\\nless')
-  symbols.set('Less Than or Equal', '\\leq')
-  symbols.set('Not Less Than or Equal', '\\nleq')
+  symbols.set('Not Less Than', '\\nless');
+  symbols.set('Less Than or Equal', '\\leq');
+  symbols.set('Not Less Than or Equal', '\\nleq');
   // Greater than symbols
-  symbols.set('Not Greater Than', '\\ngtr')
-  symbols.set('Greater Than or Equal', '\\geq')
-  symbols.set('Not Greater Than or Equal', '\\ngeq')
+  symbols.set('Not Greater Than', '\\ngtr');
+  symbols.set('Greater Than or Equal', '\\geq');
+  symbols.set('Not Greater Than or Equal', '\\ngeq');
   // Subset
-  symbols.set('Proper Subset', '\\subset')
-  symbols.set('Not Proper Subset', '\\not\\subset')
-  symbols.set('Subset', '\\subseteq')
-  symbols.set('Not Subset', '\\nsubseteq')
+  symbols.set('Proper Subset', '\\subset');
+  symbols.set('Not Proper Subset', '\\not\\subset');
+  symbols.set('Subset', '\\subseteq');
+  symbols.set('Not Subset', '\\nsubseteq');
   // Superset
-  symbols.set('Proper Superset', '\\supset')
-  symbols.set('Not Proper Superset', '\\not\\supset')
-  symbols.set('Superset', '\\supseteq')
-  symbols.set('Not Superset', '\\nsupseteq')
+  symbols.set('Proper Superset', '\\supset');
+  symbols.set('Not Proper Superset', '\\not\\supset');
+  symbols.set('Superset', '\\supseteq');
+  symbols.set('Not Superset', '\\nsupseteq');
   // Additional Set Notation
-  symbols.set('Member Of', '\\in')
-  symbols.set('Not Member Of', '\\notin')
-  symbols.set('Has Member', '\\ni')
-  symbols.set('Union', '\\cup')
-  symbols.set('Intersection', '\\cap')
+  symbols.set('Member Of', '\\in');
+  symbols.set('Not Member Of', '\\notin');
+  symbols.set('Has Member', '\\ni');
+  symbols.set('Union', '\\cup');
+  symbols.set('Intersection', '\\cap');
   // Logic
-  symbols.set('There Exists', '\\ni')
-  symbols.set('For All', '\\ni')
-  symbols.set('Logical Not', '\\neg')
-  symbols.set('Logical And', '\\land')
-  symbols.set('Logical Or', '\\lor')
-  
+  symbols.set('There Exists', '\\ni');
+  symbols.set('For All', '\\ni');
+  symbols.set('Logical Not', '\\neg');
+  symbols.set('Logical And', '\\land');
+  symbols.set('Logical Or', '\\lor');
+
   symbols.forEach((value: string, key: string) => {
-    let commandName = 'latex:' + key.replace(" ", "-").toLowerCase()
+    let commandName = 'latex:' + key.replace(' ', '-').toLowerCase();
     app.commands.addCommand(commandName, {
       label: key,
       caption: value,
       execute: async args => {
-        let widget = editorTracker.currentWidget
+        let widget = editorTracker.currentWidget;
         if (widget && PathExt.extname(widget.context.path) === '.tex') {
-          let editor = widget.content.editor
+          let editor = widget.content.editor;
           if (editor.replaceSelection) {
-            editor.replaceSelection(value)
+            editor.replaceSelection(value);
           }
-          
         }
       }
-    })
-  
+    });
+
     symbolMenu.addItem({
       command: commandName,
-      args: {},
-    })
-  })
+      args: {}
+    });
+  });
 
   app.commands.addCommand('latex:create-table', {
     label: 'Create Table',
     caption: 'Open a window to create a LaTeX table',
     execute: async args => {
       let rowResult = await InputDialog.getNumber({
-          title: 'How many rows?',
-        })
+        title: 'How many rows?'
+      });
       if (rowResult.button.accept) {
         let colResult = await InputDialog.getNumber({
-          title: 'How many columns?',
-        })
+          title: 'How many columns?'
+        });
         if (colResult.button.accept) {
-          let widget = editorTracker.currentWidget
+          let widget = editorTracker.currentWidget;
           if (widget && PathExt.extname(widget.context.path) === '.tex') {
-            let editor = widget.content.editor
+            let editor = widget.content.editor;
             if (editor.replaceSelection) {
               if (rowResult.value && colResult.value) {
-                editor.replaceSelection(generateTable(rowResult.value, colResult.value))
+                editor.replaceSelection(
+                  generateTable(rowResult.value, colResult.value)
+                );
               }
             }
           }
         }
       }
     }
-  })
+  });
 
-  const menu = new Menu({commands: app.commands})
-  menu.title.label = "LaTeX"
+  const menu = new Menu({ commands: app.commands });
+  menu.title.label = 'LaTeX';
   menu.addItem({
     submenu: constantMenu,
     type: 'submenu',
-    args: {},
-  })
+    args: {}
+  });
   menu.addItem({
     submenu: symbolMenu,
     type: 'submenu',
-    args: {},
-  })
+    args: {}
+  });
 
   menu.addItem({
     type: 'command',
-    command: 'latex:create-table',
-  })
+    command: 'latex:create-table'
+  });
 
-  mainMenu.addMenu(menu, { rank: 100})
+  mainMenu.addMenu(menu, { rank: 100 });
 }
 
-function generateTable(rowNum: number, colNum: number): string
-{
-  let columnConfig = 'c|'
+function generateTable(rowNum: number, colNum: number): string {
+  let columnConfig = 'c|';
 
-  let rowText = ''
+  let rowText = '';
   for (let i = 1; i <= rowNum * colNum; i++) {
-    if ((i % colNum) == 0) {
-      rowText += `cell${i} \\\\`
+    if (i % colNum == 0) {
+      rowText += `cell${i} \\\\`;
       if (i != rowNum * colNum) {
-        rowText += '\n\\hline\n'
+        rowText += '\n\\hline\n';
       }
     } else {
-      rowText += `cell${i} & `
+      rowText += `cell${i} & `;
     }
   }
 
@@ -928,7 +925,7 @@ function generateTable(rowNum: number, colNum: number): string
           ${rowText}
           \\hline
           \\end{tabular}
-          \\end{center}`.replace(/^ +/gm, '')
+          \\end{center}`.replace(/^ +/gm, '');
 }
 
 /**
