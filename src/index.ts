@@ -444,7 +444,6 @@ function activateLatexPlugin(
             let widget = editorTracker.currentWidget;
             let inputString = value.value;
             let inputArgs = inputString.split(',');
-            console.log(inputArgs);
             if (widget && inputArgs.length == 2) {
               let editor = widget.content.editor;
               if (editor.replaceSelection) {
@@ -459,6 +458,40 @@ function activateLatexPlugin(
             }
           }
         });
+      };
+
+      const insertBulletList = () => {
+        let widget = editorTracker.currentWidget;
+        if (widget) {
+          let editor = widget.content.editor;
+          if (editor.replaceSelection) {
+            editor.replaceSelection(
+              '\\begin{itemize}' +
+                '\n' +
+                '\t' +
+                '\\item' +
+                '\n' +
+                '\\end{itemize}'
+            );
+          }
+        }
+      };
+
+      const insertNumberedList = () => {
+        let widget = editorTracker.currentWidget;
+        if (widget) {
+          let editor = widget.content.editor;
+          if (editor.replaceSelection) {
+            editor.replaceSelection(
+              '\\begin{enumerate}' +
+                '\n' +
+                '\t' +
+                '\\item' +
+                '\n' +
+                '\\end{enumerate}'
+            );
+          }
+        }
       };
 
       const previewButton = new ToolbarButton({
@@ -489,17 +522,35 @@ function activateLatexPlugin(
         tooltip: 'Click to open fraction input dialog'
       });
 
+      const bulletListButton = new ToolbarButton({
+        className: 'insert-bullet-list',
+        label: 'Bullet List',
+        onClick: insertBulletList,
+        tooltip: 'Click to insert bullet list'
+      });
+
+      const numberedListButton = new ToolbarButton({
+        className: 'insert-numbered-list',
+        label: 'Numbered List',
+        onClick: insertNumberedList,
+        tooltip: 'Click to insert numbered list'
+      });
+
       if (context.path.endsWith('.tex')) {
         panel.toolbar.insertItem(10, 'Preview', previewButton);
         panel.toolbar.insertItem(10, 'sub', subscriptButton);
         panel.toolbar.insertItem(10, 'super', superscriptButton);
         panel.toolbar.insertItem(10, 'fraction', fractionButton);
+        panel.toolbar.insertItem(10, 'bullet-list', bulletListButton);
+        panel.toolbar.insertItem(10, 'numbered-list', numberedListButton);
       }
       return new DisposableDelegate(() => {
         previewButton.dispose();
         subscriptButton.dispose();
         superscriptButton.dispose();
         fractionButton.dispose();
+        bulletListButton.dispose();
+        numberedListButton.dispose();
       });
     }
   }
