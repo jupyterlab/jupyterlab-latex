@@ -461,6 +461,60 @@ function activateLatexPlugin(
         });
       };
 
+      const insertBold = () => {
+        let widget = editorTracker.currentWidget;
+        if (widget) {
+          let editor = widget.content.editor;
+          if (editor.replaceSelection && editor.getSelection) {
+            let start = editor.getSelection().start;
+            let end = editor.getSelection().end;
+            if (start.line == end.line) {
+              let selection: string | undefined = editor.getLine(start.line);
+              if (selection) {
+                selection = selection.substring(start.column, end.column);
+                editor.replaceSelection('\\textbf{' + selection + '}');
+              }
+            }
+          }
+        }
+      };
+
+      const insertItalics = () => {
+        let widget = editorTracker.currentWidget;
+        if (widget) {
+          let editor = widget.content.editor;
+          if (editor.replaceSelection && editor.getSelection) {
+            let start = editor.getSelection().start;
+            let end = editor.getSelection().end;
+            if (start.line == end.line) {
+              let selection: string | undefined = editor.getLine(start.line);
+              if (selection) {
+                selection = selection.substring(start.column, end.column);
+                editor.replaceSelection('\\textit{' + selection + '}');
+              }
+            }
+          }
+        }
+      };
+
+      const insertUnderline = () => {
+        let widget = editorTracker.currentWidget;
+        if (widget) {
+          let editor = widget.content.editor;
+          if (editor.replaceSelection && editor.getSelection) {
+            let start = editor.getSelection().start;
+            let end = editor.getSelection().end;
+            if (start.line == end.line) {
+              let selection: string | undefined = editor.getLine(start.line);
+              if (selection) {
+                selection = selection.substring(start.column, end.column);
+                editor.replaceSelection('\\underline{' + selection + '}');
+              }
+            }
+          }
+        }
+      };
+
       const previewButton = new ToolbarButton({
         className: 'run-latexPreview-command',
         label: 'Preview',
@@ -489,17 +543,44 @@ function activateLatexPlugin(
         tooltip: 'Click to open fraction input dialog'
       });
 
+      const boldButton = new ToolbarButton({
+        className: 'bold-text',
+        label: 'B',
+        onClick: insertBold,
+        tooltip: 'Click to insert bold text'
+      });
+
+      const italicsButton = new ToolbarButton({
+        className: 'italicize-text',
+        label: 'I',
+        onClick: insertItalics,
+        tooltip: 'Click to insert italicized text'
+      });
+
+      const underlineButton = new ToolbarButton({
+        className: 'underline-text',
+        label: 'U',
+        onClick: insertUnderline,
+        tooltip: 'Click to insert underlined text'
+      });
+
       if (context.path.endsWith('.tex')) {
         panel.toolbar.insertItem(10, 'Preview', previewButton);
         panel.toolbar.insertItem(10, 'sub', subscriptButton);
         panel.toolbar.insertItem(10, 'super', superscriptButton);
         panel.toolbar.insertItem(10, 'fraction', fractionButton);
+        panel.toolbar.insertItem(10, 'bold', boldButton);
+        panel.toolbar.insertItem(10, 'italics', italicsButton);
+        panel.toolbar.insertItem(10, 'underline', underlineButton);
       }
       return new DisposableDelegate(() => {
         previewButton.dispose();
         subscriptButton.dispose();
         superscriptButton.dispose();
         fractionButton.dispose();
+        boldButton.dispose();
+        italicsButton.dispose();
+        underlineButton.dispose();
       });
     }
   }
