@@ -127,8 +127,6 @@ JupyterLab LabTeX is a document generator extension for JupyterLab which allows 
 
 - Typeface Modifier GUI
 
-- Text Alignment and Spacing
-
 ### Bug Fixes
 
 N/A
