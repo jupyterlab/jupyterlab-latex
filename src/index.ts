@@ -403,6 +403,7 @@ function activateLatexPlugin(
       const execOpenLataxPreview = () => {
         commands.execute(CommandIDs.openLatexPreview);
       };
+
       const insertSubscript = () => {
         InputDialog.getText({ title: 'Provide Desired Subscript' }).then(
           value => {
@@ -444,7 +445,6 @@ function activateLatexPlugin(
             let widget = editorTracker.currentWidget;
             let inputString = value.value;
             let inputArgs = inputString.split(',');
-            console.log(inputArgs);
             if (widget && inputArgs.length == 2) {
               let editor = widget.content.editor;
               if (editor.replaceSelection) {
@@ -475,6 +475,22 @@ function activateLatexPlugin(
                 editor.replaceSelection('\\textbf{' + selection + '}');
               }
             }
+          }
+        }
+      };
+      const insertBulletList = () => {
+        let widget = editorTracker.currentWidget;
+        if (widget) {
+          let editor = widget.content.editor;
+          if (editor.replaceSelection) {
+            editor.replaceSelection(
+              '\\begin{itemize}' +
+                '\n' +
+                '\t' +
+                '\\item' +
+                '\n' +
+                '\\end{itemize}'
+            );
           }
         }
       };
@@ -511,6 +527,22 @@ function activateLatexPlugin(
                 editor.replaceSelection('\\underline{' + selection + '}');
               }
             }
+          }
+        }
+      };
+      const insertNumberedList = () => {
+        let widget = editorTracker.currentWidget;
+        if (widget) {
+          let editor = widget.content.editor;
+          if (editor.replaceSelection) {
+            editor.replaceSelection(
+              '\\begin{enumerate}' +
+                '\n' +
+                '\t' +
+                '\\item' +
+                '\n' +
+                '\\end{enumerate}'
+            );
           }
         }
       };
@@ -563,6 +595,19 @@ function activateLatexPlugin(
         onClick: insertUnderline,
         tooltip: 'Click to insert underlined text'
       });
+      const bulletListButton = new ToolbarButton({
+        className: 'insert-bullet-list',
+        label: 'Bullet List',
+        onClick: insertBulletList,
+        tooltip: 'Click to insert bullet list'
+      });
+
+      const numberedListButton = new ToolbarButton({
+        className: 'insert-numbered-list',
+        label: 'Numbered List',
+        onClick: insertNumberedList,
+        tooltip: 'Click to insert numbered list'
+      });
 
       if (context.path.endsWith('.tex')) {
         panel.toolbar.insertItem(10, 'Preview', previewButton);
@@ -572,6 +617,8 @@ function activateLatexPlugin(
         panel.toolbar.insertItem(10, 'bold', boldButton);
         panel.toolbar.insertItem(10, 'italics', italicsButton);
         panel.toolbar.insertItem(10, 'underline', underlineButton);
+        panel.toolbar.insertItem(10, 'bullet-list', bulletListButton);
+        panel.toolbar.insertItem(10, 'numbered-list', numberedListButton);
       }
       return new DisposableDelegate(() => {
         previewButton.dispose();
@@ -581,6 +628,8 @@ function activateLatexPlugin(
         boldButton.dispose();
         italicsButton.dispose();
         underlineButton.dispose();
+        bulletListButton.dispose();
+        numberedListButton.dispose();
       });
     }
   }
