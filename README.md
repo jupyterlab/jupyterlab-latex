@@ -115,7 +115,31 @@ JupyterLab LabTeX is a document generator extension for JupyterLab which allows 
 
 # Release Notes
 
----
+--- 
+
+## Version 0.4.0 
+
+### New Features 
+
+* Image Formatting GUI: This feature allows the user to format an image (size, placement, captions, etc.) 
+
+* Insert Images GUI: This feature (partially complete) allows the user to upload an image from their PC and insert it directly into the document 
+
+* Insert Plots GUI: This feature allows the user to insert graphs and plots in an intuitive manner 
+
+* Text Layout Customization GUI: This feature allows the user to format a paragraphs layout (alignment for example) 
+
+### Bug Fixes 
+
+N/A 
+
+### Known Issues 
+
+* While the insert images GUI works, it's having trouble getting the real path to an image, and is thus unable to insert an image.
+
+* During autocomplete implementation, a bug was found with either Jupyterlab-LSP or TexLab. We are working with their respective maintainers to resolve the issue. 
+
+--- 
 
 ## Version 0.3.0
 
