@@ -546,6 +546,144 @@ function activateLatexPlugin(
           }
         }
       };
+      const insertPlot = () => {
+        InputDialog.getItem({
+          title: 'Select Plot Type',
+          items: ['Mathematical Expression', 'Data From File', 'Scatter Plot', 'Bar Graphs', 'Contour Plots', 'Parametric Plot']
+        }).then(
+          value => {
+            if (value.value) {
+              let plotText = "";
+
+              switch(value.value) { 
+                case 'Mathematical Expression': { 
+                    plotText = '\\begin{tikzpicture}' +
+                    '\n\\begin{axis}[' +
+                    '\n\taxis lines = left,' +
+                    '\n\txlabel = \\(x\\),' +
+                    '\n\tylabel = {\\(f(x)\\)},' +
+                    '\n]' +
+                    '\n\\addplot [' +
+                    '\n\tdomain=-10:10, ' +
+                    '\n\tsamples=100, ' +
+                    '\n\tcolor=blue,' +
+                    '\n]' +
+                    '\n{x^2};' +
+                    '\n\\addlegendentry{\\(x^2\\)}' +
+                    '\n\\end{axis}' +
+                    '\n\\end{tikzpicture}'
+                   break; 
+                } 
+                case 'Data From File': { 
+                    plotText = '\\begin{tikzpicture}' +
+                    '\n\\begin{axis}[' +
+                    '\n\ttitle={Title},' +
+                    '\n\txlabel={x axis label},' +
+                    '\n\tylabel={y axis label},' +
+                    '\n\txmin=0, xmax=100,' +
+                    '\n\tymin=0, ymax=100,' +
+                    '\n\txtick={},' +
+                    '\n\tytick={},' +
+                    '\n\tlegend pos=north west' +
+                    '\n]' +
+                    '\n\n\\addplot[' +
+                    '\n\tcolor=blue,' +
+                    '\n\tmark=*]' +
+                    '\n{Data File Path};' +
+                    '\n\n\\legend{Legend Text}' +
+                    '\n\n\\end{axis}' +
+                    '\n\\end{tikzpicture}'
+                   break; 
+                } 
+                case 'Scatter Plot': { 
+                  plotText = '\\begin{tikzpicture}' +
+                  '\n\\begin{axis}[' +
+                  '\n\ttitle={Title},' +
+                  '\n\txlabel={x axis label},' +
+                  '\n\tylabel={y axis label},' +
+                  '\n\txmin=0, xmax=100,' +
+                  '\n\tymin=0, ymax=100,' +
+                  '\n\txtick={},' +
+                  '\n\tytick={},' +
+                  '\n\tlegend pos=north west' +
+                  '\n]' +
+                  '\n\n\\addplot[' +
+                  '\n\tonly marks,' +
+                  '\n\tmark=*]' +
+                  '\ntable' +
+                  '\n{Data File Path};' +
+                  '\n\n\\legend{Legend Text}' +
+                  '\n\n\\end{axis}' +
+                  '\n\\end{tikzpicture}' 
+                  break; 
+                } 
+                case 'Bar Graphs': { 
+                  plotText = '\\begin{tikzpicture}' +
+                  '\n\\begin{axis}[' +
+                  '\ntitle={Title},' +
+                  '\nxlabel={x axis label},' +
+                  '\nylabel={y axis label},' +
+                  '\nxmin=0, xmax=100,' +
+                  '\nymin=0, ymax=100,' +
+                  '\nenlargelimits=0.05,' +
+                  '\nlegend pos=north west,' +
+                  '\nybar,' +
+                  '\n]' +
+                  '\n\n\\addplot table {\\mydata};' +
+                  '\n\n\\end{axis}' +
+                  '\n\\end{tikzpicture}'
+                  break; 
+                } 
+                case 'Contour Plots': { 
+                  plotText = '\\begin{tikzpicture}' +
+                  '\n\\begin{axis}' +
+                  '\n[' +
+                  '\n\ttitle={Title},' +
+                  '\n\tview={0}{90}' +
+                  '\n]' +
+                  '\n\\addplot3[' +
+                  '\n\tcontour gnuplot={levels={0.5}}' +
+                  '\n]' +
+                  '\n{sqrt(x^2+y^2)};' +
+                  '\n\\addlegendentry{\\(sqrt(x^2+y^2)\\)}' +
+                  '\n\\end{axis}' +
+                  '\n\\end{tikzpicture}'
+                  break; 
+                } 
+                case 'Parametric Plot': { 
+                  plotText = '\\begin{tikzpicture}' +
+                  '\n\\begin{axis}' +
+                  '\n[' +
+                  '\n\ttitle={Title},' +
+                  '\n\tview={60}{30}' +
+                  '\n]' +
+                  '\n\n\\addplot3[' +
+                  '\n\tdomain=-5:5,' +
+                  '\n\tsamples = 60,' +
+                  '\n\tsamples y=0,' +
+                  '\n]' +
+                  '\n({sin(deg(x))},' +
+                  '\n{cos(deg(x))},' +
+                  '\n{x});' +
+                  '\n\n\\addlegendentry{\\(Legend Label)\\)}' +
+                  '\n\n\\end{axis}' +
+                  '\n\\end{tikzpicture}'
+                  break; 
+                } 
+              } 
+              
+              let widget = editorTracker.currentWidget;
+              if (widget) {
+                let editor = widget.content.editor;
+                if (editor.replaceSelection) {
+                  editor.replaceSelection(plotText);
+                }
+              }
+              
+            }
+          }
+        );
+      };
 
       const previewButton = new ToolbarButton({
         className: 'run-latexPreview-command',
@@ -609,6 +747,13 @@ function activateLatexPlugin(
         tooltip: 'Click to insert numbered list'
       });
 
+      const plotButton = new ToolbarButton({
+        className: 'insert-plot',
+        label: 'Plot',
+        onClick: insertPlot,
+        tooltip: 'Click to insert a plot'
+      })
+
       if (context.path.endsWith('.tex')) {
         panel.toolbar.insertItem(10, 'Preview', previewButton);
         panel.toolbar.insertItem(10, 'sub', subscriptButton);
@@ -619,6 +764,7 @@ function activateLatexPlugin(
         panel.toolbar.insertItem(10, 'underline', underlineButton);
         panel.toolbar.insertItem(10, 'bullet-list', bulletListButton);
         panel.toolbar.insertItem(10, 'numbered-list', numberedListButton);
+        panel.toolbar.insertItem(10, 'insert-plot', plotButton);
       }
       return new DisposableDelegate(() => {
         previewButton.dispose();
@@ -630,6 +776,7 @@ function activateLatexPlugin(
         underlineButton.dispose();
         bulletListButton.dispose();
         numberedListButton.dispose();
+        plotButton.dispose();
       });
     }
   }
