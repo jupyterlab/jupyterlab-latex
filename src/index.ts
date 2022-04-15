@@ -50,6 +50,13 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import latexIconStr from '../style/latex.svg';
 
+import listIconStr from '../style/icons/list.svg';
+import olistIconStr from '../style/icons/olist.svg';
+import italicIconStr from '../style/icons/italic.svg';
+import boldIconStr from '../style/icons/bold.svg';
+import underlineIconStr from '../style/icons/underline.svg';
+import tableIconStr from '../style/icons/table.svg';
+
 import { InputDialog } from '@jupyterlab/apputils';
 
 import '../style/index.css';
@@ -582,43 +589,72 @@ function activateLatexPlugin(
         tooltip: 'Click to open fraction input dialog'
       });
 
+      const boldicon = new LabIcon({
+        name: 'launcher:bold-icon',
+        svgstr: boldIconStr
+      });
+
       const boldButton = new ToolbarButton({
         className: 'bold-text',
-        label: 'B',
+        icon: boldicon,
         onClick: insertBold,
         tooltip: 'Click to insert bold text'
       });
 
+      const italicsicon = new LabIcon({
+        name: 'launcher:italics-icon',
+        svgstr: italicIconStr
+      });
+
       const italicsButton = new ToolbarButton({
         className: 'italicize-text',
-        label: 'I',
+        icon: italicsicon,
         onClick: insertItalics,
         tooltip: 'Click to insert italicized text'
       });
 
+      const underlineicon = new LabIcon({
+        name: 'launcher:underline-icon',
+        svgstr: underlineIconStr
+      });
       const underlineButton = new ToolbarButton({
         className: 'underline-text',
-        label: 'U',
+        icon: underlineicon,
         onClick: insertUnderline,
         tooltip: 'Click to insert underlined text'
       });
+
+      const listicon = new LabIcon({
+        name: 'launcher:list-icon',
+        svgstr: listIconStr
+      });
+
       const bulletListButton = new ToolbarButton({
         className: 'insert-bullet-list',
-        label: 'Bullet List',
+        icon: listicon,
         onClick: insertBulletList,
         tooltip: 'Click to insert bullet list'
       });
 
+      const olisticon = new LabIcon({
+        name: 'launcher:olist-icon',
+        svgstr: olistIconStr
+      });
+
       const numberedListButton = new ToolbarButton({
         className: 'insert-numbered-list',
-        label: 'Numbered List',
+        icon: olisticon,
         onClick: insertNumberedList,
         tooltip: 'Click to insert numbered list'
       });
 
+      const tableicon = new LabIcon({
+        name: 'launcher:table-icon',
+        svgstr: tableIconStr
+      });
       const tableInsertButton = new ToolbarButton({
         className: 'insert-table',
-        label: 'Table',
+        icon: tableicon,
         onClick: execCreateTable,
         tooltip: 'Click to insert table'
       });
