@@ -97,6 +97,8 @@ namespace CommandIDs {
    * Create new latex file
    */
   export const createNew = 'latex:create-new-latex-file';
+
+  export const createTable = 'latex:create-table';
 }
 
 /**
@@ -546,6 +548,11 @@ function activateLatexPlugin(
           }
         }
       };
+      const execCreateTable = () => {
+        //const createTable = 'latex:create-table'
+        commands.execute(CommandIDs.createTable);
+        //app.commands.addCommand('latex:create-table', {
+      };
 
       const previewButton = new ToolbarButton({
         className: 'run-latexPreview-command',
@@ -609,6 +616,13 @@ function activateLatexPlugin(
         tooltip: 'Click to insert numbered list'
       });
 
+      const tableInsertButton = new ToolbarButton({
+        className: 'insert-table',
+        label: 'Table',
+        onClick: execCreateTable,
+        tooltip: 'Click to insert table'
+      });
+
       if (context.path.endsWith('.tex')) {
         panel.toolbar.insertItem(10, 'Preview', previewButton);
         panel.toolbar.insertItem(10, 'sub', subscriptButton);
@@ -619,6 +633,7 @@ function activateLatexPlugin(
         panel.toolbar.insertItem(10, 'underline', underlineButton);
         panel.toolbar.insertItem(10, 'bullet-list', bulletListButton);
         panel.toolbar.insertItem(10, 'numbered-list', numberedListButton);
+        panel.toolbar.insertItem(10, 'table', tableInsertButton);
       }
       return new DisposableDelegate(() => {
         previewButton.dispose();
@@ -630,6 +645,7 @@ function activateLatexPlugin(
         underlineButton.dispose();
         bulletListButton.dispose();
         numberedListButton.dispose();
+        tableInsertButton.dispose();
       });
     }
   }
