@@ -11,7 +11,10 @@ import {
 import {
   IWidgetTracker,
   WidgetTracker,
-  showErrorMessage
+  showErrorMessage,
+  ICommandPalette,
+  InputDialog,
+  ToolbarButton
 } from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
@@ -44,8 +47,6 @@ import { LabIcon } from '@jupyterlab/ui-components';
 
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
-import { ICommandPalette } from '@jupyterlab/apputils';
-
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import latexIconStr from '../style/latex.svg';
@@ -57,14 +58,12 @@ import boldIconStr from '../style/icons/bold.svg';
 import underlineIconStr from '../style/icons/underline.svg';
 import tableIconStr from '../style/icons/table.svg';
 
-import { InputDialog } from '@jupyterlab/apputils';
-
 import '../style/index.css';
+
 import { Menu } from '@lumino/widgets';
 
 import { NotebookPanel, INotebookModel } from '@jupyterlab/notebook';
 
-import { ToolbarButton } from '@jupyterlab/apputils';
 import { IDisposable, DisposableDelegate } from '@lumino/disposable';
 
 /**
@@ -402,7 +401,7 @@ function activateLatexPlugin(
     state.save(id, { paths: Array.from(Private.previews) });
   };
 
-  class EditorButtonExtension
+  class EditorToolbarPanel
     implements
       DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
     createNew(
@@ -414,35 +413,63 @@ function activateLatexPlugin(
       };
 
       const insertSubscript = () => {
-        InputDialog.getText({ title: 'Provide Desired Subscript' }).then(
-          value => {
-            if (value.value) {
-              let widget = editorTracker.currentWidget;
-              if (widget) {
-                let editor = widget.content.editor;
-                if (editor.replaceSelection) {
-                  editor.replaceSelection('_{' + value.value + '}');
+        let widget = editorTracker.currentWidget;
+        if (widget) {
+          let editor = widget.content.editor;
+          if (editor.replaceSelection && editor.getSelection) {
+            let start = editor.getSelection().start;
+            let end = editor.getSelection().end;
+            if (start.line == end.line) {
+              let selection: string | undefined = editor.getLine(start.line);
+              if (selection) {
+                selection = selection.substring(start.column, end.column);
+                if (selection.length > 0) {
+                  editor.replaceSelection('_{' + selection + '}');
+                } else {
+                  InputDialog.getText({
+                    title: 'Provide Desired Subscript'
+                  }).then(value => {
+                    if (value.value) {
+                      if (editor.replaceSelection) {
+                        editor.replaceSelection('_{' + value.value + '}');
+                      }
+                    }
+                  });
                 }
               }
             }
           }
-        );
+        }
       };
 
       const insertSuperscript = () => {
-        InputDialog.getText({ title: 'Provide Desired Superscript' }).then(
-          value => {
-            if (value.value) {
-              let widget = editorTracker.currentWidget;
-              if (widget) {
-                let editor = widget.content.editor;
-                if (editor.replaceSelection) {
-                  editor.replaceSelection('^{' + value.value + '}');
+        let widget = editorTracker.currentWidget;
+        if (widget) {
+          let editor = widget.content.editor;
+          if (editor.replaceSelection && editor.getSelection) {
+            let start = editor.getSelection().start;
+            let end = editor.getSelection().end;
+            if (start.line == end.line) {
+              let selection: string | undefined = editor.getLine(start.line);
+              if (selection) {
+                selection = selection.substring(start.column, end.column);
+                if (selection.length > 0) {
+                  editor.replaceSelection('^{' + selection + '}');
+                } else {
+                  InputDialog.getText({
+                    title: 'Provide Desired Superscript'
+                  }).then(value => {
+                    if (value.value) {
+                      if (editor.replaceSelection) {
+                        editor.replaceSelection('^{' + value.value + '}');
+                      }
+                    }
+                  });
                 }
               }
             }
           }
-        );
+        }
       };
 
       const insertFraction = () => {
@@ -686,7 +713,7 @@ function activateLatexPlugin(
     }
   }
 
-  app.docRegistry.addWidgetExtension('Editor', new EditorButtonExtension());
+  app.docRegistry.addWidgetExtension('Editor', new EditorToolbarPanel());
 
   // If there are any active previews in the statedb,
   // activate them upon initialization.
