@@ -628,6 +628,7 @@ function activateLatexPlugin(
         tooltip: 'Click to open fraction input dialog'
       });
 
+
       const leftTextAlignmentButton = new ToolbarButton({
         className: 'insert-text',
         label: 'Left Align',
@@ -647,7 +648,6 @@ function activateLatexPlugin(
         label: 'Right Align',
         onClick: rightAlign,
         tooltip: 'Click to left align highlighted text'
-      });
 
       const boldButton = new ToolbarButton({
         className: 'bold-text',
@@ -681,6 +681,7 @@ function activateLatexPlugin(
         label: 'Numbered List',
         onClick: insertNumberedList,
         tooltip: 'Click to insert numbered list'
+
       });
 
       if (context.path.endsWith('.tex')) {
@@ -698,6 +699,7 @@ function activateLatexPlugin(
         panel.toolbar.insertItem(10, 'underline', underlineButton);
         panel.toolbar.insertItem(10, 'bullet-list', bulletListButton);
         panel.toolbar.insertItem(10, 'numbered-list', numberedListButton);
+
       }
       return new DisposableDelegate(() => {
         previewButton.dispose();
@@ -714,6 +716,7 @@ function activateLatexPlugin(
         underlineButton.dispose();
         bulletListButton.dispose();
         numberedListButton.dispose();
+
       });
     }
   }
