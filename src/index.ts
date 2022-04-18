@@ -50,6 +50,9 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import latexIconStr from '../style/latex.svg';
 
+
+import plotIconStr from '../style/icons/chart-column-solid.svg';
+
 import { InputDialog } from '@jupyterlab/apputils';
 
 import '../style/index.css';
@@ -747,9 +750,14 @@ function activateLatexPlugin(
         tooltip: 'Click to insert numbered list'
       });
 
+      const plotIcon = new LabIcon({
+        name: 'launcher:plot-icon',
+        svgstr: plotIconStr
+      });
+
       const plotButton = new ToolbarButton({
         className: 'insert-plot',
-        label: 'Plot',
+        icon: plotIcon,
         onClick: insertPlot,
         tooltip: 'Click to insert a plot'
       })
