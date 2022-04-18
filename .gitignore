@@ -10,3 +10,6 @@ lib/
 node_modules/
 npm-debug.log
 test/build/*
+.DS_Store
+workspace.code-workspace
+.DS_Store

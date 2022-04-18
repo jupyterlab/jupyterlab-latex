@@ -600,6 +600,92 @@ function activateLatexPlugin(
         }
       };
 
+      const insertBold = () => {
+        let widget = editorTracker.currentWidget;
+        if (widget) {
+          let editor = widget.content.editor;
+          if (editor.replaceSelection && editor.getSelection) {
+            let start = editor.getSelection().start;
+            let end = editor.getSelection().end;
+            if (start.line == end.line) {
+              let selection: string | undefined = editor.getLine(start.line);
+              if (selection) {
+                selection = selection.substring(start.column, end.column);
+                editor.replaceSelection('\\textbf{' + selection + '}');
+              }
+            }
+          }
+        }
+      };
+      const insertBulletList = () => {
+        let widget = editorTracker.currentWidget;
+        if (widget) {
+          let editor = widget.content.editor;
+          if (editor.replaceSelection) {
+            editor.replaceSelection(
+              '\\begin{itemize}' +
+                '\n' +
+                '\t' +
+                '\\item' +
+                '\n' +
+                '\\end{itemize}'
+            );
+          }
+        }
+      };
+
+      const insertItalics = () => {
+        let widget = editorTracker.currentWidget;
+        if (widget) {
+          let editor = widget.content.editor;
+          if (editor.replaceSelection && editor.getSelection) {
+            let start = editor.getSelection().start;
+            let end = editor.getSelection().end;
+            if (start.line == end.line) {
+              let selection: string | undefined = editor.getLine(start.line);
+              if (selection) {
+                selection = selection.substring(start.column, end.column);
+                editor.replaceSelection('\\textit{' + selection + '}');
+              }
+            }
+          }
+        }
+      };
+
+      const insertUnderline = () => {
+        let widget = editorTracker.currentWidget;
+        if (widget) {
+          let editor = widget.content.editor;
+          if (editor.replaceSelection && editor.getSelection) {
+            let start = editor.getSelection().start;
+            let end = editor.getSelection().end;
+            if (start.line == end.line) {
+              let selection: string | undefined = editor.getLine(start.line);
+              if (selection) {
+                selection = selection.substring(start.column, end.column);
+                editor.replaceSelection('\\underline{' + selection + '}');
+              }
+            }
+          }
+        }
+      };
+      const insertNumberedList = () => {
+        let widget = editorTracker.currentWidget;
+        if (widget) {
+          let editor = widget.content.editor;
+          if (editor.replaceSelection) {
+            editor.replaceSelection(
+              '\\begin{enumerate}' +
+                '\n' +
+                '\t' +
+                '\\item' +
+                '\n' +
+                '\\end{enumerate}'
+            );
+          }
+        }
+      };
+
       const previewButton = new ToolbarButton({
         className: 'run-latexPreview-command',
         label: 'Preview',
@@ -628,7 +714,7 @@ function activateLatexPlugin(
         tooltip: 'Click to open fraction input dialog'
       });
 
-
+<<<<<<< HEAD
       const leftTextAlignmentButton = new ToolbarButton({
         className: 'insert-text',
         label: 'Left Align',
@@ -648,7 +734,10 @@ function activateLatexPlugin(
         label: 'Right Align',
         onClick: rightAlign,
         tooltip: 'Click to left align highlighted text'
+      });
 
+=======
+>>>>>>> 3716399af43fd4c0ed391008e1c9ce7d7a9c1d10
       const boldButton = new ToolbarButton({
         className: 'bold-text',
         label: 'B',
@@ -681,7 +770,6 @@ function activateLatexPlugin(
         label: 'Numbered List',
         onClick: insertNumberedList,
         tooltip: 'Click to insert numbered list'
-
       });
 
       if (context.path.endsWith('.tex')) {
@@ -689,34 +777,38 @@ function activateLatexPlugin(
         panel.toolbar.insertItem(10, 'sub', subscriptButton);
         panel.toolbar.insertItem(10, 'super', superscriptButton);
         panel.toolbar.insertItem(10, 'fraction', fractionButton);
+<<<<<<< HEAD
 
         panel.toolbar.insertItem(10, 'left', leftTextAlignmentButton);
         panel.toolbar.insertItem(10, 'center', centerTextAlignmentButton);
         panel.toolbar.insertItem(10, 'right', rightTextAlignmentButton);
 
+=======
+>>>>>>> 3716399af43fd4c0ed391008e1c9ce7d7a9c1d10
         panel.toolbar.insertItem(10, 'bold', boldButton);
         panel.toolbar.insertItem(10, 'italics', italicsButton);
         panel.toolbar.insertItem(10, 'underline', underlineButton);
         panel.toolbar.insertItem(10, 'bullet-list', bulletListButton);
         panel.toolbar.insertItem(10, 'numbered-list', numberedListButton);
-
       }
       return new DisposableDelegate(() => {
         previewButton.dispose();
         subscriptButton.dispose();
         superscriptButton.dispose();
         fractionButton.dispose();
+<<<<<<< HEAD
 
         leftTextAlignmentButton.dispose();
         centerTextAlignmentButton.dispose();
         rightTextAlignmentButton.dispose();
 
+=======
+>>>>>>> 3716399af43fd4c0ed391008e1c9ce7d7a9c1d10
         boldButton.dispose();
         italicsButton.dispose();
         underlineButton.dispose();
         bulletListButton.dispose();
         numberedListButton.dispose();
-
       });
     }
   }
