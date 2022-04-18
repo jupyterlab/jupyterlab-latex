@@ -460,6 +460,59 @@ function activateLatexPlugin(
           }
         });
       };
+      const leftAlign = () => {
+        InputDialog.getText({
+          title: 'Provide Text to Left Align'
+        }).then(value => {
+          if (value.value) {
+            let widget = editorTracker.currentWidget;
+            let inputString = value.value;
+            let inputArgs = inputString;
+            if (widget) {
+              let editor = widget.content.editor;
+              if (editor.replaceSelection) {
+                editor.replaceSelection('\\raggedright{' + inputArgs + '}');
+              }
+            }
+          }
+        });
+      };
+
+      const centerAlign = () => {
+        InputDialog.getText({
+          title: 'Provide Text to Center Align'
+        }).then(value => {
+          if (value.value) {
+            let widget = editorTracker.currentWidget;
+            let inputString = value.value;
+            let inputArgs = inputString;
+            if (widget) {
+              let editor = widget.content.editor;
+              if (editor.replaceSelection) {
+                editor.replaceSelection('\\centering{' + inputArgs + '}');
+              }
+            }
+          }
+        });
+      };
+
+      const rightAlign = () => {
+        InputDialog.getText({
+          title: 'Provide Text to Right Align'
+        }).then(value => {
+          if (value.value) {
+            let widget = editorTracker.currentWidget;
+            let inputString = value.value;
+            let inputArgs = inputString;
+            if (widget) {
+              let editor = widget.content.editor;
+              if (editor.replaceSelection) {
+                editor.replaceSelection('\\flushright{' + inputArgs + '}');
+              }
+            }
+          }
+        });
+      };
 
       const previewButton = new ToolbarButton({
         className: 'run-latexPreview-command',
@@ -489,17 +542,44 @@ function activateLatexPlugin(
         tooltip: 'Click to open fraction input dialog'
       });
 
+      const leftTextAlignmentButton = new ToolbarButton({
+        className: 'insert-text',
+        label: 'Left Align',
+        onClick: leftAlign,
+        tooltip: 'Click to left align highlighted text'
+      });
+
+      const centerTextAlignmentButton = new ToolbarButton({
+        className: 'insert-text',
+        label: 'Center Align',
+        onClick: centerAlign,
+        tooltip: 'Click to left align highlighted text'
+      });
+
+      const rightTextAlignmentButton = new ToolbarButton({
+        className: 'insert-text',
+        label: 'Right Align',
+        onClick: rightAlign,
+        tooltip: 'Click to left align highlighted text'
+      });
+
       if (context.path.endsWith('.tex')) {
         panel.toolbar.insertItem(10, 'Preview', previewButton);
         panel.toolbar.insertItem(10, 'sub', subscriptButton);
         panel.toolbar.insertItem(10, 'super', superscriptButton);
         panel.toolbar.insertItem(10, 'fraction', fractionButton);
+        panel.toolbar.insertItem(10, 'left', leftTextAlignmentButton);
+        panel.toolbar.insertItem(10, 'center', centerTextAlignmentButton);
+        panel.toolbar.insertItem(10, 'right', rightTextAlignmentButton);
       }
       return new DisposableDelegate(() => {
         previewButton.dispose();
         subscriptButton.dispose();
         superscriptButton.dispose();
         fractionButton.dispose();
+        leftTextAlignmentButton.dispose();
+        centerTextAlignmentButton.dispose();
+        rightTextAlignmentButton.dispose();
       });
     }
   }
