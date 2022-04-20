@@ -116,6 +116,8 @@ c.LatexConfig.shell_escape = "allow"
 
 ---
 
+<<<<<<< HEAD
+
 # JupyterLab LabTeX
 
 JupyterLab LabTeX is a document generator extension for JupyterLab which allows users to edit and compile LaTeX documents in a more efficient and user-friendly way.
@@ -204,4 +206,7 @@ N/A
 
 ---
 
-For information on the changes with different versions of the `jupyterlab-latex` library, see our [changelog](./docs/changelog.md)
+=======
+
+> > > > > > > dev_revised
+> > > > > > > For information on the changes with different versions of the `jupyterlab-latex` library, see our [changelog](./docs/changelog.md)

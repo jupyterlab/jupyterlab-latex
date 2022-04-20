@@ -11,7 +11,10 @@ import {
 import {
   IWidgetTracker,
   WidgetTracker,
-  showErrorMessage
+  showErrorMessage,
+  ICommandPalette,
+  InputDialog,
+  ToolbarButton
 } from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
@@ -44,20 +47,23 @@ import { LabIcon } from '@jupyterlab/ui-components';
 
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
-import { ICommandPalette } from '@jupyterlab/apputils';
-
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import latexIconStr from '../style/latex.svg';
 
-import { InputDialog } from '@jupyterlab/apputils';
+import listIconStr from '../style/icons/list.svg';
+import olistIconStr from '../style/icons/olist.svg';
+import italicIconStr from '../style/icons/italic.svg';
+import boldIconStr from '../style/icons/bold.svg';
+import underlineIconStr from '../style/icons/underline.svg';
+import tableIconStr from '../style/icons/table.svg';
 
 import '../style/index.css';
+
 import { Menu } from '@lumino/widgets';
 
 import { NotebookPanel, INotebookModel } from '@jupyterlab/notebook';
 
-import { ToolbarButton } from '@jupyterlab/apputils';
 import { IDisposable, DisposableDelegate } from '@lumino/disposable';
 
 /**
@@ -97,6 +103,8 @@ namespace CommandIDs {
    * Create new latex file
    */
   export const createNew = 'latex:create-new-latex-file';
+
+  export const createTable = 'latex:create-table';
 }
 
 /**
@@ -393,7 +401,7 @@ function activateLatexPlugin(
     state.save(id, { paths: Array.from(Private.previews) });
   };
 
-  class EditorButtonExtension
+  class EditorToolbarPanel
     implements
       DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
     createNew(
@@ -405,35 +413,63 @@ function activateLatexPlugin(
       };
 
       const insertSubscript = () => {
-        InputDialog.getText({ title: 'Provide Desired Subscript' }).then(
-          value => {
-            if (value.value) {
-              let widget = editorTracker.currentWidget;
-              if (widget) {
-                let editor = widget.content.editor;
-                if (editor.replaceSelection) {
-                  editor.replaceSelection('_{' + value.value + '}');
+        let widget = editorTracker.currentWidget;
+        if (widget) {
+          let editor = widget.content.editor;
+          if (editor.replaceSelection && editor.getSelection) {
+            let start = editor.getSelection().start;
+            let end = editor.getSelection().end;
+            if (start.line == end.line) {
+              let selection: string | undefined = editor.getLine(start.line);
+              if (selection) {
+                selection = selection.substring(start.column, end.column);
+                if (selection.length > 0) {
+                  editor.replaceSelection('_{' + selection + '}');
+                } else {
+                  InputDialog.getText({
+                    title: 'Provide Desired Subscript'
+                  }).then(value => {
+                    if (value.value) {
+                      if (editor.replaceSelection) {
+                        editor.replaceSelection('_{' + value.value + '}');
+                      }
+                    }
+                  });
                 }
               }
             }
           }
-        );
+        }
       };
 
       const insertSuperscript = () => {
-        InputDialog.getText({ title: 'Provide Desired Superscript' }).then(
-          value => {
-            if (value.value) {
-              let widget = editorTracker.currentWidget;
-              if (widget) {
-                let editor = widget.content.editor;
-                if (editor.replaceSelection) {
-                  editor.replaceSelection('^{' + value.value + '}');
+        let widget = editorTracker.currentWidget;
+        if (widget) {
+          let editor = widget.content.editor;
+          if (editor.replaceSelection && editor.getSelection) {
+            let start = editor.getSelection().start;
+            let end = editor.getSelection().end;
+            if (start.line == end.line) {
+              let selection: string | undefined = editor.getLine(start.line);
+              if (selection) {
+                selection = selection.substring(start.column, end.column);
+                if (selection.length > 0) {
+                  editor.replaceSelection('^{' + selection + '}');
+                } else {
+                  InputDialog.getText({
+                    title: 'Provide Desired Superscript'
+                  }).then(value => {
+                    if (value.value) {
+                      if (editor.replaceSelection) {
+                        editor.replaceSelection('^{' + value.value + '}');
+                      }
+                    }
+                  });
                 }
               }
             }
           }
-        );
+        }
       };
 
       const insertFraction = () => {
@@ -600,6 +636,11 @@ function activateLatexPlugin(
           }
         }
       };
+      const execCreateTable = () => {
+        //const createTable = 'latex:create-table'
+        commands.execute(CommandIDs.createTable);
+        //app.commands.addCommand('latex:create-table', {
+      };
 
       const previewButton = new ToolbarButton({
         className: 'run-latexPreview-command',
@@ -649,39 +690,74 @@ function activateLatexPlugin(
         onClick: rightAlign,
         tooltip: 'Click to left align highlighted text'
       });
+      const boldicon = new LabIcon({
+        name: 'launcher:bold-icon',
+        svgstr: boldIconStr
+      });
 
       const boldButton = new ToolbarButton({
         className: 'bold-text',
-        label: 'B',
+        icon: boldicon,
         onClick: insertBold,
         tooltip: 'Click to insert bold text'
       });
 
+      const italicsicon = new LabIcon({
+        name: 'launcher:italics-icon',
+        svgstr: italicIconStr
+      });
+
       const italicsButton = new ToolbarButton({
         className: 'italicize-text',
-        label: 'I',
+        icon: italicsicon,
         onClick: insertItalics,
         tooltip: 'Click to insert italicized text'
       });
 
+      const underlineicon = new LabIcon({
+        name: 'launcher:underline-icon',
+        svgstr: underlineIconStr
+      });
       const underlineButton = new ToolbarButton({
         className: 'underline-text',
-        label: 'U',
+        icon: underlineicon,
         onClick: insertUnderline,
         tooltip: 'Click to insert underlined text'
       });
+
+      const listicon = new LabIcon({
+        name: 'launcher:list-icon',
+        svgstr: listIconStr
+      });
+
       const bulletListButton = new ToolbarButton({
         className: 'insert-bullet-list',
-        label: 'Bullet List',
+        icon: listicon,
         onClick: insertBulletList,
         tooltip: 'Click to insert bullet list'
       });
 
+      const olisticon = new LabIcon({
+        name: 'launcher:olist-icon',
+        svgstr: olistIconStr
+      });
+
       const numberedListButton = new ToolbarButton({
         className: 'insert-numbered-list',
-        label: 'Numbered List',
+        icon: olisticon,
         onClick: insertNumberedList,
         tooltip: 'Click to insert numbered list'
+      });
+
+      const tableicon = new LabIcon({
+        name: 'launcher:table-icon',
+        svgstr: tableIconStr
+      });
+      const tableInsertButton = new ToolbarButton({
+        className: 'insert-table',
+        icon: tableicon,
+        onClick: execCreateTable,
+        tooltip: 'Click to insert table'
       });
 
       if (context.path.endsWith('.tex')) {
@@ -699,6 +775,7 @@ function activateLatexPlugin(
         panel.toolbar.insertItem(10, 'underline', underlineButton);
         panel.toolbar.insertItem(10, 'bullet-list', bulletListButton);
         panel.toolbar.insertItem(10, 'numbered-list', numberedListButton);
+        panel.toolbar.insertItem(10, 'table', tableInsertButton);
       }
       return new DisposableDelegate(() => {
         previewButton.dispose();
@@ -715,11 +792,12 @@ function activateLatexPlugin(
         underlineButton.dispose();
         bulletListButton.dispose();
         numberedListButton.dispose();
+        tableInsertButton.dispose();
       });
     }
   }
 
-  app.docRegistry.addWidgetExtension('Editor', new EditorButtonExtension());
+  app.docRegistry.addWidgetExtension('Editor', new EditorToolbarPanel());
 
   // If there are any active previews in the statedb,
   // activate them upon initialization.
