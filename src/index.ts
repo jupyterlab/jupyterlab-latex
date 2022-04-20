@@ -57,6 +57,9 @@ import italicIconStr from '../style/icons/italic.svg';
 import boldIconStr from '../style/icons/bold.svg';
 import underlineIconStr from '../style/icons/underline.svg';
 import tableIconStr from '../style/icons/table.svg';
+import rightIconStr from '../style/icons/right-align.svg';
+import centerIconStr from '../style/icons/center-align.svg';
+import leftIconStr from '../style/icons/left-align.svg';
 
 import '../style/index.css';
 
@@ -412,7 +415,23 @@ function activateLatexPlugin(
         commands.execute(CommandIDs.openLatexPreview);
       };
 
-      const insertSubscript = () => {
+      const createInputDialog = (mess: string, action: string) => {
+        let widget = editorTracker.currentWidget;
+        if (widget) {
+          let editor = widget.content.editor;
+          InputDialog.getText({
+            title: mess
+          }).then(value => {
+            if (value.value) {
+              if (editor.replaceSelection) {
+                editor.replaceSelection(action + '{' + value.value + '}');
+              }
+            }
+          });
+        }
+      };
+
+      const replaceSelection = (action: string) => {
         let widget = editorTracker.currentWidget;
         if (widget) {
           let editor = widget.content.editor;
@@ -424,51 +443,29 @@ function activateLatexPlugin(
               if (selection) {
                 selection = selection.substring(start.column, end.column);
                 if (selection.length > 0) {
-                  editor.replaceSelection('_{' + selection + '}');
-                } else {
-                  InputDialog.getText({
-                    title: 'Provide Desired Subscript'
-                  }).then(value => {
-                    if (value.value) {
-                      if (editor.replaceSelection) {
-                        editor.replaceSelection('_{' + value.value + '}');
-                      }
-                    }
-                  });
+                  editor.replaceSelection(action + '{' + selection + '}');
+                  return 1;
                 }
               }
             }
           }
         }
+        return 0;
+      };
+
+      const insertSubscript = () => {
+        let action = '_';
+        let result = replaceSelection(action);
+        if (result == 0) {
+          createInputDialog('Provide Desired Subscript', action);
+        }
       };
 
       const insertSuperscript = () => {
-        let widget = editorTracker.currentWidget;
-        if (widget) {
-          let editor = widget.content.editor;
-          if (editor.replaceSelection && editor.getSelection) {
-            let start = editor.getSelection().start;
-            let end = editor.getSelection().end;
-            if (start.line == end.line) {
-              let selection: string | undefined = editor.getLine(start.line);
-              if (selection) {
-                selection = selection.substring(start.column, end.column);
-                if (selection.length > 0) {
-                  editor.replaceSelection('^{' + selection + '}');
-                } else {
-                  InputDialog.getText({
-                    title: 'Provide Desired Superscript'
-                  }).then(value => {
-                    if (value.value) {
-                      if (editor.replaceSelection) {
-                        editor.replaceSelection('^{' + value.value + '}');
-                      }
-                    }
-                  });
-                }
-              }
-            }
-          }
+        let action = '^';
+        let result = replaceSelection(action);
+        if (result == 0) {
+          createInputDialog('Provide Desired Superscript', action);
         }
       };
 
@@ -496,75 +493,52 @@ function activateLatexPlugin(
           }
         });
       };
+
       const leftAlign = () => {
-        InputDialog.getText({
-          title: 'Provide Text to Left Align'
-        }).then(value => {
-          if (value.value) {
-            let widget = editorTracker.currentWidget;
-            let inputString = value.value;
-            let inputArgs = inputString;
-            if (widget) {
-              let editor = widget.content.editor;
-              if (editor.replaceSelection) {
-                editor.replaceSelection('\\raggedright{' + inputArgs + '}');
-              }
-            }
-          }
-        });
+        let action = '\\leftline';
+        let result = replaceSelection(action);
+        if (result == 0) {
+          createInputDialog('Provide Text to Left Align', action);
+        }
       };
 
       const centerAlign = () => {
-        InputDialog.getText({
-          title: 'Provide Text to Center Align'
-        }).then(value => {
-          if (value.value) {
-            let widget = editorTracker.currentWidget;
-            let inputString = value.value;
-            let inputArgs = inputString;
-            if (widget) {
-              let editor = widget.content.editor;
-              if (editor.replaceSelection) {
-                editor.replaceSelection('\\centering{' + inputArgs + '}');
-              }
-            }
-          }
-        });
+        let action = '\\centerline';
+        let result = replaceSelection(action);
+        if (result == 0) {
+          createInputDialog('Provide Text to Center Align', action);
+        }
       };
 
       const rightAlign = () => {
-        InputDialog.getText({
-          title: 'Provide Text to Right Align'
-        }).then(value => {
-          if (value.value) {
-            let widget = editorTracker.currentWidget;
-            let inputString = value.value;
-            let inputArgs = inputString;
-            if (widget) {
-              let editor = widget.content.editor;
-              if (editor.replaceSelection) {
-                editor.replaceSelection('\\flushright{' + inputArgs + '}');
-              }
-            }
-          }
-        });
+        let action = '\\rightline';
+        let result = replaceSelection(action);
+        if (result == 0) {
+          createInputDialog('Provide Text to Right Align', action);
+        }
       };
 
       const insertBold = () => {
-        let widget = editorTracker.currentWidget;
-        if (widget) {
-          let editor = widget.content.editor;
-          if (editor.replaceSelection && editor.getSelection) {
-            let start = editor.getSelection().start;
-            let end = editor.getSelection().end;
-            if (start.line == end.line) {
-              let selection: string | undefined = editor.getLine(start.line);
-              if (selection) {
-                selection = selection.substring(start.column, end.column);
-                editor.replaceSelection('\\textbf{' + selection + '}');
-              }
-            }
-          }
+        let action = '\\textbf';
+        let result = replaceSelection(action);
+        if (result == 0) {
+          createInputDialog('Provide Text to Bold', action);
+        }
+      };
+
+      const insertItalics = () => {
+        let action = '\\textit';
+        let result = replaceSelection(action);
+        if (result == 0) {
+          createInputDialog('Provide Text to Italicise', action);
+        }
+      };
+
+      const insertUnderline = () => {
+        let action = '\\underline';
+        let result = replaceSelection(action);
+        if (result == 0) {
+          createInputDialog('Provide Text to Underline', action);
         }
       };
 
@@ -585,41 +559,6 @@ function activateLatexPlugin(
         }
       };
 
-      const insertItalics = () => {
-        let widget = editorTracker.currentWidget;
-        if (widget) {
-          let editor = widget.content.editor;
-          if (editor.replaceSelection && editor.getSelection) {
-            let start = editor.getSelection().start;
-            let end = editor.getSelection().end;
-            if (start.line == end.line) {
-              let selection: string | undefined = editor.getLine(start.line);
-              if (selection) {
-                selection = selection.substring(start.column, end.column);
-                editor.replaceSelection('\\textit{' + selection + '}');
-              }
-            }
-          }
-        }
-      };
-
-      const insertUnderline = () => {
-        let widget = editorTracker.currentWidget;
-        if (widget) {
-          let editor = widget.content.editor;
-          if (editor.replaceSelection && editor.getSelection) {
-            let start = editor.getSelection().start;
-            let end = editor.getSelection().end;
-            if (start.line == end.line) {
-              let selection: string | undefined = editor.getLine(start.line);
-              if (selection) {
-                selection = selection.substring(start.column, end.column);
-                editor.replaceSelection('\\underline{' + selection + '}');
-              }
-            }
-          }
-        }
-      };
       const insertNumberedList = () => {
         let widget = editorTracker.currentWidget;
         if (widget) {
@@ -636,6 +575,7 @@ function activateLatexPlugin(
           }
         }
       };
+
       const execCreateTable = () => {
         //const createTable = 'latex:create-table'
         commands.execute(CommandIDs.createTable);
@@ -669,24 +609,35 @@ function activateLatexPlugin(
         onClick: insertFraction,
         tooltip: 'Click to open fraction input dialog'
       });
-
+      const lefticon = new LabIcon({
+        name: 'launcher:left-icon',
+        svgstr: leftIconStr
+      });
       const leftTextAlignmentButton = new ToolbarButton({
         className: 'insert-text',
-        label: 'Left Align',
+        icon: lefticon,
         onClick: leftAlign,
         tooltip: 'Click to left align highlighted text'
       });
 
+      const centericon = new LabIcon({
+        name: 'launcher:center-icon',
+        svgstr: centerIconStr
+      });
       const centerTextAlignmentButton = new ToolbarButton({
         className: 'insert-text',
-        label: 'Center Align',
+        icon: centericon,
         onClick: centerAlign,
         tooltip: 'Click to left align highlighted text'
       });
 
+      const righticon = new LabIcon({
+        name: 'launcher:right-icon',
+        svgstr: rightIconStr
+      });
       const rightTextAlignmentButton = new ToolbarButton({
         className: 'insert-text',
-        label: 'Right Align',
+        icon: righticon,
         onClick: rightAlign,
         tooltip: 'Click to left align highlighted text'
       });
