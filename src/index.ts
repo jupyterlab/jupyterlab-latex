@@ -527,6 +527,19 @@ function activateLatexPlugin(
         }
       };
 
+      app.commands.addCommand('latex:bold', {
+        label: 'Insert Bold',
+        execute: async args => {
+          insertBold()
+        }
+      });
+    
+      app.commands.addKeyBinding({
+        command: 'latex:insert-bold',
+        keys: ['Accel B'],
+        selector: '#jp-main-dock-panel'
+      });
+
       const insertItalics = () => {
         let action = '\\textit';
         let result = replaceSelection(action);
@@ -535,6 +548,19 @@ function activateLatexPlugin(
         }
       };
 
+      app.commands.addCommand('latex:insert-italics', {
+        label: 'Insert Italics',
+        execute: async args => {
+          insertItalics()
+        }
+      });
+    
+      app.commands.addKeyBinding({
+        command: 'latex:insert-italics',
+        keys: ['Accel I'],
+        selector: '#jp-main-dock-panel'
+      });
+
       const insertUnderline = () => {
         let action = '\\underline';
         let result = replaceSelection(action);
@@ -542,6 +568,19 @@ function activateLatexPlugin(
           createInputDialog('Provide Text to Underline', action);
         }
       };
+
+      app.commands.addCommand('latex:insert-underline', {
+        label: 'Insert Underline',
+        execute: async args => {
+          insertUnderline()
+        }
+      });
+    
+      app.commands.addKeyBinding({
+        command: 'latex:insert-underline',
+        keys: ['Accel U'],
+        selector: '#jp-main-dock-panel'
+      });
 
       const insertBulletList = () => {
         let widget = editorTracker.currentWidget;
