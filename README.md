@@ -112,19 +112,11 @@ For example, to force your LaTeX distribution to run any command, use:
 c.LatexConfig.shell_escape = "allow"
 ```
 
-## Changes
-
----
-
-<<<<<<< HEAD
-
 # JupyterLab LabTeX
 
 JupyterLab LabTeX is a document generator extension for JupyterLab which allows users to edit and compile LaTeX documents in a more efficient and user-friendly way.
 
 # Release Notes
-
----
 
 ## Version 0.4.0
 
@@ -148,8 +140,6 @@ N/A
 
 - During autocomplete implementation, a bug was found with either Jupyterlab-LSP or TexLab. We are working with their respective maintainers to resolve the issue.
 
----
-
 ## Version 0.3.0
 
 ### New Features
@@ -166,7 +156,7 @@ N/A
 
 ### Known Issues
 
-N/A
+- While using the typeface modifier buttons, a user can only select/highlight a single line of text to apply the typeface modification to.
 
 ## Version 0.2.0
 
@@ -204,9 +194,6 @@ N/A
 
 N/A
 
----
+## Changes
 
-=======
-
-> > > > > > > dev_revised
-> > > > > > > For information on the changes with different versions of the `jupyterlab-latex` library, see our [changelog](./docs/changelog.md)
+For information on the changes with different versions of the `jupyterlab-latex` library, see our [changelog](./docs/changelog.md)
