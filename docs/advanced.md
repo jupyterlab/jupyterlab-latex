@@ -40,13 +40,13 @@ pip install -e .
 Link your development version of the extension with JupyterLab
 
 ```bash
-jupyter labextension develop . --overwrite{% if cookiecutter.has_server_extension.lower().startswith('y') %}
+jupyter labextension develop . --overwrite
 ```
 
 Server extension must be manually installed in develop mode
 
 ```bash
-jupyter server extension enable {{ cookiecutter.python_name }}{% endif %}
+jupyter server extension enable jupyterlab_latex
 ```
 
 Rebuild extension Typescript source after making changes
