@@ -50,6 +50,7 @@ jobs:
       run: |
         set -eux
         python -m pip install .
+        jupyter server extension enable jupyterlab_latex
     - name: Integration test
       run: |
         jupyter serverextension list 2>&1 | grep -ie "jupyterlab_latex.*OK"
