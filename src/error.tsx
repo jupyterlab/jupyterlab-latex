@@ -58,7 +58,6 @@ export interface ILatexProps extends React.Props<LatexError> {
 }
 
 export class LatexError extends React.Component<ILatexProps, {}> {
-
   selectedValue: string;
   fullMessage: string;
   errorOnlyMessage: string;
@@ -73,33 +72,28 @@ export class LatexError extends React.Component<ILatexProps, {}> {
   }
 
   handleChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
-      this.selectedValue = event.target.value;
-      if (event.target.value === 'Filtered') {
-        this.displayedMessage = this.errorOnlyMessage;
-      }
-      else if (event.target.value === 'Unfiltered') {
-        this.displayedMessage = this.fullMessage;
-      }
-      else if (event.target.value === 'JSON') {
-        this.displayedMessage = this.props.text;
-      }
+    this.selectedValue = event.target.value;
+    if (event.target.value === 'Filtered') {
+      this.displayedMessage = this.errorOnlyMessage;
+    } else if (event.target.value === 'Unfiltered') {
+      this.displayedMessage = this.fullMessage;
+    } else if (event.target.value === 'JSON') {
+      this.displayedMessage = this.props.text;
+    }
 
-      /**
-       * Force ErrorPanel to rerender.
-       */
-      this.setState({});
-      this.props.node.update();
+    /**
+     * Force ErrorPanel to rerender.
+     */
+    this.setState({});
+    this.props.node.update();
   };
 
   render() {
     return (
       <>
+        <label style={{ marginLeft: '1em', color: 'black' }}>Log Level:</label>
 
-        <label style = {{marginLeft: '1em', color: 'black'}}>
-          Log Level:
-        </label>
-
-        <div style = {{display: 'inline-block', position: 'relative'}}>
+        <div style={{ display: 'inline-block', position: 'relative' }}>
           <HTMLSelect
             className={TOOLBAR_CELLTYPE_DROPDOWN_CLASS}
             onChange={this.handleChange}
@@ -109,12 +103,11 @@ export class LatexError extends React.Component<ILatexProps, {}> {
           />
         </div>
 
-        <div style={{height: 'calc(100% - 3em)'}}>
+        <div style={{ height: 'calc(100% - 3em)' }}>
           <pre className={LATEX_ERROR_CONTAINER}>
             <code>{this.displayedMessage}</code>
           </pre>
         </div>
-        
       </>
     );
   }

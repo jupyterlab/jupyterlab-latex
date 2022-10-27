@@ -236,6 +236,17 @@ function synctexViewRequest(
   });
 }
 
+function isLatexFile(
+  editorTracker: IEditorTracker
+): IDocumentWidget<FileEditor, DocumentRegistry.IModel> | null {
+  let widget = editorTracker.currentWidget;
+  if (widget && PathExt.extname(widget.context.path) === '.tex') {
+    return widget;
+  } else {
+    return null;
+  }
+}
+
 /**
  * Activate the file browser.
  */
@@ -527,19 +538,6 @@ function activateLatexPlugin(
         }
       };
 
-      app.commands.addCommand('latex:bold', {
-        label: 'Insert Bold',
-        execute: async args => {
-          insertBold()
-        }
-      });
-    
-      app.commands.addKeyBinding({
-        command: 'latex:insert-bold',
-        keys: ['Accel B'],
-        selector: '#jp-main-dock-panel'
-      });
-
       const insertItalics = () => {
         let action = '\\textit';
         let result = replaceSelection(action);
@@ -548,19 +546,6 @@ function activateLatexPlugin(
         }
       };
 
-      app.commands.addCommand('latex:insert-italics', {
-        label: 'Insert Italics',
-        execute: async args => {
-          insertItalics()
-        }
-      });
-    
-      app.commands.addKeyBinding({
-        command: 'latex:insert-italics',
-        keys: ['Accel I'],
-        selector: '#jp-main-dock-panel'
-      });
-
       const insertUnderline = () => {
         let action = '\\underline';
         let result = replaceSelection(action);
@@ -568,19 +553,6 @@ function activateLatexPlugin(
           createInputDialog('Provide Text to Underline', action);
         }
       };
-
-      app.commands.addCommand('latex:insert-underline', {
-        label: 'Insert Underline',
-        execute: async args => {
-          insertUnderline()
-        }
-      });
-    
-      app.commands.addKeyBinding({
-        command: 'latex:insert-underline',
-        keys: ['Accel U'],
-        selector: '#jp-main-dock-panel'
-      });
 
       const insertBulletList = () => {
         let widget = editorTracker.currentWidget;
@@ -618,54 +590,63 @@ function activateLatexPlugin(
       const insertPlot = () => {
         InputDialog.getItem({
           title: 'Select Plot Type',
-          items: ['Mathematical Expression', 'Data From File', 'Scatter Plot', 'Bar Graphs', 'Contour Plots', 'Parametric Plot']
-        }).then(
-          value => {
-            if (value.value) {
-              let plotText = "";
+          items: [
+            'Mathematical Expression',
+            'Data From File',
+            'Scatter Plot',
+            'Bar Graphs',
+            'Contour Plots',
+            'Parametric Plot'
+          ]
+        }).then(value => {
+          if (value.value) {
+            let plotText = '';
 
-              switch(value.value) { 
-                case 'Mathematical Expression': { 
-                    plotText = '\\begin{tikzpicture}' +
-                    '\n\\begin{axis}[' +
-                    '\n\taxis lines = left,' +
-                    '\n\txlabel = \\(x\\),' +
-                    '\n\tylabel = {\\(f(x)\\)},' +
-                    '\n]' +
-                    '\n\\addplot [' +
-                    '\n\tdomain=-10:10, ' +
-                    '\n\tsamples=100, ' +
-                    '\n\tcolor=blue,' +
-                    '\n]' +
-                    '\n{x^2};' +
-                    '\n\\addlegendentry{\\(x^2\\)}' +
-                    '\n\\end{axis}' +
-                    '\n\\end{tikzpicture}'
-                   break; 
-                } 
-                case 'Data From File': { 
-                    plotText = '\\begin{tikzpicture}' +
-                    '\n\\begin{axis}[' +
-                    '\n\ttitle={Title},' +
-                    '\n\txlabel={x axis label},' +
-                    '\n\tylabel={y axis label},' +
-                    '\n\txmin=0, xmax=100,' +
-                    '\n\tymin=0, ymax=100,' +
-                    '\n\txtick={},' +
-                    '\n\tytick={},' +
-                    '\n\tlegend pos=north west' +
-                    '\n]' +
-                    '\n\n\\addplot[' +
-                    '\n\tcolor=blue,' +
-                    '\n\tmark=*]' +
-                    '\n{Data File Path};' +
-                    '\n\n\\legend{Legend Text}' +
-                    '\n\n\\end{axis}' +
-                    '\n\\end{tikzpicture}'
-                   break; 
-                } 
-                case 'Scatter Plot': { 
-                  plotText = '\\begin{tikzpicture}' +
+            switch (value.value) {
+              case 'Mathematical Expression': {
+                plotText =
+                  '\\begin{tikzpicture}' +
+                  '\n\\begin{axis}[' +
+                  '\n\taxis lines = left,' +
+                  '\n\txlabel = \\(x\\),' +
+                  '\n\tylabel = {\\(f(x)\\)},' +
+                  '\n]' +
+                  '\n\\addplot [' +
+                  '\n\tdomain=-10:10, ' +
+                  '\n\tsamples=100, ' +
+                  '\n\tcolor=blue,' +
+                  '\n]' +
+                  '\n{x^2};' +
+                  '\n\\addlegendentry{\\(x^2\\)}' +
+                  '\n\\end{axis}' +
+                  '\n\\end{tikzpicture}';
+                break;
+              }
+              case 'Data From File': {
+                plotText =
+                  '\\begin{tikzpicture}' +
+                  '\n\\begin{axis}[' +
+                  '\n\ttitle={Title},' +
+                  '\n\txlabel={x axis label},' +
+                  '\n\tylabel={y axis label},' +
+                  '\n\txmin=0, xmax=100,' +
+                  '\n\tymin=0, ymax=100,' +
+                  '\n\txtick={},' +
+                  '\n\tytick={},' +
+                  '\n\tlegend pos=north west' +
+                  '\n]' +
+                  '\n\n\\addplot[' +
+                  '\n\tcolor=blue,' +
+                  '\n\tmark=*]' +
+                  '\n{Data File Path};' +
+                  '\n\n\\legend{Legend Text}' +
+                  '\n\n\\end{axis}' +
+                  '\n\\end{tikzpicture}';
+                break;
+              }
+              case 'Scatter Plot': {
+                plotText =
+                  '\\begin{tikzpicture}' +
                   '\n\\begin{axis}[' +
                   '\n\ttitle={Title},' +
                   '\n\txlabel={x axis label},' +
@@ -683,11 +664,12 @@ function activateLatexPlugin(
                   '\n{Data File Path};' +
                   '\n\n\\legend{Legend Text}' +
                   '\n\n\\end{axis}' +
-                  '\n\\end{tikzpicture}' 
-                  break; 
-                } 
-                case 'Bar Graphs': { 
-                  plotText = '\\begin{tikzpicture}' +
+                  '\n\\end{tikzpicture}';
+                break;
+              }
+              case 'Bar Graphs': {
+                plotText =
+                  '\\begin{tikzpicture}' +
                   '\n\\begin{axis}[' +
                   '\ntitle={Title},' +
                   '\nxlabel={x axis label},' +
@@ -700,11 +682,12 @@ function activateLatexPlugin(
                   '\n]' +
                   '\n\n\\addplot table {\\mydata};' +
                   '\n\n\\end{axis}' +
-                  '\n\\end{tikzpicture}'
-                  break; 
-                } 
-                case 'Contour Plots': { 
-                  plotText = '\\begin{tikzpicture}' +
+                  '\n\\end{tikzpicture}';
+                break;
+              }
+              case 'Contour Plots': {
+                plotText =
+                  '\\begin{tikzpicture}' +
                   '\n\\begin{axis}' +
                   '\n[' +
                   '\n\ttitle={Title},' +
@@ -716,11 +699,12 @@ function activateLatexPlugin(
                   '\n{sqrt(x^2+y^2)};' +
                   '\n\\addlegendentry{\\(sqrt(x^2+y^2)\\)}' +
                   '\n\\end{axis}' +
-                  '\n\\end{tikzpicture}'
-                  break; 
-                } 
-                case 'Parametric Plot': { 
-                  plotText = '\\begin{tikzpicture}' +
+                  '\n\\end{tikzpicture}';
+                break;
+              }
+              case 'Parametric Plot': {
+                plotText =
+                  '\\begin{tikzpicture}' +
                   '\n\\begin{axis}' +
                   '\n[' +
                   '\n\ttitle={Title},' +
@@ -736,22 +720,20 @@ function activateLatexPlugin(
                   '\n{x});' +
                   '\n\n\\addlegendentry{\\(Legend Label)\\)}' +
                   '\n\n\\end{axis}' +
-                  '\n\\end{tikzpicture}'
-                  break; 
-                } 
-              } 
-              
-              let widget = editorTracker.currentWidget;
-              if (widget) {
-                let editor = widget.content.editor;
-                if (editor.replaceSelection) {
-                  editor.replaceSelection(plotText);
-                }
+                  '\n\\end{tikzpicture}';
+                break;
               }
-              
+            }
+
+            let widget = editorTracker.currentWidget;
+            if (widget) {
+              let editor = widget.content.editor;
+              if (editor.replaceSelection) {
+                editor.replaceSelection(plotText);
+              }
             }
           }
-        );
+        });
       };
 
       const execCreateTable = () => {
@@ -899,7 +881,7 @@ function activateLatexPlugin(
         icon: plotIcon,
         onClick: insertPlot,
         tooltip: 'Click to insert a plot'
-      })
+      });
 
       if (context.path.endsWith('.tex')) {
         panel.toolbar.insertItem(10, 'Preview', previewButton);
@@ -993,10 +975,7 @@ function activateLatexPlugin(
     },
     isEnabled: hasWidget,
     isVisible: () => {
-      let widget = editorTracker.currentWidget;
-      return (
-        (widget && PathExt.extname(widget.context.path) === '.tex') || false
-      );
+      return isLatexFile(editorTracker) != null;
     },
     label: 'Show LaTeX Preview'
   });
@@ -1218,8 +1197,8 @@ function addLatexMenu(
       label: key,
       caption: value,
       execute: async args => {
-        let widget = editorTracker.currentWidget;
-        if (widget && PathExt.extname(widget.context.path) === '.tex') {
+        let widget = isLatexFile(editorTracker);
+        if (widget) {
           let editor = widget.content.editor;
           if (editor.replaceSelection) {
             editor.replaceSelection(value);
@@ -1275,8 +1254,8 @@ function addLatexMenu(
       label: key,
       caption: value,
       execute: async args => {
-        let widget = editorTracker.currentWidget;
-        if (widget && PathExt.extname(widget.context.path) === '.tex') {
+        let widget = isLatexFile(editorTracker);
+        if (widget) {
           let editor = widget.content.editor;
           if (editor.replaceSelection) {
             editor.replaceSelection(value);
@@ -1303,8 +1282,8 @@ function addLatexMenu(
           title: 'How many columns?'
         });
         if (colResult.button.accept) {
-          let widget = editorTracker.currentWidget;
-          if (widget && PathExt.extname(widget.context.path) === '.tex') {
+          let widget = isLatexFile(editorTracker);
+          if (widget) {
             let editor = widget.content.editor;
             if (editor.replaceSelection) {
               if (rowResult.value && colResult.value) {
