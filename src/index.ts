@@ -498,7 +498,6 @@ function activateLatexPlugin(
   if (menu) {
     menu.fileMenu.newMenu.addGroup([{ command }], 30);
   }
-  console.log(`Jupyterlab-latex enabled, development extension loaded.`);
 }
 
 /**
