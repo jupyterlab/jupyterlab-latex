@@ -6,7 +6,7 @@ import shutil
 
 from tornado import gen, web
 
-from notebook.base.handlers import APIHandler
+from jupyter_server.base.handlers import APIHandler
 
 from .config import LatexConfig
 from .util import run_command
