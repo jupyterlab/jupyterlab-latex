@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/latex",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "JupyterLab extension for running LaTeX",
   "keywords": [
     "jupyter",
@@ -85,7 +85,7 @@
     "@types/react-dom": "^16.9.4",
     "@typescript-eslint/eslint-plugin": "^2.27.0",
     "@typescript-eslint/parser": "^2.27.0",
-    "eslint": "^7.5.0",
+    "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.1",
     "eslint-plugin-prettier": "^3.1.2",
     "husky": "^2.4.1",

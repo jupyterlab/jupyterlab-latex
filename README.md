@@ -126,6 +126,13 @@ The `jlpm` command is JupyterLab's pinned version of
 [yarn](https://yarnpkg.com/) that is installed with JupyterLab. You may use
 `yarn` or `npm` in lieu of `jlpm` below.
 
+To simplify the development setup, you can use the following Conda environment:
+
+```
+conda create -n jupyterlab-latex-env -c conda-forge python=3.10 jupyterlab=3.6.3 jupyter_packaging=0.12.3 nodejs=18
+conda activate jupyterlab-latex-env
+```
+
 ```bash
 # Clone the repo to your local environment
 git clone https://github.com/jupyterlab/jupyterlab-latex.git
