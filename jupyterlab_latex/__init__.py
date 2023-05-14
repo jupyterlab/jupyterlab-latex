@@ -6,7 +6,6 @@ __all__ = [
     "__version__",
     "_jupyter_labextension_paths",
     "_jupyter_server_extension_paths",
-    "_jupyter_server_extension_points",
     "_load_jupyter_server_extension",
     "load_jupyter_server_extension",
 ]
