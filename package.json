@@ -100,7 +100,7 @@
     "typescript": "~5.0.4"
   },
   "resolutions": {
-    "@types/react": "~16.4.13"
+    "@types/react": "~18.2.6"
   },
   "jupyterlab": {
     "extension": "lib/index.js",
