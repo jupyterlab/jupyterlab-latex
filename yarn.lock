@@ -821,12 +821,13 @@
     csstype "^3.0.2"
 
 "@types/react@^17.0.0":
-  version "16.4.18"
-  resolved "https://registry.npmjs.org/@types/react/-/react-16.4.18.tgz"
-  integrity sha512-eFzJKEg6pdeaukVLVZ8Xb79CTl/ysX+ExmOfAAqcFlCCK5TgFDD9kWR0S18sglQ3EmM8U+80enjUqbfnUyqpdA==
+  version "17.0.59"
+  resolved "https://registry.npmjs.org/@types/react/-/react-17.0.59.tgz"
+  integrity sha512-gSON5zWYIGyoBcycCE75E9+r6dCC2dHdsrVkOEiIYNU5+Q28HcBAuqvDuxHcCbMfHBHdeT5Tva/AFn3rnMKE4g==
   dependencies:
     "@types/prop-types" "*"
-    csstype "^2.2.0"
+    "@types/scheduler" "*"
+    csstype "^3.0.2"
 
 "@types/scheduler@*":
   version "0.16.2"
@@ -2193,11 +2194,6 @@ cssesc@^3.0.0:
   version "3.0.0"
   resolved "https://registry.npmjs.org/cssesc/-/cssesc-3.0.0.tgz"
   integrity sha512-/Tb/JcjK111nNScGob5MNtsntNM1aCNUDipB/TkwZFhyDrrE47SOx/18wF2bbjgc3ZzCSKW1T5nt5EbFoAz/Vg==
-
-csstype@^2.2.0:
-  version "2.6.17"
-  resolved "https://registry.npmjs.org/csstype/-/csstype-2.6.17.tgz"
-  integrity sha512-u1wmTI1jJGzCJzWndZo8mk4wnPTZd1eOIYTYvuEyOQGfmDl3TrabCCfKnOC86FZwW/9djqTl933UF/cS425i9A==
 
 csstype@^3.0.2, csstype@~3.0.3:
   version "3.0.8"
