@@ -84,8 +84,8 @@ setup_dict = dict(
         'Framework :: Jupyter',
     ],
     install_requires=[
-        'jupyterlab>=3,<4',
-        'jupyter_server>=1.6,<2'
+        'jupyterlab>=3.6,<4',
+        'jupyter_server>=2'
     ],
     cmdclass=wrap_installers(post_develop=post_develop, ensured_targets=ensured_targets)
 )
