@@ -75,14 +75,15 @@
     "@lumino/domutils": "^1.2.3",
     "@lumino/messaging": "^1.4.3",
     "@lumino/widgets": "^1.16.1",
-    "pdfjs-dist": "2.0.943",
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1"
+    "pdfjs-dist": "2.4.456",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "yjs": "^13.6.1"
   },
   "devDependencies": {
     "@jupyterlab/builder": "^3.6.3",
-    "@types/react": "^16.9.16",
-    "@types/react-dom": "^16.9.4",
+    "@types/react": "^17.0.2",
+    "@types/react-dom": "^17.0.2",
     "@typescript-eslint/eslint-plugin": "^4.13.0",
     "@typescript-eslint/parser": "^4.13.0",
     "eslint": "^7.5.0",
@@ -98,9 +99,6 @@
     "tslint-config-prettier": "^1.18.0",
     "tslint-plugin-prettier": "^2.0.1",
     "typescript": "~5.0.4"
-  },
-  "resolutions": {
-    "@types/react": "~18.2.6"
   },
   "jupyterlab": {
     "extension": "lib/index.js",

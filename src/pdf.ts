@@ -235,6 +235,7 @@ export class PDFJSViewer extends Widget {
       };
 
       this._getDocument(this._objectUrl)
+        .promise
         .then((pdfDocument: any) => {
           this._pdfDocument = pdfDocument;
           this._viewer!.setDocument(pdfDocument);
