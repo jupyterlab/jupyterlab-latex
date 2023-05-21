@@ -36,17 +36,17 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "jlpm build:lib && jlpm build:labextension:dev",
+    "build:prod": "jlpm clean && jlpm build:lib && jlpm build:labextension",
     "build:labextension": "jupyter labextension build .",
     "build:labextension:dev": "jupyter labextension build --development True .",
     "build:lib": "tsc",
-    "build:prod": "jlpm clean && jlpm build:lib && jlpm build:labextension",
     "clean": "jlpm clean:lib",
-    "clean:all": "jlpm clean:lib && jlpm clean:labextension",
-    "clean:labextension": "rimraf jupyterlab-latex/labextension",
     "clean:lib": "rimraf lib tsconfig.tsbuildinfo",
-    "install:extension": "jlpm build",
+    "clean:labextension": "rimraf jupyterlab-latex/labextension",
+    "clean:all": "jlpm clean:lib && jlpm clean:labextension",
     "precommit": "lint-staged",
     "prettier": "prettier --write '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
+    "install:extension": "jlpm build",
     "watch": "tsc -w"
   },
   "lint-staged": {
