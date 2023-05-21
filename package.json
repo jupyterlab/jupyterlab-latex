@@ -75,21 +75,21 @@
     "@lumino/domutils": "^2.0.0",
     "@lumino/messaging": "^2.0.0",
     "@lumino/widgets": "^2.0.1",
-    "pdfjs-dist": "2.0.943",
+    "pdfjs-dist": "2.4.456",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
-  },
+    "react-dom": "^18.2.0",
+    "yjs": "^13.6.1"
   "devDependencies": {
     "@jupyterlab/builder": "^4.0.0-beta.0",
-    "@types/json-schema": "^7.0.11",
     "@types/react": "^18.0.26",
     "@types/react-dom": "^16.9.4",
     "@typescript-eslint/eslint-plugin": "^5.55.0",
     "@typescript-eslint/parser": "^5.55.0",
-    "css-loader": "^6.7.1",
     "eslint": "^8.36.0",
     "eslint-config-prettier": "^8.7.0",
     "eslint-plugin-prettier": "^4.2.1",
+    "@types/json-schema": "^7.0.11",
+    "css-loader": "^6.7.1",
     "husky": "^2.4.1",
     "lint-staged": "^8.2.1",
     "mkdirp": "^1.0.3",
@@ -106,11 +106,7 @@
     "tslint": "^5.18.0",
     "tslint-config-prettier": "^1.18.0",
     "tslint-plugin-prettier": "^2.0.1",
-    "typescript": "~5.0.2",
-    "yjs": "^13.5.40"
-  },
-  "resolutions": {
-    "@types/react": "~16.4.13"
+    "typescript": "~5.0.4"
   },
   "jupyterlab": {
     "extension": "lib/index.js",
