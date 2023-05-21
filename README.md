@@ -25,9 +25,9 @@ For more advanced usage documentation, see [here](docs/advanced.md).
 
 ## Requirements
 
-- JupyterLab >= 3.6
+- JupyterLab >= 4.0
   - older versions are supported in previous releases available on PyPI and npm, check [releases](https://github.com/jupyterlab/jupyterlab-latex/releases)
-- Python >= 3.6
+- Python >= 3.8
 - An application that can compile `.tex` files to PDF (e.g., `pdflatex`, `xelatex`; use `pdflatex.exe` on Windows with MiKTeX). This application must be available as a command in the same environment as the notebook server.
 - An application that can process `.bib` files for producing bibliographies. As with the LaTeX command, this must be available in the same environment as the notebook server.
 
@@ -56,7 +56,8 @@ and see the block like this in the output
 ```
 jupyterlab_latex enabled
     - Validating jupyterlab_latex...
-      jupyterlab_latex 3.1.0 OK
+Package jupyterlab_latex took 0.0010s to import
+      jupyterlab_latex 4.0.0 OK
 ```
 
 then
@@ -129,7 +130,7 @@ The `jlpm` command is JupyterLab's pinned version of
 To simplify the development setup, you can use the following Conda environment:
 
 ```
-conda create -n jupyterlab-latex-env -c conda-forge python=3.10 jupyterlab=3.6.3 jupyter_packaging=0.12.3 nodejs=18
+conda create -n jupyterlab-latex-env -c conda-forge python=3.10 jupyterlab=4.0.0 jupyter_packaging=0.12.3 nodejs=18
 conda activate jupyterlab-latex-env
 ```
 
