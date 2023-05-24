@@ -42,7 +42,7 @@ import { ILauncher } from '@jupyterlab/launcher';
 
 import { LabIcon } from '@jupyterlab/ui-components';
 
-import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 
 import { ICommandPalette } from '@jupyterlab/apputils';
 
@@ -109,7 +109,7 @@ type ISynctexEditOptions = PDFJSViewer.IPosition;
 const latexPlugin: JupyterFrontEndPlugin<void> = {
   id: latexPluginId,
   requires: [
-    IFileBrowserFactory,
+    IDefaultFileBrowser,
     IDocumentManager,
     IEditorTracker,
     ILabShell,
@@ -220,7 +220,7 @@ function synctexViewRequest(
  */
 function activateLatexPlugin(
   app: JupyterFrontEnd,
-  browserFactory: IFileBrowserFactory,
+  browser: IDefaultFileBrowser,
   manager: IDocumentManager,
   editorTracker: IEditorTracker,
   shell: ILabShell,
@@ -454,7 +454,7 @@ function activateLatexPlugin(
     execute: async args => {
       // Get the directory in which the LaTeX file must be created;
       // otherwise take the current filebrowser directory
-      const cwd = args['cwd'] || browserFactory.defaultBrowser.model.path;
+      const cwd = args['cwd'] || browser.model.path;
 
       // Create a new untitled LaTeX file
       const model = await commands.execute('docmanager:new-untitled', {

@@ -1,7 +1,7 @@
 [build-system]
 requires = [
     "jupyter_packaging~=0.12,<2", 
-    "jupyterlab~=3.6"
+    "jupyterlab==4.0.0"
 ]
 build-backend = "jupyter_packaging.build_api"
 

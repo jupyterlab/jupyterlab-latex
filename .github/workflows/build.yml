@@ -45,13 +45,13 @@ jobs:
           yarn-
 
     - name: Install dependencies
-      run: python -m pip install -U jupyter_packaging~=0.12.3 jupyterlab~=3.6.3 pip wheel
+      run: python -m pip install -U jupyter_packaging~=0.12.3 jupyterlab~=4.0.0 pip wheel
     - name: Install the extension
       run: |
         set -eux
         python -m pip install .
     - name: Integration test
       run: |
-        jupyter serverextension list 2>&1 | grep -ie "jupyterlab_latex.*OK"
+        jupyter server extension list 2>&1 | grep -ie "jupyterlab_latex.*OK"
         jupyter labextension list 2>&1 | grep -ie "@jupyterlab/latex.*OK"
 

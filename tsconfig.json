@@ -9,7 +9,7 @@
     "lib": ["DOM", "ES6"],
     "module": "esnext",
     "moduleResolution": "node",
-    "target": "ES6",
+    "target": "ESNext",
     "outDir": "./lib",
     "jsx": "react"
   },
