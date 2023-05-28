@@ -26,39 +26,3 @@ in the JupyterLab advanced settings editor.
 The extension defaults to running `synctex` for establishing the mapping.
 You can configure this command by setting `c.LatexConfig.synctex_command`
 in your `jupyter_notebook_config.py` file.
-
-## Installing from source
-
-You can install from source in order to develop the extension.
-
-From the `jupyterlab-latex` directory, enter the following into your terminal:
-
-```bash
-pip install -e .
-```
-
-Link your development version of the extension with JupyterLab
-
-```bash
-jupyter labextension develop . --overwrite{% if cookiecutter.has_server_extension.lower().startswith('y') %}
-```
-
-Server extension must be manually installed in develop mode
-
-```bash
-jupyter server extension enable {{ cookiecutter.python_name }}{% endif %}
-```
-
-Rebuild extension Typescript source after making changes
-
-```bash
-jlpm run build
-```
-
-You can build a Python wheel for testing the distribution
-
-```bash
-python setup.py sdist bdist_wheel
-```
-
-The wheel and the source archive will be created in `dist/` directory.

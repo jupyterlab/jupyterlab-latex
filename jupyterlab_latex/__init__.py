@@ -6,7 +6,6 @@ __all__ = [
     "__version__",
     "_jupyter_labextension_paths",
     "_jupyter_server_extension_paths",
-    "_jupyter_server_extension_points",
     "_load_jupyter_server_extension",
     "load_jupyter_server_extension",
 ]
@@ -35,7 +34,7 @@ def load_jupyter_server_extension(nb_server_app):
     Args:
         nb_server_app (NotebookApp): handle to the Notebook webserver instance.
     """
-    from notebook.utils import url_path_join
+    from jupyter_server.utils import url_path_join
 
     from .build import LatexBuildHandler
     from .synctex import LatexSynctexHandler

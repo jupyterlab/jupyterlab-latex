@@ -52,7 +52,7 @@ export class ErrorPanel extends Widget {
   }
 }
 
-export interface ILatexProps extends React.Props<LatexError> {
+export interface ILatexProps {
   text: string;
   node: ErrorPanel;
 }
@@ -112,3 +112,4 @@ export class LatexError extends React.Component<ILatexProps, {}> {
     );
   }
 }
+

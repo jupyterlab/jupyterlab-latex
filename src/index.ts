@@ -45,7 +45,7 @@ import { ILauncher } from '@jupyterlab/launcher';
 
 import { LabIcon } from '@jupyterlab/ui-components';
 
-import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
@@ -126,11 +126,10 @@ type ISynctexEditOptions = PDFJSViewer.IPosition;
 /**
  * The JupyterFrontEnd plugin for the LaTeX extension.
  */
-
 const latexPlugin: JupyterFrontEndPlugin<void> = {
   id: latexPluginId,
   requires: [
-    IFileBrowserFactory,
+    IDefaultFileBrowser,
     IDocumentManager,
     IEditorTracker,
     ILabShell,
@@ -252,7 +251,7 @@ function isLatexFile(
  */
 function activateLatexPlugin(
   app: JupyterFrontEnd,
-  browserFactory: IFileBrowserFactory,
+  browser: IDefaultFileBrowser,
   manager: IDocumentManager,
   editorTracker: IEditorTracker,
   shell: ILabShell,
@@ -266,10 +265,12 @@ function activateLatexPlugin(
 ): void {
   const { commands } = app;
   const id = 'jupyterlab-latex';
+  
   const icon = new LabIcon({
     name: 'launcher:latex-icon',
     svgstr: latexIconStr
   });
+
   let synctex = true;
 
   // Settings for the notebook server.
@@ -989,7 +990,7 @@ function activateLatexPlugin(
     execute: async args => {
       // Get the directory in which the LaTeX file must be created;
       // otherwise take the current filebrowser directory
-      const cwd = args['cwd'] || browserFactory.defaultBrowser.model.path;
+      const cwd = args['cwd'] || browser.model.path;
 
       // Create a new untitled LaTeX file
       const model = await commands.execute('docmanager:new-untitled', {

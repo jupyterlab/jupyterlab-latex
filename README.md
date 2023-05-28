@@ -25,9 +25,9 @@ For more advanced usage documentation, see [here](docs/advanced.md).
 
 ## Requirements
 
-- JupyterLab >= 3.0
+- JupyterLab >= 4.0
   - older versions are supported in previous releases available on PyPI and npm, check [releases](https://github.com/jupyterlab/jupyterlab-latex/releases)
-- Python >= 3.6
+- Python >= 3.8
 - An application that can compile `.tex` files to PDF (e.g., `pdflatex`, `xelatex`; use `pdflatex.exe` on Windows with MiKTeX). This application must be available as a command in the same environment as the notebook server.
 - An application that can process `.bib` files for producing bibliographies. As with the LaTeX command, this must be available in the same environment as the notebook server.
 
@@ -56,7 +56,8 @@ and see the block like this in the output
 ```
 jupyterlab_latex enabled
     - Validating jupyterlab_latex...
-      jupyterlab_latex 3.1.0 OK
+Package jupyterlab_latex took 0.0010s to import
+      jupyterlab_latex 4.0.0 OK
 ```
 
 then
@@ -111,5 +112,55 @@ For example, to force your LaTeX distribution to run any command, use:
 ```python
 c.LatexConfig.shell_escape = "allow"
 ```
+
+## Contributing
+
+If you would like to contribute to the project, please read our [contributor documentation](https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md).
+
+JupyterLab follows the official [Jupyter Code of Conduct](https://github.com/jupyter/governance/blob/master/conduct/code_of_conduct.md).
+
+### Development install
+
+Note: You will need NodeJS to build the extension package.
+
+The `jlpm` command is JupyterLab's pinned version of
+[yarn](https://yarnpkg.com/) that is installed with JupyterLab. You may use
+`yarn` or `npm` in lieu of `jlpm` below.
+
+To simplify the development setup, you can use the following Conda environment:
+
+```
+conda create -n jupyterlab-latex-env -c conda-forge python=3.10 jupyterlab=4.0.0 jupyter_packaging=0.12.3 nodejs=18
+conda activate jupyterlab-latex-env
+```
+
+```bash
+# Clone the repo to your local environment
+git clone https://github.com/jupyterlab/jupyterlab-latex.git
+# Change directory to the jupyterlab-latex directory
+cd jupyterlab-latex
+# Install package in development mode
+pip install -e .
+
+# Link your development version of the extension with JupyterLab
+jupyter labextension develop . --overwrite
+# Server extension must be manually installed in develop mode
+jupyter server extension enable jupyterlab_latex
+# Rebuild extension Typescript source after making changes
+jlpm run build
+```
+
+You can watch the source directory and run JupyterLab at the same time in different terminals to watch for changes in the extension's source and automatically rebuild the extension.
+
+```bash
+# Watch the source directory in one terminal, automatically rebuilding when needed
+jlpm run watch
+# Run JupyterLab in another terminal
+jupyter lab
+```
+
+With the watch command running, every saved change will immediately be built locally and available in your running JupyterLab. Refresh JupyterLab to load the change in your browser (you may need to wait several seconds for the extension to be rebuilt).
+
+## Changes
 
 For information on the changes with different versions of the `jupyterlab-latex` library, see our [changelog](./docs/changelog.md)

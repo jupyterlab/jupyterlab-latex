@@ -6,7 +6,7 @@ import shutil
 
 from tornado import gen, web
 
-from notebook.base.handlers import APIHandler
+from jupyter_server.base.handlers import APIHandler
 
 from .config import LatexConfig
 from .util import run_command
@@ -66,6 +66,7 @@ class LatexBuildHandler(APIHandler):
 
     def initialize(self, notebook_dir):
         self.notebook_dir = notebook_dir
+
 
     def build_tex_cmd_sequence(self, tex_base_name, run_bibtex=False):
         """Builds tuples that will be used to call LaTeX shell commands.
