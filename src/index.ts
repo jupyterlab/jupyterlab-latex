@@ -1317,7 +1317,7 @@ function addLatexMenu(
     command: 'latex:create-table'
   });
 
-  mainMenu.addMenu(menu, { rank: 100 });
+  mainMenu.addMenu(menu, true, { rank: 100 });
 }
 
 function generateTable(rowNum: number, colNum: number): string {
