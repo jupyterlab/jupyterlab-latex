@@ -130,7 +130,7 @@ The `jlpm` command is JupyterLab's pinned version of
 To simplify the development setup, you can use the following Conda environment:
 
 ```
-conda create -n jupyterlab-latex-env -c conda-forge python=3.10 jupyterlab=4.0.0 jupyter_packaging=0.12.3 nodejs=18
+conda create -n jupyterlab-latex-env -c conda-forge python=3.10 jupyterlab=4.0.0 hatchling=1.17.0 nodejs=18
 conda activate jupyterlab-latex-env
 ```
 
