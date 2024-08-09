@@ -33,7 +33,6 @@ classifiers = [
 ]
 dependencies = [
     "jupyter_server>=2,<3",
-    "jupyterlab>=4,<5",
 ]
 version = "4.0.0"
 
@@ -46,7 +45,6 @@ Homepage = "https://github.com/jupyterlab/jupyterlab-latex"
 [tool.hatch.build.targets.wheel.shared-data]
 "jupyterlab_latex/labextension/static" = "share/jupyter/labextensions/@jupyterlab/latex/static"
 "install.json" = "share/jupyter/labextensions/@jupyterlab/latex/install.json"
-"jupyterlab_latex/labextension/build_log.json" = "share/jupyter/labextensions/@jupyterlab/latex/build_log.json"
 "jupyterlab_latex/labextension/package.json" = "share/jupyter/labextensions/@jupyterlab/latex/package.json"
 "jupyterlab_latex/labextension/schemas/@jupyterlab/latex" = "share/jupyter/labextensions/@jupyterlab/latex/schemas/@jupyterlab/latex"
 "jupyter-config/server-config" = "etc/jupyter/jupyter_server_config.d"
