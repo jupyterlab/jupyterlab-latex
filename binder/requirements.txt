@@ -1,4 +1,0 @@
-jupyter_packaging ~=0.12.3,<2
-jupyterlab ~=4.0
-setuptools
-nbgitpuller
