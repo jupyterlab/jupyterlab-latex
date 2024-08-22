@@ -7,9 +7,9 @@ node_modules/
 *.egg-info/
 .ipynb_checkpoints
 *.tsbuildinfo
-jupyterlab-latex/labextension
+jupyterlab_latex/labextension
 # Version file is handled by hatchling
-jupyterlab-latex/_version.py
+jupyterlab_latex/_version.py
 
 # Created by https://www.gitignore.io/api/python
 # Edit at https://www.gitignore.io/?templates=python

@@ -1,7 +1,7 @@
 {
   "ServerApp": {
     "jpserver_extensions": {
-      "jupyterlab-latex": true
+      "jupyterlab_latex": true
     }
   }
 }
