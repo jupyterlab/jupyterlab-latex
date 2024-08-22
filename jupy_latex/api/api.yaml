@@ -1,0 +1,97 @@
+openapi: 3.0.0
+info:
+  title: JupyterLab LaTeX Live Renderer
+  description: Handles requests from JupyterLab to render LaTeX documents as they are being written.
+  version: 0.1.0
+  
+paths:
+  /latex/build/{filePath}:
+    get:
+      summary: Triggers a compilation on the .tex file located at the filePath.
+      parameters:
+        - name: filePath
+          in: path
+          required: true
+          description: The path to the .tex file relative to the root directory of jupyterlab.
+          schema:
+            type: string
+            format: uri
+        - name: synctex
+          in: query
+          required: false
+          description: Whether to build the document using SyncTeX: 1 for true, and 0 for false.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The document was successfully built.
+        '400':
+          description: The request did not specify a .tex file.
+        '403':
+          description: The request specified a file that does not exist.
+        '500':
+          description: The compilation steps for building the pdf had an error.
+  /latex/synctex/{filePath}:
+    get:
+      summary: Get a mapping between the text file and the compiled pdf.
+      parameters:
+        - name: filePath
+          in: path
+          required: true
+          description: The path of the .tex or .pdf file to map. If the path ends in .tex it gets the forward synchronization. If the path ends in .pdf it gets the reverse synchronization.
+          schema:
+            type: string
+            format: uri
+        - name: line
+          in: query
+          required: false
+          description: The line of the text file for forwards synchronization.
+          schema:
+            type: integer
+        - name: column
+          in: query
+          required: false
+          description: The column of the text file for forwards synchronization.
+          schema:
+            type: integer
+        - name: page
+          in: query
+          required: false
+          description: The page of the PDF file for reverse synchronization.
+          schema:
+            type: integer
+        - name: x
+          in: query
+          required: false
+          description: The x position on the page (in pts) of the PDF file for reverse synchronization.
+          schema:
+            type: number
+        - name: y
+          in: query
+          required: false
+          description: The y position on the page (in pts) of the PDF file for reverse synchronization.
+          schema:
+            type: number
+      responses:
+        '200':
+          description: The SyncTeX mapping was successful.
+          schema:
+            type: object
+            description: The mapping between the .tex and .pdf documents.
+            properties:
+              x:
+                type: number
+              y:
+                type: number
+              page:
+                type: integer
+              line:
+                type: integer
+              column:
+                type: integer
+        '400':
+          description: The request did not specify a .tex or .pdf file.
+        '403':
+          description: The request specified a file that did not exist, or the .synctex.gz file did not exist.
+        '500':
+          description: The SyncTeX mapping had an error.
