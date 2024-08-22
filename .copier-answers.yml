@@ -1,14 +1,14 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
 _commit: v4.3.5
 _src_path: https://github.com/jupyterlab/extension-template
-author_email: axle@axleinfo.com
-author_name: axle
+author_email: jupyter@googlegroups.com
+author_name: Jupyter Development Team
 has_binder: true
 has_settings: true
 kind: server
-labextension_name: jupy_latex
-project_short_description: A JupyterLab extension.
-python_name: jupy_latex
+labextension_name: jupyterlab-latex
+project_short_description: JupyterLab extension for running LaTeX
+python_name: jupyterlab
 repository: ''
 test: false
 

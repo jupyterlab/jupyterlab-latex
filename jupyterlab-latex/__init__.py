@@ -20,7 +20,7 @@ def _jupyter_labextension_paths():
 
 def _jupyter_server_extension_points():
     return [{
-        'module': 'jupy_latex'
+        'module': 'jupyterlab-latex'
     }]
 
 _jupyter_server_extension_paths = _jupyter_server_extension_points

@@ -307,11 +307,11 @@ function activateLatexPlugin(
       if (err.response.status === 404) {
         const noServerExt = {
           message:
-            'You probably do not have jupy_latex ' +
+            'You probably do not have jupyterlab-latex ' +
             'installed or enabled. ' +
-            'Please, run "pip install -U jupy_latex." ' +
+            'Please, run "pip install -U jupyterlab-latex." ' +
             'If that does not work, try "jupyter serverextension ' +
-            'enable --sys-prefix jupy_latex".'
+            'enable --sys-prefix jupyterlab-latex".'
         };
         showErrorMessage('Server Extension Error', noServerExt);
         return;
