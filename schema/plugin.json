@@ -2,8 +2,8 @@
   "jupyter.lab.shortcuts": [],
   "jupyter.lab.setting-icon-class": "jp-FileIcon",
   "jupyter.lab.setting-icon-label": "LaTeX",
-  "title": "jupyterlab_latex",
-  "description": "jupyterlab_latex settings.",
+  "title": "LaTeX",
+  "description": "LaTeX settings.",
   "type": "object",
   "properties": {
     "synctex": {

@@ -15,7 +15,8 @@ path_regex = r'(?P<path>(?:(?:/[^/]+)+|/?))'
 
 def _jupyter_labextension_paths():
     return [{
-        "src": "labextension"
+        "src": "labextension",
+        "dest": "@jupyterlab/latex"
     }]
 
 def _jupyter_server_extension_points():

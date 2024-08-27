@@ -30,14 +30,12 @@ dynamic = ["version", "description", "authors", "urls", "keywords"]
 [tool.hatch.version]
 source = "nodejs"
 
-
 [tool.hatch.metadata.hooks.nodejs]
 fields = ["description", "authors", "urls", "keywords"]
 
 [tool.hatch.build.targets.sdist]
 artifacts = ["jupyterlab_latex/labextension"]
 exclude = [".github", "binder"]
-
 
 [tool.hatch.build.targets.wheel.shared-data]
 "jupyterlab_latex/labextension/static" = "share/jupyter/labextensions/@jupyterlab/latex/static"
