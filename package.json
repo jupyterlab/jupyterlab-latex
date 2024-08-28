@@ -25,10 +25,10 @@
         "lib/*/*.js",
         "style/*.*",
         "style/index.js"
-      ],
+    ],
     "directories": {
         "lib": "lib/"
-    },      
+    },
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
     "style": "style/index.css",
@@ -141,9 +141,9 @@
         "schemaDir": "schema",
         "sharedPackages": {
             "pdfjs-dist": {
-              "bundled": true,
-              "singleton": true,
-              "strictVersion": true
+                "bundled": true,
+                "singleton": true,
+                "strictVersion": true
             }
         }
     },
@@ -222,7 +222,7 @@
             {
                 "files": "*.md",
                 "options": {
-                  "parser": "markdown"
+                    "parser": "markdown"
                 }
             }
         ]
