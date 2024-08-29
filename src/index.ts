@@ -55,8 +55,7 @@ import '../style/index.css';
 /**
  * A class that tracks editor widgets.
  */
-export interface IPDFJSTracker
-  extends IWidgetTracker<IDocumentWidget<PDFJSViewer>> {}
+export type IPDFJSTracker = IWidgetTracker<IDocumentWidget<PDFJSViewer>>;
 
 /* tslint:disable */
 /**
@@ -252,7 +251,7 @@ function activateLatexPlugin(
   // a .tex document, open a LaTeX preview for it.
   const openPreview = (widget: IDocumentWidget) => {
     // If we can't find the document context, bail.
-    let texContext = manager.contextForWidget(widget);
+    const texContext = manager.contextForWidget(widget);
     if (!texContext) {
       return;
     }
@@ -389,10 +388,10 @@ function activateLatexPlugin(
   // If there are any active previews in the statedb,
   // activate them upon initialization.
   Promise.all([state.fetch(id), app.restored]).then(([args]) => {
-    let paths =
+    const paths =
       (args && ((args as ReadonlyJSONObject)['paths'] as string[])) || [];
     paths.forEach(path => {
-      let widget = manager.findWidget(path);
+      const widget = manager.findWidget(path);
       if (widget) {
         openPreview(widget);
       }
@@ -430,14 +429,14 @@ function activateLatexPlugin(
   commands.addCommand(CommandIDs.openLatexPreview, {
     execute: () => {
       // Get the current widget that had its contextMenu activated.
-      let widget = editorTracker.currentWidget;
+      const widget = editorTracker.currentWidget;
       if (widget) {
         openPreview(widget);
       }
     },
     isEnabled: hasWidget,
     isVisible: () => {
-      let widget = editorTracker.currentWidget;
+      const widget = editorTracker.currentWidget;
       return (
         (widget && PathExt.extname(widget.context.path) === '.tex') || false
       );
@@ -519,7 +518,7 @@ function addSynctexCommands(
     app.commands.addCommand(CommandIDs.synctexEdit, {
       execute: () => {
         // Get the pdf widget that had its contextMenu activated.
-        let widget = pdfTracker.currentWidget;
+        const widget = pdfTracker.currentWidget;
         if (widget) {
           // Get the page number.
           const pos = widget.content.position;
@@ -568,7 +567,7 @@ function addSynctexCommands(
     app.commands.addCommand(CommandIDs.synctexView, {
       execute: () => {
         // Get the current widget that had its contextMenu activated.
-        let widget = editorTracker.currentWidget;
+        const widget = editorTracker.currentWidget;
         if (widget) {
           // Get the cursor position.
           let pos = widget.content.editor.getCursorPosition();
@@ -602,7 +601,7 @@ function addSynctexCommands(
       },
       isEnabled: hasEditorWidget,
       isVisible: () => {
-        let widget = editorTracker.currentWidget;
+        const widget = editorTracker.currentWidget;
         return !!widget && Private.previews.has(widget.context.path);
       },
       label: 'Scroll PDF to Cursor'

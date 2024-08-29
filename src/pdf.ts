@@ -199,15 +199,15 @@ export class PDFJSViewer extends Widget {
       if (!this._viewer) {
         return;
       }
-      let data = this.context.model.toString();
+      const data = this.context.model.toString();
       // If there is no data, do nothing.
       if (!data) {
         resolve(void 0);
       }
       const blob = Private.b64toBlob(data, MIME_TYPE);
 
-      let oldDocument = this._pdfDocument;
-      let oldUrl = this._objectUrl;
+      const oldDocument = this._pdfDocument;
+      const oldUrl = this._objectUrl;
       this._objectUrl = URL.createObjectURL(blob);
 
       let scale: number | string = 'page-width';
@@ -370,7 +370,7 @@ export class PDFJSViewer extends Widget {
    * Handle `before-detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
-    let node = this.node;
+    const node = this.node;
     node.removeEventListener('click', this);
   }
 
@@ -474,9 +474,9 @@ namespace Private {
    * Create the node for the PDF widget.
    */
   export function createNode(): HTMLElement {
-    let node = document.createElement('div');
+    const node = document.createElement('div');
     node.className = PDF_CONTAINER_CLASS;
-    let pdf = document.createElement('div');
+    const pdf = document.createElement('div');
     pdf.className = PDF_CLASS;
     node.appendChild(pdf);
     node.tabIndex = -1;
@@ -614,24 +614,24 @@ namespace Private {
    */
   export function b64toBlob(
     b64Data: string,
-    contentType: string = '',
-    sliceSize: number = 512
+    contentType = '',
+    sliceSize = 512
   ): Blob {
     const byteCharacters = atob(b64Data);
-    let byteArrays: Uint8Array[] = [];
+    const byteArrays: Uint8Array[] = [];
 
     for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-      let slice = byteCharacters.slice(offset, offset + sliceSize);
+      const slice = byteCharacters.slice(offset, offset + sliceSize);
 
-      let byteNumbers = new Array(slice.length);
+      const byteNumbers = new Array(slice.length);
       for (let i = 0; i < slice.length; i++) {
         byteNumbers[i] = slice.charCodeAt(i);
       }
-      let byteArray = new Uint8Array(byteNumbers);
+      const byteArray = new Uint8Array(byteNumbers);
       byteArrays.push(byteArray);
     }
 
-    let blob = new Blob(byteArrays, { type: contentType });
+    const blob = new Blob(byteArrays, { type: contentType });
     return blob;
   }
 
