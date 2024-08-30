@@ -2,12 +2,7 @@
   "name": "@jupyterlab/latex",
   "version": "4.0.0",
   "description": "JupyterLab extension for running LaTeX",
-  "keywords": [
-    "jupyter",
-    "jupyterlab",
-    "jupyterlab-extension",
-    "latex"
-  ],
+  "keywords": ["jupyter", "jupyterlab", "jupyterlab-extension", "latex"],
   "homepage": "https://github.com/jupyterlab/jupyterlab-latex",
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab-latex/issues"
@@ -118,10 +113,7 @@
     "tslint-plugin-prettier": "^2.0.1",
     "typescript": "~5.0.4"
   },
-  "sideEffects": [
-    "style/*.css",
-    "style/index.js"
-  ],
+  "sideEffects": ["style/*.css", "style/index.js"],
   "styleModule": "style/index.js",
   "publishConfig": {
     "access": "public"
@@ -129,9 +121,7 @@
   "jupyterlab": {
     "discovery": {
       "server": {
-        "managers": [
-          "pip"
-        ],
+        "managers": ["pip"],
         "base": {
           "name": "jupyterlab_latex"
         }
@@ -148,12 +138,7 @@
       }
     }
   },
-  "eslintIgnore": [
-    "node_modules",
-    "dist",
-    "coverage",
-    "**/*.d.ts"
-  ],
+  "eslintIgnore": ["node_modules", "dist", "coverage", "**/*.d.ts"],
   "eslintConfig": {
     "extends": [
       "eslint:recommended",
@@ -166,17 +151,13 @@
       "project": "tsconfig.json",
       "sourceType": "module"
     },
-    "plugins": [
-      "@typescript-eslint"
-    ],
+    "plugins": ["@typescript-eslint"],
     "rules": {
       "@typescript-eslint/naming-convention": [
         "error",
         {
           "selector": "interface",
-          "format": [
-            "PascalCase"
-          ],
+          "format": ["PascalCase"],
           "custom": {
             "regex": "^I[A-Z]",
             "match": true
@@ -200,10 +181,7 @@
           "allowTemplateLiterals": false
         }
       ],
-      "curly": [
-        "error",
-        "all"
-      ],
+      "curly": ["error", "all"],
       "eqeqeq": "error",
       "prefer-arrow-callback": "error"
     }
@@ -234,9 +212,7 @@
       "stylelint-config-standard",
       "stylelint-prettier/recommended"
     ],
-    "plugins": [
-      "stylelint-csstree-validator"
-    ],
+    "plugins": ["stylelint-csstree-validator"],
     "rules": {
       "csstree/validator": true,
       "property-no-vendor-prefix": null,
