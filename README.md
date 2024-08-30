@@ -163,4 +163,4 @@ With the watch command running, every saved change will immediately be built loc
 
 ## Changes
 
-For information on the changes with different versions of the `jupyterlab-latex` library, see our [changelog](./docs/changelog.md)
+For information on the changes with different versions of the `jupyterlab-latex` library, see our [changelog](./CHANGELOG.md)
