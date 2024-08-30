@@ -1,5 +1,9 @@
 # Changelog for `jupyterlab_latex`
 
+<!-- <START NEW CHANGELOG ENTRY> -->
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 - **3.2.0**:
 
   - Minimum supported JupyterLab is 3.6.0
