@@ -57,7 +57,7 @@ and see the block like this in the output
 jupyterlab_latex enabled
     - Validating jupyterlab_latex...
 Package jupyterlab_latex took 0.0010s to import
-      jupyterlab_latex 4.0.0 OK
+      jupyterlab_latex 4.1.0 OK
 ```
 
 then
