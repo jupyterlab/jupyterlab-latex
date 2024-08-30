@@ -115,12 +115,8 @@ class PageNumberComponent extends React.Component<
    * Render page number widget.
    */
   render() {
-    const {
-      currentPageLabel,
-      currentPageNumber,
-      pagesCount,
-      userInput
-    } = this.state;
+    const { currentPageLabel, currentPageNumber, pagesCount, userInput } =
+      this.state;
     const text = currentPageLabel
       ? ` (${currentPageNumber} of ${pagesCount})`
       : ` of ${pagesCount}`;

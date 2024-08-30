@@ -1,17 +1,24 @@
 {
   "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "composite": true,
     "declaration": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "skipLibCheck": true,
-    "noEmitOnError": true,
-    "noUnusedLocals": true,
-    "lib": ["DOM", "ES6"],
+    "esModuleInterop": true,
+    "incremental": true,
+    "jsx": "react",
     "module": "esnext",
     "moduleResolution": "node",
-    "target": "ESNext",
-    "outDir": "./lib",
-    "jsx": "react"
+    "noEmitOnError": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "preserveWatchOutput": true,
+    "resolveJsonModule": true,
+    "outDir": "lib",
+    "rootDir": "src",
+    "strict": true,
+    "strictNullChecks": true,
+    "target": "ES2018"
   },
-  "include": ["src/*"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "style"]
 }

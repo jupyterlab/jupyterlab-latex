@@ -57,7 +57,7 @@ and see the block like this in the output
 jupyterlab_latex enabled
     - Validating jupyterlab_latex...
 Package jupyterlab_latex took 0.0010s to import
-      jupyterlab_latex 4.0.0 OK
+      jupyterlab_latex 4.1.0 OK
 ```
 
 then
@@ -130,7 +130,7 @@ The `jlpm` command is JupyterLab's pinned version of
 To simplify the development setup, you can use the following Conda environment:
 
 ```
-conda create -n jupyterlab-latex-env -c conda-forge python=3.10 jupyterlab=4.0.0 jupyter_packaging=0.12.3 nodejs=18
+conda create -n jupyterlab-latex-env -c conda-forge python=3.10 jupyterlab=4.0.0 hatchling=1.17.0 nodejs=18
 conda activate jupyterlab-latex-env
 ```
 
@@ -163,4 +163,4 @@ With the watch command running, every saved change will immediately be built loc
 
 ## Changes
 
-For information on the changes with different versions of the `jupyterlab-latex` library, see our [changelog](./docs/changelog.md)
+For information on the changes with different versions of the `jupyterlab-latex` library, see our [changelog](./CHANGELOG.md)

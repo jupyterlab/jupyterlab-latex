@@ -1,20 +1,11 @@
 {
   "name": "@jupyterlab/latex",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "description": "JupyterLab extension for running LaTeX",
-  "keywords": [
-    "jupyter",
-    "jupyterlab",
-    "jupyterlab-extension",
-    "latex"
-  ],
+  "keywords": ["jupyter", "jupyterlab", "jupyterlab-extension", "latex"],
   "homepage": "https://github.com/jupyterlab/jupyterlab-latex",
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab-latex/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jupyterlab/jupyterlab-latex.git"
   },
   "license": "BSD-3-Clause",
   "author": {
@@ -22,11 +13,11 @@
     "email": "jupyter@googlegroups.com"
   },
   "files": [
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "style/**/*.{css,js,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
+    "schema/*.json",
     "lib/*/*d.ts",
     "lib/*/*.js",
-    "lib/*.d.ts",
-    "lib/*.js",
-    "schema/*.json",
     "style/*.*",
     "style/index.js"
   ],
@@ -34,26 +25,37 @@
     "lib": "lib/"
   },
   "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "style": "style/index.css",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab-latex.git"
+  },
   "scripts": {
     "build": "jlpm build:lib && jlpm build:labextension:dev",
-    "build:prod": "jlpm clean && jlpm build:lib && jlpm build:labextension",
+    "build:prod": "jlpm clean && jlpm build:lib:prod && jlpm build:labextension",
     "build:labextension": "jupyter labextension build .",
     "build:labextension:dev": "jupyter labextension build --development True .",
-    "build:lib": "tsc",
+    "build:lib": "tsc --sourceMap",
+    "build:lib:prod": "tsc",
     "clean": "jlpm clean:lib",
     "clean:lib": "rimraf lib tsconfig.tsbuildinfo",
-    "clean:labextension": "rimraf jupyterlab-latex/labextension",
-    "clean:all": "jlpm clean:lib && jlpm clean:labextension",
-    "precommit": "lint-staged",
-    "prettier": "prettier --write '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
+    "clean:lintcache": "rimraf .eslintcache .stylelintcache",
+    "clean:labextension": "rimraf jupyterlab_latex/labextension jupyterlab_latex/_version.py",
+    "clean:all": "jlpm clean:lib && jlpm clean:labextension && jlpm clean:lintcache",
+    "eslint": "jlpm eslint:check --fix",
+    "eslint:check": "eslint . --cache",
     "install:extension": "jlpm build",
-    "watch": "tsc -w"
-  },
-  "lint-staged": {
-    "**/*{.ts,.tsx,.css,.json,.md}": [
-      "prettier --write",
-      "git add"
-    ]
+    "lint": "jlpm stylelint && jlpm prettier && jlpm eslint",
+    "lint:check": "jlpm stylelint:check && jlpm prettier:check && jlpm eslint:check",
+    "prettier": "jlpm prettier:base --write --list-different",
+    "prettier:base": "prettier \"**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}\"",
+    "prettier:check": "jlpm prettier:base --check",
+    "stylelint": "jlpm stylelint:check --fix",
+    "stylelint:check": "stylelint --cache \"style/**/*.css\"",
+    "watch": "run-p watch:src watch:labextension",
+    "watch:src": "tsc -w --sourceMap",
+    "watch:labextension": "jupyter labextension watch ."
   },
   "dependencies": {
     "@jupyterlab/application": "^4.0.0",
@@ -104,14 +106,29 @@
     "stylelint-config-prettier": "^9.0.4",
     "stylelint-config-recommended": "^8.0.0",
     "stylelint-config-standard": "^26.0.0",
+    "stylelint-csstree-validator": "^3.0.0",
     "stylelint-prettier": "^2.0.0",
     "tslint": "^5.18.0",
     "tslint-config-prettier": "^1.18.0",
     "tslint-plugin-prettier": "^2.0.1",
     "typescript": "~5.0.4"
   },
+  "sideEffects": ["style/*.css", "style/index.js"],
+  "styleModule": "style/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
   "jupyterlab": {
-    "extension": "lib/index.js",
+    "discovery": {
+      "server": {
+        "managers": ["pip"],
+        "base": {
+          "name": "jupyterlab_latex"
+        }
+      }
+    },
+    "extension": true,
+    "outputDir": "jupyterlab_latex/labextension",
     "schemaDir": "schema",
     "sharedPackages": {
       "pdfjs-dist": {
@@ -119,8 +136,89 @@
         "singleton": true,
         "strictVersion": true
       }
-    },
-    "outputDir": "jupyterlab_latex/labextension"
+    }
   },
-  "styleModule": "style/index.js"
+  "eslintIgnore": ["node_modules", "dist", "coverage", "**/*.d.ts"],
+  "eslintConfig": {
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/eslint-recommended",
+      "plugin:@typescript-eslint/recommended",
+      "plugin:prettier/recommended"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+      "project": "tsconfig.json",
+      "sourceType": "module"
+    },
+    "plugins": ["@typescript-eslint"],
+    "rules": {
+      "@typescript-eslint/naming-convention": [
+        "error",
+        {
+          "selector": "interface",
+          "format": ["PascalCase"],
+          "custom": {
+            "regex": "^I[A-Z]",
+            "match": true
+          }
+        }
+      ],
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          "args": "none"
+        }
+      ],
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-namespace": "off",
+      "@typescript-eslint/no-use-before-define": "off",
+      "@typescript-eslint/quotes": [
+        "error",
+        "single",
+        {
+          "avoidEscape": true,
+          "allowTemplateLiterals": false
+        }
+      ],
+      "curly": ["error", "all"],
+      "eqeqeq": "error",
+      "prefer-arrow-callback": "error"
+    }
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "none",
+    "arrowParens": "avoid",
+    "endOfLine": "auto",
+    "overrides": [
+      {
+        "files": "*.json",
+        "options": {
+          "parser": "json"
+        }
+      },
+      {
+        "files": "*.md",
+        "options": {
+          "parser": "markdown"
+        }
+      }
+    ]
+  },
+  "stylelint": {
+    "extends": [
+      "stylelint-config-recommended",
+      "stylelint-config-standard",
+      "stylelint-prettier/recommended"
+    ],
+    "plugins": ["stylelint-csstree-validator"],
+    "rules": {
+      "csstree/validator": true,
+      "property-no-vendor-prefix": null,
+      "selector-class-pattern": "^([a-z][A-z\\d]*)(-[A-z\\d]+)*$",
+      "selector-no-vendor-prefix": null,
+      "value-no-vendor-prefix": null
+    }
+  }
 }
