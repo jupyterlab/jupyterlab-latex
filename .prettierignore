@@ -4,4 +4,3 @@ node_modules
 ./**/package.json
 package.json
 jupyterlab_latex
-CHANGELOG.md
