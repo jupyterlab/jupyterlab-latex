@@ -4,9 +4,19 @@
 
 <!-- <END NEW CHANGELOG ENTRY> -->
 
+- **4.1.0**:
+
+  - Migrate to [JupyterLab extension template](https://github.com/jupyterlab/extension-template)
+  - Minor JS changes
+
+- **4.0.0**:
+
+  - Update to JupyterLab 4.0
+  - Update to Lumino 2
+
 - **3.2.0**:
 
-  - Minimum supported JupyterLab is 3.6.0
+  - Update to JupyterLab 3.6.0
   - Bump JS and Python dependencies
   - Fix build issues
 
