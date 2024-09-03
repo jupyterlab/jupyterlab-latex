@@ -79,11 +79,13 @@ class LatexSynctexHandler(APIHandler):
         """
         c = LatexConfig(config=self.config)
 
+        pdf_path = os.path.join(self.notebook_dir, pdf_name+".pdf")
+
         cmd = (
             c.synctex_command,
             'edit',
             '-o',
-            f'{pos["page"]}:{pos["x"]}:{pos["y"]}:{self.notebook_dir}/{pdf_name+".pdf"}'
+            f'{pos["page"]}:{pos["x"]}:{pos["y"]}:{pdf_path}'
             )
 
         return cmd
