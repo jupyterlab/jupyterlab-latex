@@ -82,8 +82,12 @@ export class PDFJSViewer extends Widget {
   constructor(context: DocumentRegistry.Context) {
     super({ node: Private.createNode() });
     this._pdfjsLoaded = Private.ensurePDFJS().then(pdfjsLib => {
+      const eventBus = new pdfjsLib.EventBus();
       this._getDocument = pdfjsLib.getDocument;
-      this._viewer = new pdfjsLib.PDFViewer({ container: this.node });
+      this._viewer = new pdfjsLib.PDFViewer({
+        container: this.node,
+        eventBus: eventBus
+      });
     });
 
     this.context = context;
@@ -648,7 +652,7 @@ namespace Private {
 
     return {
       ...(({ getDocument }) => ({ getDocument }))(lib),
-      ...(({ PDFViewer }) => ({ PDFViewer }))(viewer)
+      ...(({ PDFViewer, EventBus }) => ({ PDFViewer, EventBus }))(viewer)
     };
   }
 }
