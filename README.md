@@ -1,4 +1,5 @@
 # JupyterLab LaTeX
+
 [binder-badge]: https://mybinder.org/badge_logo.svg
 [binder-latest]: https://mybinder.org/v2/gh/jupyterlab/jupyterlab-latex.git/master?urlpath=lab/tree/sample.tex
 [ci-badge]: https://github.com/jupyterlab/jupyterlab-latex/actions/workflows/build.yml/badge.svg
@@ -46,7 +47,7 @@ To install the extension, run the following in your terminal:
   ```
 - For `conda`
   ```bash
-  conda install conda-forge::jupyterlab-latex 
+  conda install conda-forge::jupyterlab-latex
   ```
 
 ### Check installation
