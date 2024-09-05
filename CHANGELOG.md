@@ -2,6 +2,26 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.1.3
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab-latex/compare/v4.1.1...3e490aa42608c5170c36b5dd8e641045b3cb9818))
+
+### Maintenance and upkeep improvements
+
+- Update PDF.js to 3.8.162 [#232](https://github.com/jupyterlab/jupyterlab-latex/pull/232) ([@ktaletsk](https://github.com/ktaletsk))
+
+### Documentation improvements
+
+- Add missing comma [#233](https://github.com/jupyterlab/jupyterlab-latex/pull/233) ([@krassowski](https://github.com/krassowski))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-latex/graphs/contributors?from=2024-09-05&to=2024-09-05&type=c))
+
+[@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-latex+involves%3Agithub-actions+updated%3A2024-09-05..2024-09-05&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-latex+involves%3Akrassowski+updated%3A2024-09-05..2024-09-05&type=Issues) | [@ktaletsk](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-latex+involves%3Aktaletsk+updated%3A2024-09-05..2024-09-05&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.1.2
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab-latex/compare/v4.1.1...9bf16578ab7763e62ea0ca055d7ec4584440ddef))
@@ -15,8 +35,6 @@
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-latex/graphs/contributors?from=2024-09-05&to=2024-09-05&type=c))
 
 [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-latex+involves%3Akrassowski+updated%3A2024-09-05..2024-09-05&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.1.1
 
