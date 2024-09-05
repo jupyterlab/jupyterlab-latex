@@ -2,7 +2,39 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.1.2
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab-latex/compare/v4.1.1...9bf16578ab7763e62ea0ca055d7ec4584440ddef))
+
+### Documentation improvements
+
+- Add missing comma [#233](https://github.com/jupyterlab/jupyterlab-latex/pull/233) ([@krassowski](https://github.com/krassowski))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-latex/graphs/contributors?from=2024-09-05&to=2024-09-05&type=c))
+
+[@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-latex+involves%3Akrassowski+updated%3A2024-09-05..2024-09-05&type=Issues)
+
 <!-- <END NEW CHANGELOG ENTRY> -->
+
+## 4.1.1
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab-latex/compare/v4.1.0...5a48105d5e859338fc596266620727b240fb62af))
+
+### Enhancements made
+
+- Migrate to updated JupyterLab extension template [#230](https://github.com/jupyterlab/jupyterlab-latex/pull/230) ([@akisaini](https://github.com/akisaini))
+
+### Bugs fixed
+
+- Fix a bug of synctex edit command [#231](https://github.com/jupyterlab/jupyterlab-latex/pull/231) ([@naoh16](https://github.com/naoh16))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-latex/graphs/contributors?from=2024-08-30&to=2024-09-04&type=c))
+
+[@akisaini](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-latex+involves%3Aakisaini+updated%3A2024-08-30..2024-09-04&type=Issues) | [@ktaletsk](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-latex+involves%3Aktaletsk+updated%3A2024-08-30..2024-09-04&type=Issues) | [@naoh16](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-latex+involves%3Anaoh16+updated%3A2024-08-30..2024-09-04&type=Issues)
 
 - **4.1.0**:
 
