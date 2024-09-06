@@ -1,5 +1,16 @@
 # Changelog for `jupyterlab_latex`
 
+- **4.1.0**:
+
+- Added UI improvements to LaTeX Editor
+    - Preview Button
+    - Symbol and Constant Menu
+    - Filtered Error Messages
+    - Table Creation GUI
+    - Equation Buttons
+    - Typeface Modifier GUI
+    - Bullet point and Numbered List Buttons
+
 - **3.2.0**:
 
   - Minimum supported JupyterLab is 3.6.0
