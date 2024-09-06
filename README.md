@@ -12,7 +12,7 @@
 
 [![binder-badge]][binder-latest] [![ci-badge]][ci] [![npm-version-badge]][npm-version] [![pypi-version-badge]][pypi-version] ![PyPI - Downloads](https://img.shields.io/pypi/dm/jupyterlab-latex) [![Version](https://img.shields.io/conda/vn/conda-forge/jupyterlab-latex.svg)](https://anaconda.org/conda-forge/jupyterlab-latex) ![Conda Downloads](https://img.shields.io/conda/d/conda-forge/jupyterlab-latex)
 
-An extension for JupyterLab which allows for live-editing of LaTeX documents.
+A JupyterLab extension for live-editing of LaTeX documents.
 
 ## Usage
 
