@@ -145,6 +145,7 @@ class LatexSynctexHandler(APIHandler):
           there.
 
         """
+        self.log.debug(f'jupyterlab-latex: run: {" ".join(cmd)} (CWD: {os.getcwd()})')
         code, output = yield run_command(cmd)
         if code != 0:
             self.set_status(500)
