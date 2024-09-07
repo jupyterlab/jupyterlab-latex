@@ -16,8 +16,8 @@ class LatexSynctexHandler(APIHandler):
     A handler that runs synctex on the server.
     """
 
-    def initialize(self, notebook_dir):
-        self.notebook_dir = notebook_dir
+    def initialize(self, root_dir):
+        self.root_dir = root_dir
 
 
     def build_synctex_cmd(self, base_name, ext):
@@ -79,7 +79,7 @@ class LatexSynctexHandler(APIHandler):
         """
         c = LatexConfig(config=self.config)
 
-        pdf_path = os.path.join(self.notebook_dir, pdf_name+".pdf")
+        pdf_path = os.path.join(self.root_dir, pdf_name+".pdf")
 
         cmd = (
             c.synctex_command,
@@ -107,8 +107,8 @@ class LatexSynctexHandler(APIHandler):
 
         """
         c = LatexConfig(config=self.config)
-        pdf_path = os.path.join(self.notebook_dir, tex_name+".pdf")
-        tex_path = os.path.join(self.notebook_dir, tex_name+".tex")
+        pdf_path = os.path.join(self.root_dir, tex_name+".pdf")
+        tex_path = os.path.join(self.root_dir, tex_name+".tex")
 
         cmd = (
             c.synctex_command,
@@ -176,7 +176,7 @@ class LatexSynctexHandler(APIHandler):
         # Parse the path into the base name and extension of the file
         relative_file_path = str(Path(path.strip('/')))
         relative_base_path = os.path.splitext(relative_file_path)[0]
-        full_file_path = os.path.join(self.notebook_dir, relative_file_path)
+        full_file_path = os.path.join(self.root_dir, relative_file_path)
         workdir = os.path.dirname(full_file_path)
         base_name, ext = os.path.splitext(os.path.basename(full_file_path))
 
