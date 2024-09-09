@@ -1,0 +1,9 @@
+node_modules
+dist
+coverage
+*.d.ts
+style/**/*.js
+jupyterlab_latex/labextension/static/*.js
+lib/**/*.js
+src/error.tsx
+eslint.config.js
