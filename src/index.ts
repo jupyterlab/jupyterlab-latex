@@ -25,7 +25,7 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 
-import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
+import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';  
 
 import { ServerConnection } from '@jupyterlab/services';
 
