@@ -11,7 +11,10 @@ import {
 import {
   IWidgetTracker,
   WidgetTracker,
-  showErrorMessage
+  showErrorMessage,
+  ICommandPalette,
+  InputDialog,
+  ToolbarButton
 } from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
@@ -44,13 +47,38 @@ import { LabIcon } from '@jupyterlab/ui-components';
 
 import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 
-import { ICommandPalette } from '@jupyterlab/apputils';
-
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import latexIconStr from '../style/latex.svg';
 
+import listIconStr from '../style/icons/list.svg';
+
+import olistIconStr from '../style/icons/olist.svg';
+
+import italicIconStr from '../style/icons/italic.svg';
+
+import boldIconStr from '../style/icons/bold.svg';
+
+import underlineIconStr from '../style/icons/underline.svg';
+
+import tableIconStr from '../style/icons/table.svg';
+
+import rightIconStr from '../style/icons/right-align.svg';
+
+import centerIconStr from '../style/icons/center-align.svg';
+
+import leftIconStr from '../style/icons/left-align.svg';
+
+import plotIconStr from '../style/icons/chart-column-solid.svg';
+
 import '../style/index.css';
+
+
+import { Menu } from '@lumino/widgets';
+
+import { NotebookPanel, INotebookModel } from '@jupyterlab/notebook';
+
+import { IDisposable, DisposableDelegate } from '@lumino/disposable';
 
 /**
  * A class that tracks editor widgets.
@@ -88,6 +116,8 @@ namespace CommandIDs {
    * Create new latex file
    */
   export const createNew = 'latex:create-new-latex-file';
+
+  export const createTable = 'latex:create-table';
 }
 
 /**
@@ -213,6 +243,18 @@ function synctexViewRequest(
     });
   });
 }
+
+function isLatexFile(
+  editorTracker: IEditorTracker
+): IDocumentWidget<FileEditor, DocumentRegistry.IModel> | null {
+  let widget = editorTracker.currentWidget;
+  if (widget && PathExt.extname(widget.context.path) === '.tex') {
+    return widget;
+  } else {
+    return null;
+  }
+}
+
 
 /**
  * Activate the file browser.
@@ -391,6 +433,517 @@ function activateLatexPlugin(
     state.save(id, { paths: Array.from(Private.previews) });
   };
 
+ class EditorToolbarPanel
+    implements
+      DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
+    createNew(
+      panel: NotebookPanel,
+      context: DocumentRegistry.IContext<INotebookModel>
+    ): IDisposable {
+      const execOpenLataxPreview = () => {
+        commands.execute(CommandIDs.openLatexPreview);
+      };
+
+      const createInputDialog = (mess: string, action: string) => {
+        let widget = editorTracker.currentWidget;
+        if (widget) {
+          let editor = widget.content.editor;
+          InputDialog.getText({
+            title: mess
+          }).then(value => {
+            if (value.value) {
+              if (editor.replaceSelection) {
+                editor.replaceSelection(action + '{' + value.value + '}');
+              }
+            }
+          });
+        }
+      };
+
+      const replaceSelection = (action: string) => {
+        let widget = editorTracker.currentWidget;
+        if (widget) {
+          let editor = widget.content.editor;
+          if (editor.replaceSelection && editor.getSelection) {
+            let start = editor.getSelection().start;
+            let end = editor.getSelection().end;
+            if (start.line == end.line) {
+              let selection: string | undefined = editor.getLine(start.line);
+              if (selection) {
+                selection = selection.substring(start.column, end.column);
+                if (selection.length > 0) {
+                  editor.replaceSelection(action + '{' + selection + '}');
+                  return 1;
+                }
+              }
+            }
+          }
+        }
+        return 0;
+      };
+
+      const insertSubscript = () => {
+        let action = '_';
+        let result = replaceSelection(action);
+        if (result == 0) {
+          createInputDialog('Provide Desired Subscript', action);
+        }
+      };
+
+      const insertSuperscript = () => {
+        let action = '^';
+        let result = replaceSelection(action);
+        if (result == 0) {
+          createInputDialog('Provide Desired Superscript', action);
+        }
+      };
+
+      const insertFraction = () => {
+        InputDialog.getText({
+          title:
+            'Provide Desired Fraction: Numerator, Denominator\nEX: 1,2 -> \u00BD '
+        }).then(value => {
+          if (value.value) {
+            let widget = editorTracker.currentWidget;
+            let inputString = value.value;
+            let inputArgs = inputString.split(',');
+            if (widget && inputArgs.length == 2) {
+              let editor = widget.content.editor;
+              if (editor.replaceSelection) {
+                editor.replaceSelection(
+                  '\\frac{' +
+                    inputArgs[0].trim() +
+                    '}{' +
+                    inputArgs[1].trim() +
+                    '}'
+                );
+              }
+            }
+          }
+        });
+      };
+
+      const leftAlign = () => {
+        let action = '\\leftline';
+        let result = replaceSelection(action);
+        if (result == 0) {
+          createInputDialog('Provide Text to Left Align', action);
+        }
+      };
+
+      const centerAlign = () => {
+        let action = '\\centerline';
+        let result = replaceSelection(action);
+        if (result == 0) {
+          createInputDialog('Provide Text to Center Align', action);
+        }
+      };
+
+      const rightAlign = () => {
+        let action = '\\rightline';
+        let result = replaceSelection(action);
+        if (result == 0) {
+          createInputDialog('Provide Text to Right Align', action);
+        }
+      };
+
+      const insertBold = () => {
+        let action = '\\textbf';
+        let result = replaceSelection(action);
+        if (result == 0) {
+          createInputDialog('Provide Text to Bold', action);
+        }
+      };
+
+      const insertItalics = () => {
+        let action = '\\textit';
+        let result = replaceSelection(action);
+        if (result == 0) {
+          createInputDialog('Provide Text to Italicise', action);
+        }
+      };
+
+      const insertUnderline = () => {
+        let action = '\\underline';
+        let result = replaceSelection(action);
+        if (result == 0) {
+          createInputDialog('Provide Text to Underline', action);
+        }
+      };
+
+      const insertBulletList = () => {
+        let widget = editorTracker.currentWidget;
+        if (widget) {
+          let editor = widget.content.editor;
+          if (editor.replaceSelection) {
+            editor.replaceSelection(
+              '\\begin{itemize}' +
+                '\n' +
+                '\t' +
+                '\\item' +
+                '\n' +
+                '\\end{itemize}'
+            );
+          }
+        }
+      };
+
+      const insertNumberedList = () => {
+        let widget = editorTracker.currentWidget;
+        if (widget) {
+          let editor = widget.content.editor;
+          if (editor.replaceSelection) {
+            editor.replaceSelection(
+              '\\begin{enumerate}' +
+                '\n' +
+                '\t' +
+                '\\item' +
+                '\n' +
+                '\\end{enumerate}'
+            );
+          }
+        }
+      };
+      const insertPlot = () => {
+        InputDialog.getItem({
+          title: 'Select Plot Type',
+          items: [
+            'Mathematical Expression',
+            'Data From File',
+            'Scatter Plot',
+            'Bar Graphs',
+            'Contour Plots',
+            'Parametric Plot'
+          ]
+        }).then(value => {
+          if (value.value) {
+            let plotText = '';
+
+            switch (value.value) {
+              case 'Mathematical Expression': {
+                plotText =
+                  '\\begin{tikzpicture}' +
+                  '\n\\begin{axis}[' +
+                  '\n\taxis lines = left,' +
+                  '\n\txlabel = \\(x\\),' +
+                  '\n\tylabel = {\\(f(x)\\)},' +
+                  '\n]' +
+                  '\n\\addplot [' +
+                  '\n\tdomain=-10:10, ' +
+                  '\n\tsamples=100, ' +
+                  '\n\tcolor=blue,' +
+                  '\n]' +
+                  '\n{x^2};' +
+                  '\n\\addlegendentry{\\(x^2\\)}' +
+                  '\n\\end{axis}' +
+                  '\n\\end{tikzpicture}';
+                break;
+              }
+              case 'Data From File': {
+                plotText =
+                  '\\begin{tikzpicture}' +
+                  '\n\\begin{axis}[' +
+                  '\n\ttitle={Title},' +
+                  '\n\txlabel={x axis label},' +
+                  '\n\tylabel={y axis label},' +
+                  '\n\txmin=0, xmax=100,' +
+                  '\n\tymin=0, ymax=100,' +
+                  '\n\txtick={},' +
+                  '\n\tytick={},' +
+                  '\n\tlegend pos=north west' +
+                  '\n]' +
+                  '\n\n\\addplot[' +
+                  '\n\tcolor=blue,' +
+                  '\n\tmark=*]' +
+                  '\n{Data File Path};' +
+                  '\n\n\\legend{Legend Text}' +
+                  '\n\n\\end{axis}' +
+                  '\n\\end{tikzpicture}';
+                break;
+              }
+              case 'Scatter Plot': {
+                plotText =
+                  '\\begin{tikzpicture}' +
+                  '\n\\begin{axis}[' +
+                  '\n\ttitle={Title},' +
+                  '\n\txlabel={x axis label},' +
+                  '\n\tylabel={y axis label},' +
+                  '\n\txmin=0, xmax=100,' +
+                  '\n\tymin=0, ymax=100,' +
+                  '\n\txtick={},' +
+                  '\n\tytick={},' +
+                  '\n\tlegend pos=north west' +
+                  '\n]' +
+                  '\n\n\\addplot[' +
+                  '\n\tonly marks,' +
+                  '\n\tmark=*]' +
+                  '\ntable' +
+                  '\n{Data File Path};' +
+                  '\n\n\\legend{Legend Text}' +
+                  '\n\n\\end{axis}' +
+                  '\n\\end{tikzpicture}';
+                break;
+              }
+              case 'Bar Graphs': {
+                plotText =
+                  '\\begin{tikzpicture}' +
+                  '\n\\begin{axis}[' +
+                  '\ntitle={Title},' +
+                  '\nxlabel={x axis label},' +
+                  '\nylabel={y axis label},' +
+                  '\nxmin=0, xmax=100,' +
+                  '\nymin=0, ymax=100,' +
+                  '\nenlargelimits=0.05,' +
+                  '\nlegend pos=north west,' +
+                  '\nybar,' +
+                  '\n]' +
+                  '\n\n\\addplot table {\\mydata};' +
+                  '\n\n\\end{axis}' +
+                  '\n\\end{tikzpicture}';
+                break;
+              }
+              case 'Contour Plots': {
+                plotText =
+                  '\\begin{tikzpicture}' +
+                  '\n\\begin{axis}' +
+                  '\n[' +
+                  '\n\ttitle={Title},' +
+                  '\n\tview={0}{90}' +
+                  '\n]' +
+                  '\n\\addplot3[' +
+                  '\n\tcontour gnuplot={levels={0.5}}' +
+                  '\n]' +
+                  '\n{sqrt(x^2+y^2)};' +
+                  '\n\\addlegendentry{\\(sqrt(x^2+y^2)\\)}' +
+                  '\n\\end{axis}' +
+                  '\n\\end{tikzpicture}';
+                break;
+              }
+              case 'Parametric Plot': {
+                plotText =
+                  '\\begin{tikzpicture}' +
+                  '\n\\begin{axis}' +
+                  '\n[' +
+                  '\n\ttitle={Title},' +
+                  '\n\tview={60}{30}' +
+                  '\n]' +
+                  '\n\n\\addplot3[' +
+                  '\n\tdomain=-5:5,' +
+                  '\n\tsamples = 60,' +
+                  '\n\tsamples y=0,' +
+                  '\n]' +
+                  '\n({sin(deg(x))},' +
+                  '\n{cos(deg(x))},' +
+                  '\n{x});' +
+                  '\n\n\\addlegendentry{\\(Legend Label)\\)}' +
+                  '\n\n\\end{axis}' +
+                  '\n\\end{tikzpicture}';
+                break;
+              }
+            }
+
+            let widget = editorTracker.currentWidget;
+            if (widget) {
+              let editor = widget.content.editor;
+              if (editor.replaceSelection) {
+                editor.replaceSelection(plotText);
+              }
+            }
+          }
+        });
+      };
+
+      const execCreateTable = () => {
+        //const createTable = 'latex:create-table'
+        commands.execute(CommandIDs.createTable);
+        //app.commands.addCommand('latex:create-table', {
+      };
+
+      const previewButton = new ToolbarButton({
+        className: 'run-latexPreview-command',
+        label: 'Preview',
+        onClick: execOpenLataxPreview,
+        tooltip: 'Click to preview your LaTeX document'
+      });
+
+      const subscriptButton = new ToolbarButton({
+        className: 'insert-subscript',
+        label: 'Xᵧ',
+        onClick: insertSubscript,
+        tooltip: 'Click to open subscript input dialog'
+      });
+
+      const superscriptButton = new ToolbarButton({
+        className: 'insert-superscript',
+        label: 'X\u02B8',
+        onClick: insertSuperscript,
+        tooltip: 'Click to open superscript input dialog'
+      });
+
+      const fractionButton = new ToolbarButton({
+        className: 'insert-fraction',
+        label: 'X/Y',
+        onClick: insertFraction,
+        tooltip: 'Click to open fraction input dialog'
+      });
+      const lefticon = new LabIcon({
+        name: 'launcher:left-icon',
+        svgstr: leftIconStr
+      });
+      const leftTextAlignmentButton = new ToolbarButton({
+        className: 'insert-text',
+        icon: lefticon,
+        onClick: leftAlign,
+        tooltip: 'Click to left align highlighted text'
+      });
+
+      const centericon = new LabIcon({
+        name: 'launcher:center-icon',
+        svgstr: centerIconStr
+      });
+      const centerTextAlignmentButton = new ToolbarButton({
+        className: 'insert-text',
+        icon: centericon,
+        onClick: centerAlign,
+        tooltip: 'Click to left align highlighted text'
+      });
+
+      const righticon = new LabIcon({
+        name: 'launcher:right-icon',
+        svgstr: rightIconStr
+      });
+      const rightTextAlignmentButton = new ToolbarButton({
+        className: 'insert-text',
+        icon: righticon,
+        onClick: rightAlign,
+        tooltip: 'Click to left align highlighted text'
+      });
+      const boldicon = new LabIcon({
+        name: 'launcher:bold-icon',
+        svgstr: boldIconStr
+      });
+
+      const boldButton = new ToolbarButton({
+        className: 'bold-text',
+        icon: boldicon,
+        onClick: insertBold,
+        tooltip: 'Click to insert bold text'
+      });
+
+      const italicsicon = new LabIcon({
+        name: 'launcher:italics-icon',
+        svgstr: italicIconStr
+      });
+
+      const italicsButton = new ToolbarButton({
+        className: 'italicize-text',
+        icon: italicsicon,
+        onClick: insertItalics,
+        tooltip: 'Click to insert italicized text'
+      });
+
+      const underlineicon = new LabIcon({
+        name: 'launcher:underline-icon',
+        svgstr: underlineIconStr
+      });
+      const underlineButton = new ToolbarButton({
+        className: 'underline-text',
+        icon: underlineicon,
+        onClick: insertUnderline,
+        tooltip: 'Click to insert underlined text'
+      });
+
+      const listicon = new LabIcon({
+        name: 'launcher:list-icon',
+        svgstr: listIconStr
+      });
+
+      const bulletListButton = new ToolbarButton({
+        className: 'insert-bullet-list',
+        icon: listicon,
+        onClick: insertBulletList,
+        tooltip: 'Click to insert bullet list'
+      });
+
+      const olisticon = new LabIcon({
+        name: 'launcher:olist-icon',
+        svgstr: olistIconStr
+      });
+
+      const numberedListButton = new ToolbarButton({
+        className: 'insert-numbered-list',
+        icon: olisticon,
+        onClick: insertNumberedList,
+        tooltip: 'Click to insert numbered list'
+      });
+
+      const tableicon = new LabIcon({
+        name: 'launcher:table-icon',
+        svgstr: tableIconStr
+      });
+      const tableInsertButton = new ToolbarButton({
+        className: 'insert-table',
+        icon: tableicon,
+        onClick: execCreateTable,
+        tooltip: 'Click to insert table'
+      });
+
+      const plotIcon = new LabIcon({
+        name: 'launcher:plot-icon',
+        svgstr: plotIconStr
+      });
+
+      const plotButton = new ToolbarButton({
+        className: 'insert-plot',
+        icon: plotIcon,
+        onClick: insertPlot,
+        tooltip: 'Click to insert a plot'
+      });
+
+      if (context.path.endsWith('.tex')) {
+        panel.toolbar.insertItem(10, 'Preview', previewButton);
+        panel.toolbar.insertItem(10, 'sub', subscriptButton);
+        panel.toolbar.insertItem(10, 'super', superscriptButton);
+        panel.toolbar.insertItem(10, 'fraction', fractionButton);
+
+        panel.toolbar.insertItem(10, 'left', leftTextAlignmentButton);
+        panel.toolbar.insertItem(10, 'center', centerTextAlignmentButton);
+        panel.toolbar.insertItem(10, 'right', rightTextAlignmentButton);
+
+        panel.toolbar.insertItem(10, 'bold', boldButton);
+        panel.toolbar.insertItem(10, 'italics', italicsButton);
+        panel.toolbar.insertItem(10, 'underline', underlineButton);
+        panel.toolbar.insertItem(10, 'bullet-list', bulletListButton);
+        panel.toolbar.insertItem(10, 'numbered-list', numberedListButton);
+        panel.toolbar.insertItem(10, 'table', tableInsertButton);
+        panel.toolbar.insertItem(10, 'insert-plot', plotButton);
+      }
+      return new DisposableDelegate(() => {
+        previewButton.dispose();
+        subscriptButton.dispose();
+        superscriptButton.dispose();
+        fractionButton.dispose();
+
+        leftTextAlignmentButton.dispose();
+        centerTextAlignmentButton.dispose();
+        rightTextAlignmentButton.dispose();
+
+        boldButton.dispose();
+        italicsButton.dispose();
+        underlineButton.dispose();
+        bulletListButton.dispose();
+        numberedListButton.dispose();
+        tableInsertButton.dispose();
+        plotButton.dispose();
+      });
+    }
+  }
+
+  app.docRegistry.addWidgetExtension('Editor', new EditorToolbarPanel());
+
+
+
+
   // If there are any active previews in the statedb,
   // activate them upon initialization.
   Promise.all([state.fetch(id), app.restored]).then(([args]) => {
@@ -442,10 +995,7 @@ function activateLatexPlugin(
     },
     isEnabled: hasWidget,
     isVisible: () => {
-      const widget = editorTracker.currentWidget;
-      return (
-        (widget && PathExt.extname(widget.context.path) === '.tex') || false
-      );
+      return isLatexFile(editorTracker) != null;
     },
     label: 'Show LaTeX Preview'
   });
@@ -502,6 +1052,7 @@ function activateLatexPlugin(
   // Add the command to the menu
   if (menu) {
     menu.fileMenu.newMenu.addGroup([{ command }], 30);
+    addLatexMenu(app, editorTracker, menu);
   }
 }
 
@@ -646,6 +1197,174 @@ function addSynctexCommands(
 
   return disposables;
 }
+
+function addLatexMenu(
+  app: JupyterFrontEnd,
+  editorTracker: IEditorTracker,
+  mainMenu: IMainMenu
+): void {
+  const constantMenu = new Menu({ commands: app.commands });
+  constantMenu.title.label = 'Constants';
+
+  const constants = new Map<string, string>();
+  constants.set('Pi', '\\pi');
+  constants.set('Euler–Mascheroni constant', '\\gamma');
+  constants.set('Golden Ratio', '\\varphi');
+
+  constants.forEach((value: string, key: string) => {
+    let commandName = 'latex:' + key.replace(' ', '-').toLowerCase();
+    app.commands.addCommand(commandName, {
+      label: key,
+      caption: value,
+      execute: async args => {
+        let widget = isLatexFile(editorTracker);
+        if (widget) {
+          let editor = widget.content.editor;
+          if (editor.replaceSelection) {
+            editor.replaceSelection(value);
+          }
+        }
+      }
+    });
+
+    constantMenu.addItem({
+      command: commandName,
+      args: {}
+    });
+  });
+
+  const symbolMenu = new Menu({ commands: app.commands });
+  symbolMenu.title.label = 'Symbols';
+
+  const symbols = new Map<string, string>();
+  // Less than symbols
+  symbols.set('Not Less Than', '\\nless');
+  symbols.set('Less Than or Equal', '\\leq');
+  symbols.set('Not Less Than or Equal', '\\nleq');
+  // Greater than symbols
+  symbols.set('Not Greater Than', '\\ngtr');
+  symbols.set('Greater Than or Equal', '\\geq');
+  symbols.set('Not Greater Than or Equal', '\\ngeq');
+  // Subset
+  symbols.set('Proper Subset', '\\subset');
+  symbols.set('Not Proper Subset', '\\not\\subset');
+  symbols.set('Subset', '\\subseteq');
+  symbols.set('Not Subset', '\\nsubseteq');
+  // Superset
+  symbols.set('Proper Superset', '\\supset');
+  symbols.set('Not Proper Superset', '\\not\\supset');
+  symbols.set('Superset', '\\supseteq');
+  symbols.set('Not Superset', '\\nsupseteq');
+  // Additional Set Notation
+  symbols.set('Member Of', '\\in');
+  symbols.set('Not Member Of', '\\notin');
+  symbols.set('Has Member', '\\ni');
+  symbols.set('Union', '\\cup');
+  symbols.set('Intersection', '\\cap');
+  // Logic
+  symbols.set('There Exists', '\\ni');
+  symbols.set('For All', '\\ni');
+  symbols.set('Logical Not', '\\neg');
+  symbols.set('Logical And', '\\land');
+  symbols.set('Logical Or', '\\lor');
+
+  symbols.forEach((value: string, key: string) => {
+    let commandName = 'latex:' + key.replace(' ', '-').toLowerCase();
+    app.commands.addCommand(commandName, {
+      label: key,
+      caption: value,
+      execute: async args => {
+        let widget = isLatexFile(editorTracker);
+        if (widget) {
+          let editor = widget.content.editor;
+          if (editor.replaceSelection) {
+            editor.replaceSelection(value);
+          }
+        }
+      }
+    });
+
+    symbolMenu.addItem({
+      command: commandName,
+      args: {}
+    });
+  });
+
+  app.commands.addCommand('latex:create-table', {
+    label: 'Create Table',
+    caption: 'Open a window to create a LaTeX table',
+    execute: async args => {
+      let rowResult = await InputDialog.getNumber({
+        title: 'How many rows?'
+      });
+      if (rowResult.button.accept) {
+        let colResult = await InputDialog.getNumber({
+          title: 'How many columns?'
+        });
+        if (colResult.button.accept) {
+          let widget = isLatexFile(editorTracker);
+          if (widget) {
+            let editor = widget.content.editor;
+            if (editor.replaceSelection) {
+              if (rowResult.value && colResult.value) {
+                editor.replaceSelection(
+                  generateTable(rowResult.value, colResult.value)
+                );
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+
+  const menu = new Menu({ commands: app.commands });
+  menu.title.label = 'LaTeX';
+  menu.addItem({
+    submenu: constantMenu,
+    type: 'submenu',
+    args: {}
+  });
+  menu.addItem({
+    submenu: symbolMenu,
+    type: 'submenu',
+    args: {}
+  });
+
+  menu.addItem({
+    type: 'command',
+    command: 'latex:create-table'
+  });
+
+  mainMenu.addMenu(menu, true, { rank: 100 });
+}
+
+function generateTable(rowNum: number, colNum: number): string {
+  let columnConfig = 'c|';
+
+  let rowText = '';
+  for (let i = 1; i <= rowNum * colNum; i++) {
+    if (i % colNum == 0) {
+      rowText += `cell${i} \\\\`;
+      if (i != rowNum * colNum) {
+        rowText += '\n\\hline\n';
+      }
+    } else {
+      rowText += `cell${i} & `;
+    }
+  }
+
+  return `\\begin{center}
+          \\begin{tabular}{ |${columnConfig.repeat(colNum)} } 
+          \\hline
+          ${rowText}
+          \\hline
+          \\end{tabular}
+          \\end{center}`.replace(/^ +/gm, '');
+}
+  
+
+
 
 /**
  * The list of file types for pdfs.
