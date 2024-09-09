@@ -47,11 +47,11 @@ def load_jupyter_server_extension(nb_server_app):
 
     handlers = [(f'{build}{path_regex}',
                  LatexBuildHandler,
-                 {"notebook_dir": nb_server_app.notebook_dir}
+                 {"root_dir": nb_server_app.root_dir}
                 ),
                 (f'{synctex}{path_regex}',
                  LatexSynctexHandler,
-                 {"notebook_dir": nb_server_app.notebook_dir}
+                 {"root_dir": nb_server_app.root_dir}
                  )]
     web_app.add_handlers('.*$', handlers)
 
