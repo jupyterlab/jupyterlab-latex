@@ -335,7 +335,13 @@ function activateLatexPlugin(
         return Promise.resolve(void 0);
       }
       pending = true;
-      return latexBuildRequest(texContext!.path, synctex, serverSettings)
+
+      /** Get the local file path without any drive prefix potentially added by
+       * other extensions like jupyter-collaboration
+       */
+      const localPath = app.serviceManager.contents.localPath(texContext!.path);
+
+      return latexBuildRequest(localPath, synctex, serverSettings)
         .then(() => {
           // Read the pdf file contents from disk.
           pdfContext ? pdfContext.revert() : findOpenOrRevealPDF();

@@ -1,16 +1,18 @@
 # JupyterLab LaTeX
 
-|       build       |              stable              |              latest              |
-| :---------------: | :------------------------------: | :------------------------------: |
-| [![ci-badge]][ci] | [![binder-badge]][binder-stable] | [![binder-badge]][binder-latest] |
-
+[binder-badge]: https://mybinder.org/badge_logo.svg
+[binder-latest]: https://mybinder.org/v2/gh/jupyterlab/jupyterlab-latex.git/master?urlpath=lab/tree/sample.tex
 [ci-badge]: https://github.com/jupyterlab/jupyterlab-latex/actions/workflows/build.yml/badge.svg
 [ci]: https://github.com/jupyterlab/jupyterlab-latex/actions/workflows/build.yml?query=branch/master
-[binder-badge]: https://mybinder.org/badge_logo.svg
-[binder-stable]: https://mybinder.org/v2/gh/jupyterlab/jupyterlab-latex.git/3.1.0?urlpath=lab/tree/sample.tex
-[binder-latest]: https://mybinder.org/v2/gh/jupyterlab/jupyterlab-latex.git/master?urlpath=lab/tree/sample.tex
+[npm-version-badge]: https://img.shields.io/npm/v/@jupyterlab/latex.svg
+[npm-version]: https://www.npmjs.com/package/@jupyterlab/latex
+[pypi-version-badge]: https://img.shields.io/pypi/v/jupyterlab-latex.svg
+[pypi-version]: https://pypi.org/project/jupyterlab-latex
+[pypi-downloads-badge]: https://img.shields.io/pypi/dm/jupyterlab-latex
 
-An extension for JupyterLab which allows for live-editing of LaTeX documents.
+[![binder-badge]][binder-latest] [![ci-badge]][ci] [![npm-version-badge]][npm-version] [![pypi-version-badge]][pypi-version] ![PyPI - Downloads](https://img.shields.io/pypi/dm/jupyterlab-latex) [![Version](https://img.shields.io/conda/vn/conda-forge/jupyterlab-latex.svg)](https://anaconda.org/conda-forge/jupyterlab-latex) ![Conda Downloads](https://img.shields.io/conda/d/conda-forge/jupyterlab-latex)
+
+A JupyterLab extension for live-editing of LaTeX documents.
 
 ## Usage
 
@@ -35,13 +37,18 @@ For more advanced usage documentation, see [here](docs/advanced.md).
 
 This extension includes both a notebook server extension (which interfaces with the LaTeX compiler)
 and a lab extension (which provides the UI for the LaTeX preview).
-The Python package named `jupyterlab_latex` provides both of them as a prebuilt extension.
+The Python package named `jupyterlab-latex` provides both of them as a prebuilt extension.
 
 To install the extension, run the following in your terminal:
 
-```bash
-pip install jupyterlab_latex
-```
+- For `pip`
+  ```bash
+  pip install jupyterlab-latex
+  ```
+- For `conda`
+  ```bash
+  conda install conda-forge::jupyterlab-latex
+  ```
 
 ### Check installation
 
@@ -57,7 +64,7 @@ and see the block like this in the output
 jupyterlab_latex enabled
     - Validating jupyterlab_latex...
 Package jupyterlab_latex took 0.0010s to import
-      jupyterlab_latex 4.1.0 OK
+      jupyterlab_latex 4.1.3 OK
 ```
 
 then
@@ -69,7 +76,7 @@ jupyter labextension list
 and see the block like this in the output
 
 ```
-@jupyterlab/latex v3.1.0 enabled OK (python, jupyterlab-latex)
+@jupyterlab/latex v4.1.3 enabled OK (python, jupyterlab-latex)
 ```
 
 ## Customization
