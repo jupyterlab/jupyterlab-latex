@@ -2,6 +2,28 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.1.4
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab-latex/compare/v4.1.3...c3d3d8e0ed1c8c69105a8bbc0d48858c6203af67))
+
+### Enhancements made
+
+- Use root_dir configuraion [#237](https://github.com/jupyterlab/jupyterlab-latex/pull/237) ([@naoh16](https://github.com/naoh16))
+- Make extension compatible with custom drives [#235](https://github.com/jupyterlab/jupyterlab-latex/pull/235) ([@ktaletsk](https://github.com/ktaletsk))
+
+### Documentation improvements
+
+- \[Docs\] Improve the repo description and update screenshot [#236](https://github.com/jupyterlab/jupyterlab-latex/pull/236) ([@ktaletsk](https://github.com/ktaletsk))
+- docs: fix lint error [#234](https://github.com/jupyterlab/jupyterlab-latex/pull/234) ([@ktaletsk](https://github.com/ktaletsk))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-latex/graphs/contributors?from=2024-09-05&to=2024-09-09&type=c))
+
+[@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-latex+involves%3Agithub-actions+updated%3A2024-09-05..2024-09-09&type=Issues) | [@ktaletsk](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-latex+involves%3Aktaletsk+updated%3A2024-09-05..2024-09-09&type=Issues) | [@naoh16](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-latex+involves%3Anaoh16+updated%3A2024-09-05..2024-09-09&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.1.3
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab-latex/compare/v4.1.1...3e490aa42608c5170c36b5dd8e641045b3cb9818))
@@ -19,8 +41,6 @@
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-latex/graphs/contributors?from=2024-09-05&to=2024-09-05&type=c))
 
 [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-latex+involves%3Agithub-actions+updated%3A2024-09-05..2024-09-05&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-latex+involves%3Akrassowski+updated%3A2024-09-05..2024-09-05&type=Issues) | [@ktaletsk](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-latex+involves%3Aktaletsk+updated%3A2024-09-05..2024-09-05&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.1.2
 
