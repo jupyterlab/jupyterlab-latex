@@ -64,8 +64,8 @@ class LatexBuildHandler(APIHandler):
     A handler that runs LaTeX on the server.
     """
 
-    def initialize(self, root_dir):
-        self.root_dir = root_dir
+    def initialize(self, notebook_dir):
+        self.notebook_dir = notebook_dir
 
 
     def build_tex_cmd_sequence(self, tex_base_name, run_bibtex=False):
@@ -136,6 +136,91 @@ class LatexBuildHandler(APIHandler):
         """
         return any([re.match(r'.*\.bib', x) for x in set(glob.glob("*"))])
 
+    def filter_output(self, latex_output):
+        """Filters latex output for "interesting" messages
+
+        Parameters
+        ----------
+        latex_output: string
+            This is the output of the executed latex command from,
+            run_command in run_latex.
+
+        returns:
+            A string representing the filtered output.
+
+        Notes
+        -----
+        - Based on the public domain perl script texfot v 1.43 written by
+          Karl Berry in 2014. It has no home page beyond the package on
+          CTAN: <https://ctan.org/pkg/texfot>.
+
+        """
+        ignore = re.compile(r'''^(
+            LaTeX\ Warning:\ You\ have\ requested\ package
+            |LaTeX\ Font\ Warning:\ Some\ font\ shapes
+            |LaTeX\ Font\ Warning:\ Size\ substitutions
+            |Package\ auxhook\ Warning:\ Cannot\ patch
+            |Package\ caption\ Warning:\ Un(supported|known)\ document\ class
+            |Package\ fixltx2e\ Warning:\ fixltx2e\ is\ not\ required
+            |Package\ frenchb?\.ldf\ Warning:\ (Figures|The\ definition)
+            |Package\ layouts\ Warning:\ Layout\ scale
+            |\*\*\*\ Reloading\ Xunicode\ for\ encoding      # spurious ***
+            |pdfTeX\ warning:.*inclusion:\ fou               #nd PDF version ...
+            |pdfTeX\ warning:.*inclusion:\ mul               #tiple pdfs with page group
+            |libpng\ warning:\ iCCP:\ Not\ recognizing
+            |!\ $
+            |This\ is
+            |No\ pages\ of\ output.                          # possibly not worth ignoring?
+            )''', re.VERBOSE)
+
+        next_line = re.compile(r'''^(
+            .*?:[0-9]+:                        # usual file:lineno: form
+            |!                                 # usual ! form
+            |>\ [^<]                           # from \show..., but not "> <img.whatever"
+            |.*pdfTeX\ warning                 # pdftex complaints often cross lines
+            |LaTeX\ Font\ Warning:\ Font\ shape
+            |Package\ hyperref\ Warning:\ Token\ not\ allowed
+            |removed\ on\ input\ line          # hyperref
+            |Runaway\ argument
+            )''', re.VERBOSE)
+
+        show = re.compile(r'''^(
+            Output\ written
+            |No\ pages\ of\ output
+            |\(.*end\ occurred\ inside\ a\ group
+            |(Und|Ov)erfull
+            |(LaTeX|Package|Class).*(Error|Warning)
+            |.*Citation.*undefined
+            |.*\ Error                                # as in \Url Error ->...
+            |Missing\ character:                      # good to show (need \tracinglostchars=1)
+            |\\endL.*problem                          # XeTeX?
+            |\*\*\*\s                                 # *** from some packages or subprograms
+            |l\.[0-9]+                                # line number marking
+            |all\ text\ was\ ignored\ after\ line
+            |.*Fatal\ error
+            |.*for\ symbol.*on\ input\ line
+            )''', re.VERBOSE)
+
+        print_next = False
+        filtered_output = []
+
+        for line in latex_output.split('\n'):
+            if print_next:
+                filtered_output.append(line)
+                print_next = False
+            
+            elif ignore.match(line):
+                continue
+
+            elif next_line.match(line):
+                filtered_output.append(line)
+                print_next = True
+
+            elif show.match(line):
+                filtered_output.append(line)
+
+        return '\n'.join(filtered_output)
+
 
     @gen.coroutine
     def run_latex(self, command_sequence):
@@ -162,14 +247,12 @@ class LatexBuildHandler(APIHandler):
         """
 
         for cmd in command_sequence:
-            self.log.debug(f'jupyterlab-latex: run: {" ".join(cmd)} (CWD: {os.getcwd()})')
-
             code, output = yield run_command(cmd)
             if code != 0:
                 self.set_status(500)
                 self.log.error((f'LaTeX command `{" ".join(cmd)}` '
                                  f'errored with code: {code}'))
-                return output
+                return json.dumps({'fullMessage':output, 'errorOnlyMessage':self.filter_output(output)})
 
         return "LaTeX compiled"
 
@@ -181,12 +264,9 @@ class LatexBuildHandler(APIHandler):
         Given a path, run LaTeX, cleanup, and respond when done.
         """
         # Parse the path into the base name and extension of the file
-        tex_file_path = os.path.join(self.root_dir, path.strip('/'))
+        tex_file_path = os.path.join(self.notebook_dir, path.strip('/'))
         tex_base_name, ext = os.path.splitext(os.path.basename(tex_file_path))
         c = LatexConfig(config=self.config)
-
-        self.log.debug((f"jupyterlab-latex: get: path=({path}), "
-                        f"CWD=({os.getcwd()}), root_dir=({self.serverapp.root_dir})"))
 
         if not os.path.exists(tex_file_path):
             self.set_status(403)
@@ -207,4 +287,3 @@ class LatexBuildHandler(APIHandler):
                                                            run_bibtex=bibtex)
                 out = yield self.run_latex(cmd_sequence)
         self.finish(out)
-
