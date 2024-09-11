@@ -124,11 +124,6 @@
         "style/index.js"
     ],
     "styleModule": "style/index.js",
-    "husky": {
-        "hooks": {
-          "pre-commit": "lint-staged"
-        }
-    },
     "publishConfig": {
         "access": "public"
     },
