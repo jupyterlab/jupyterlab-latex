@@ -64,8 +64,8 @@ class LatexBuildHandler(APIHandler):
     A handler that runs LaTeX on the server.
     """
 
-    def initialize(self, notebook_dir):
-        self.notebook_dir = notebook_dir
+    def initialize(self, root_dir):
+        self.root_dir = root_dir
 
 
     def build_tex_cmd_sequence(self, tex_base_name, run_bibtex=False):
@@ -138,22 +138,18 @@ class LatexBuildHandler(APIHandler):
 
     def filter_output(self, latex_output):
         """Filters latex output for "interesting" messages
-
         Parameters
         ----------
         latex_output: string
             This is the output of the executed latex command from,
             run_command in run_latex.
-
         returns:
             A string representing the filtered output.
-
         Notes
         -----
         - Based on the public domain perl script texfot v 1.43 written by
           Karl Berry in 2014. It has no home page beyond the package on
           CTAN: <https://ctan.org/pkg/texfot>.
-
         """
         ignore = re.compile(r'''^(
             LaTeX\ Warning:\ You\ have\ requested\ package
@@ -208,7 +204,7 @@ class LatexBuildHandler(APIHandler):
             if print_next:
                 filtered_output.append(line)
                 print_next = False
-            
+
             elif ignore.match(line):
                 continue
 
@@ -220,7 +216,6 @@ class LatexBuildHandler(APIHandler):
                 filtered_output.append(line)
 
         return '\n'.join(filtered_output)
-
 
     @gen.coroutine
     def run_latex(self, command_sequence):
@@ -247,6 +242,8 @@ class LatexBuildHandler(APIHandler):
         """
 
         for cmd in command_sequence:
+            self.log.debug(f'jupyterlab-latex: run: {" ".join(cmd)} (CWD: {os.getcwd()})')
+
             code, output = yield run_command(cmd)
             if code != 0:
                 self.set_status(500)
@@ -264,9 +261,12 @@ class LatexBuildHandler(APIHandler):
         Given a path, run LaTeX, cleanup, and respond when done.
         """
         # Parse the path into the base name and extension of the file
-        tex_file_path = os.path.join(self.notebook_dir, path.strip('/'))
+        tex_file_path = os.path.join(self.root_dir, path.strip('/'))
         tex_base_name, ext = os.path.splitext(os.path.basename(tex_file_path))
         c = LatexConfig(config=self.config)
+
+        self.log.debug((f"jupyterlab-latex: get: path=({path}), "
+                        f"CWD=({os.getcwd()}), root_dir=({self.serverapp.root_dir})"))
 
         if not os.path.exists(tex_file_path):
             self.set_status(403)

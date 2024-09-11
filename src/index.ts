@@ -73,8 +73,7 @@ import { IDisposable, DisposableDelegate } from '@lumino/disposable';
 /**
  * A class that tracks editor widgets.
  */
-export interface IPDFJSTracker
-  extends IWidgetTracker<IDocumentWidget<PDFJSViewer>> {}
+export type IPDFJSTracker = IWidgetTracker<IDocumentWidget<PDFJSViewer>>;
 
 /* tslint:disable */
 /**
@@ -238,7 +237,7 @@ function synctexViewRequest(
 function isLatexFile(
   editorTracker: IEditorTracker
 ): IDocumentWidget<FileEditor, DocumentRegistry.IModel> | null {
-  const widget = editorTracker.currentWidget;
+  let widget = editorTracker.currentWidget;
   if (widget && PathExt.extname(widget.context.path) === '.tex') {
     return widget;
   } else {
@@ -367,7 +366,13 @@ function activateLatexPlugin(
         return Promise.resolve(void 0);
       }
       pending = true;
-      return latexBuildRequest(texContext!.path, synctex, serverSettings)
+
+      /** Get the local file path without any drive prefix potentially added by
+       * other extensions like jupyter-collaboration
+       */
+      const localPath = app.serviceManager.contents.localPath(texContext!.path);
+
+      return latexBuildRequest(localPath, synctex, serverSettings)
         .then(() => {
           // Read the pdf file contents from disk.
           pdfContext ? pdfContext.revert() : findOpenOrRevealPDF();
@@ -418,8 +423,8 @@ function activateLatexPlugin(
   };
 
   class EditorToolbarPanel
-    implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel>
-  {
+    implements
+      DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
     createNew(
       panel: NotebookPanel,
       context: DocumentRegistry.IContext<INotebookModel>
@@ -429,9 +434,9 @@ function activateLatexPlugin(
       };
 
       const createInputDialog = (mess: string, action: string) => {
-        const widget = editorTracker.currentWidget;
+        let widget = editorTracker.currentWidget;
         if (widget) {
-          const editor = widget.content.editor;
+          let editor = widget.content.editor;
           InputDialog.getText({
             title: mess
           }).then(value => {
@@ -445,13 +450,13 @@ function activateLatexPlugin(
       };
 
       const replaceSelection = (action: string) => {
-        const widget = editorTracker.currentWidget;
+        let widget = editorTracker.currentWidget;
         if (widget) {
-          const editor = widget.content.editor;
+          let editor = widget.content.editor;
           if (editor.replaceSelection && editor.getSelection) {
-            const start = editor.getSelection().start;
-            const end = editor.getSelection().end;
-            if (start.line === end.line) {
+            let start = editor.getSelection().start;
+            let end = editor.getSelection().end;
+            if (start.line == end.line) {
               let selection: string | undefined = editor.getLine(start.line);
               if (selection) {
                 selection = selection.substring(start.column, end.column);
@@ -467,17 +472,17 @@ function activateLatexPlugin(
       };
 
       const insertSubscript = () => {
-        const action = '_';
-        const result = replaceSelection(action);
-        if (result === 0) {
+        let action = '_';
+        let result = replaceSelection(action);
+        if (result == 0) {
           createInputDialog('Provide Desired Subscript', action);
         }
       };
 
       const insertSuperscript = () => {
-        const action = '^';
-        const result = replaceSelection(action);
-        if (result === 0) {
+        let action = '^';
+        let result = replaceSelection(action);
+        if (result == 0) {
           createInputDialog('Provide Desired Superscript', action);
         }
       };
@@ -488,11 +493,11 @@ function activateLatexPlugin(
             'Provide Desired Fraction: Numerator, Denominator\nEX: 1,2 -> \u00BD '
         }).then(value => {
           if (value.value) {
-            const widget = editorTracker.currentWidget;
-            const inputString = value.value;
-            const inputArgs = inputString.split(',');
-            if (widget && inputArgs.length === 2) {
-              const editor = widget.content.editor;
+            let widget = editorTracker.currentWidget;
+            let inputString = value.value;
+            let inputArgs = inputString.split(',');
+            if (widget && inputArgs.length == 2) {
+              let editor = widget.content.editor;
               if (editor.replaceSelection) {
                 editor.replaceSelection(
                   '\\frac{' +
@@ -508,57 +513,57 @@ function activateLatexPlugin(
       };
 
       const leftAlign = () => {
-        const action = '\\leftline';
-        const result = replaceSelection(action);
-        if (result === 0) {
+        let action = '\\leftline';
+        let result = replaceSelection(action);
+        if (result == 0) {
           createInputDialog('Provide Text to Left Align', action);
         }
       };
 
       const centerAlign = () => {
-        const action = '\\centerline';
-        const result = replaceSelection(action);
-        if (result === 0) {
+        let action = '\\centerline';
+        let result = replaceSelection(action);
+        if (result == 0) {
           createInputDialog('Provide Text to Center Align', action);
         }
       };
 
       const rightAlign = () => {
-        const action = '\\rightline';
-        const result = replaceSelection(action);
-        if (result === 0) {
+        let action = '\\rightline';
+        let result = replaceSelection(action);
+        if (result == 0) {
           createInputDialog('Provide Text to Right Align', action);
         }
       };
 
       const insertBold = () => {
-        const action = '\\textbf';
-        const result = replaceSelection(action);
-        if (result === 0) {
+        let action = '\\textbf';
+        let result = replaceSelection(action);
+        if (result == 0) {
           createInputDialog('Provide Text to Bold', action);
         }
       };
 
       const insertItalics = () => {
-        const action = '\\textit';
-        const result = replaceSelection(action);
-        if (result === 0) {
+        let action = '\\textit';
+        let result = replaceSelection(action);
+        if (result == 0) {
           createInputDialog('Provide Text to Italicise', action);
         }
       };
 
       const insertUnderline = () => {
-        const action = '\\underline';
-        const result = replaceSelection(action);
-        if (result === 0) {
+        let action = '\\underline';
+        let result = replaceSelection(action);
+        if (result == 0) {
           createInputDialog('Provide Text to Underline', action);
         }
       };
 
       const insertBulletList = () => {
-        const widget = editorTracker.currentWidget;
+        let widget = editorTracker.currentWidget;
         if (widget) {
-          const editor = widget.content.editor;
+          let editor = widget.content.editor;
           if (editor.replaceSelection) {
             editor.replaceSelection(
               '\\begin{itemize}' +
@@ -573,9 +578,9 @@ function activateLatexPlugin(
       };
 
       const insertNumberedList = () => {
-        const widget = editorTracker.currentWidget;
+        let widget = editorTracker.currentWidget;
         if (widget) {
-          const editor = widget.content.editor;
+          let editor = widget.content.editor;
           if (editor.replaceSelection) {
             editor.replaceSelection(
               '\\begin{enumerate}' +
@@ -726,9 +731,9 @@ function activateLatexPlugin(
               }
             }
 
-            const widget = editorTracker.currentWidget;
+            let widget = editorTracker.currentWidget;
             if (widget) {
-              const editor = widget.content.editor;
+              let editor = widget.content.editor;
               if (editor.replaceSelection) {
                 editor.replaceSelection(plotText);
               }
@@ -976,7 +981,7 @@ function activateLatexPlugin(
     },
     isEnabled: hasWidget,
     isVisible: () => {
-      return isLatexFile(editorTracker) !== null;
+      return isLatexFile(editorTracker) != null;
     },
     label: 'Show LaTeX Preview'
   });
@@ -1193,14 +1198,14 @@ function addLatexMenu(
   constants.set('Golden Ratio', '\\varphi');
 
   constants.forEach((value: string, key: string) => {
-    const commandName = 'latex:' + key.replace(' ', '-').toLowerCase();
+    let commandName = 'latex:' + key.replace(' ', '-').toLowerCase();
     app.commands.addCommand(commandName, {
       label: key,
       caption: value,
       execute: async args => {
-        const widget = isLatexFile(editorTracker);
+        let widget = isLatexFile(editorTracker);
         if (widget) {
-          const editor = widget.content.editor;
+          let editor = widget.content.editor;
           if (editor.replaceSelection) {
             editor.replaceSelection(value);
           }
@@ -1250,14 +1255,14 @@ function addLatexMenu(
   symbols.set('Logical Or', '\\lor');
 
   symbols.forEach((value: string, key: string) => {
-    const commandName = 'latex:' + key.replace(' ', '-').toLowerCase();
+    let commandName = 'latex:' + key.replace(' ', '-').toLowerCase();
     app.commands.addCommand(commandName, {
       label: key,
       caption: value,
       execute: async args => {
-        const widget = isLatexFile(editorTracker);
+        let widget = isLatexFile(editorTracker);
         if (widget) {
-          const editor = widget.content.editor;
+          let editor = widget.content.editor;
           if (editor.replaceSelection) {
             editor.replaceSelection(value);
           }
@@ -1275,17 +1280,17 @@ function addLatexMenu(
     label: 'Create Table',
     caption: 'Open a window to create a LaTeX table',
     execute: async args => {
-      const rowResult = await InputDialog.getNumber({
+      let rowResult = await InputDialog.getNumber({
         title: 'How many rows?'
       });
       if (rowResult.button.accept) {
-        const colResult = await InputDialog.getNumber({
+        let colResult = await InputDialog.getNumber({
           title: 'How many columns?'
         });
         if (colResult.button.accept) {
-          const widget = isLatexFile(editorTracker);
+          let widget = isLatexFile(editorTracker);
           if (widget) {
-            const editor = widget.content.editor;
+            let editor = widget.content.editor;
             if (editor.replaceSelection) {
               if (rowResult.value && colResult.value) {
                 editor.replaceSelection(
@@ -1321,13 +1326,13 @@ function addLatexMenu(
 }
 
 function generateTable(rowNum: number, colNum: number): string {
-  const columnConfig = 'c|';
+  let columnConfig = 'c|';
 
   let rowText = '';
   for (let i = 1; i <= rowNum * colNum; i++) {
-    if (i % colNum === 0) {
+    if (i % colNum == 0) {
       rowText += `cell${i} \\\\`;
-      if (i !== rowNum * colNum) {
+      if (i != rowNum * colNum) {
         rowText += '\n\\hline\n';
       }
     } else {
