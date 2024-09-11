@@ -265,7 +265,7 @@ function activateLatexPlugin(
 ): void {
   const { commands } = app;
   const id = 'jupyterlab-latex';
-  
+
   const icon = new LabIcon({
     name: 'launcher:latex-icon',
     svgstr: latexIconStr
@@ -327,9 +327,9 @@ function activateLatexPlugin(
         (view: ISynctexViewOptions) => {
           // SyncTex line is one-based, so subtract 1.
           const cursor = { line: view.line - 1, column: 0 };
-          (widget as IDocumentWidget<
-            FileEditor
-          >).content.editor.setCursorPosition(cursor);
+          (
+            widget as IDocumentWidget<FileEditor>
+          ).content.editor.setCursorPosition(cursor);
         }
       );
     };
@@ -418,8 +418,8 @@ function activateLatexPlugin(
   };
 
   class EditorToolbarPanel
-    implements
-      DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
+    implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel>
+  {
     createNew(
       panel: NotebookPanel,
       context: DocumentRegistry.IContext<INotebookModel>

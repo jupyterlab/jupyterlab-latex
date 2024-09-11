@@ -112,4 +112,3 @@ export class LatexError extends React.Component<ILatexProps, {}> {
     );
   }
 }
-
