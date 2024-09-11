@@ -1,8 +1,7 @@
 """ JupyterLab LaTex : live LaTeX editing for JupyterLab """
-from ._version import __version__, __js__
+from ._version import __version__
 
 __all__ = [
-    "__js__",
     "__version__",
     "_jupyter_labextension_paths",
     "_jupyter_server_extension_paths",
@@ -17,7 +16,7 @@ path_regex = r'(?P<path>(?:(?:/[^/]+)+|/?))'
 def _jupyter_labextension_paths():
     return [{
         "src": "labextension",
-        "dest": __js__["name"]
+        "dest": "@jupyterlab/latex"
     }]
 
 def _jupyter_server_extension_points():
@@ -48,11 +47,11 @@ def load_jupyter_server_extension(nb_server_app):
 
     handlers = [(f'{build}{path_regex}',
                  LatexBuildHandler,
-                 {"notebook_dir": nb_server_app.notebook_dir}
+                 {"root_dir": nb_server_app.root_dir}
                 ),
                 (f'{synctex}{path_regex}',
                  LatexSynctexHandler,
-                 {"notebook_dir": nb_server_app.notebook_dir}
+                 {"root_dir": nb_server_app.root_dir}
                  )]
     web_app.add_handlers('.*$', handlers)
 

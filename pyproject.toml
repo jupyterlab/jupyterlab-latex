@@ -1,32 +1,82 @@
 [build-system]
-requires = [
-    "jupyter_packaging~=0.12,<2", 
-    "jupyterlab==4.0.0"
-]
-build-backend = "jupyter_packaging.build_api"
+requires = ["hatchling>=1.5.0", "jupyterlab>=4.0.0,<5", "hatch-nodejs-version>=0.3.2"]
+build-backend = "hatchling.build"
 
-[tool.jupyter-packaging.options]
-skip-if-exists = [
-    "jupyterlab_latex/labextension/static/style.js"
+[project]
+name = "jupyterlab_latex"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.8"
+classifiers = [
+    "Framework :: Jupyter",
+    "Framework :: Jupyter :: JupyterLab",
+    "Framework :: Jupyter :: JupyterLab :: 4",
+    "Framework :: Jupyter :: JupyterLab :: Extensions",
+    "Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
+dependencies = [
+    "jupyter_server>=2.0.1,<3"
+]
+dynamic = ["version", "description", "authors", "urls", "keywords"]
+
+[tool.hatch.version]
+source = "nodejs"
+
+[tool.hatch.metadata.hooks.nodejs]
+fields = ["description", "authors", "urls", "keywords"]
+
+[tool.hatch.build.targets.sdist]
+artifacts = ["jupyterlab_latex/labextension"]
+exclude = [".github", "binder"]
+
+[tool.hatch.build.targets.wheel.shared-data]
+"jupyterlab_latex/labextension/static" = "share/jupyter/labextensions/@jupyterlab/latex/static"
+"install.json" = "share/jupyter/labextensions/@jupyterlab/latex/install.json"
+"jupyterlab_latex/labextension/package.json" = "share/jupyter/labextensions/@jupyterlab/latex/package.json"
+"jupyterlab_latex/labextension/schemas/@jupyterlab/latex" = "share/jupyter/labextensions/@jupyterlab/latex/schemas/@jupyterlab/latex"
+"jupyter-config/server-config" = "etc/jupyter/jupyter_server_config.d"
+"jupyter-config/nb-config" = "etc/jupyter/jupyter_notebook_config.d"
+
+[tool.hatch.build.hooks.version]
+path = "jupyterlab_latex/_version.py"
+
+[tool.hatch.build.hooks.jupyter-builder]
+dependencies = ["hatch-jupyter-builder>=0.5"]
+build-function = "hatch_jupyter_builder.npm_builder"
 ensured-targets = [
+    "jupyterlab_latex/labextension/static/style.js",
     "jupyterlab_latex/labextension/package.json",
-    "jupyterlab_latex/labextension/static/style.js", 
 ]
+skip-if-exists = ["jupyterlab_latex/labextension/static/style.js"]
 
-[tool.jupyter-packaging.builder]
-factory = "jupyter_packaging.npm_builder"
-
-[tool.jupyter-packaging.build-args]
+[tool.hatch.build.hooks.jupyter-builder.build-kwargs]
 build_cmd = "build:prod"
-npm = [
-    "jlpm"
-]
+npm = ["jlpm"]
 
-[tool.check-manifest]
-ignore = [
-    ".*",
-    "jupyterlab_latex/labextension/**",
-    "package-lock.json",
-    "yarn.lock"
+[tool.hatch.build.hooks.jupyter-builder.editable-build-kwargs]
+build_cmd = "install:extension"
+npm = ["jlpm"]
+source_dir = "src"
+build_dir = "jupyterlab_latex/labextension"
+
+[tool.jupyter-releaser.options]
+version_cmd = "hatch version"
+
+[tool.jupyter-releaser.hooks]
+before-build-npm = [
+    "python -m pip install 'jupyterlab>=4.0.0,<5'",
+    "jlpm",
+    "jlpm build:prod"
 ]
+before-build-python = ["jlpm clean:all"]
+
+[tool.check-wheel-contents]
+ignore = ["W002"]

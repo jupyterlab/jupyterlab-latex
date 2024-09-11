@@ -58,7 +58,7 @@ export interface ILatexProps {
 }
 
 export class LatexError extends React.Component<ILatexProps, {}> {
-  selectedValue: string;
+  selectedValue: string | undefined;
   fullMessage: string;
   errorOnlyMessage: string;
   displayedMessage: string;
@@ -112,4 +112,3 @@ export class LatexError extends React.Component<ILatexProps, {}> {
     );
   }
 }
-

@@ -1,8 +1,10 @@
 {
+  "jupyter.lab.shortcuts": [],
   "jupyter.lab.setting-icon-class": "jp-FileIcon",
   "jupyter.lab.setting-icon-label": "LaTeX",
   "title": "LaTeX",
   "description": "LaTeX settings.",
+  "type": "object",
   "properties": {
     "synctex": {
       "type": "boolean",
@@ -11,6 +13,5 @@
       "default": true
     }
   },
-  "additionalProperties": false,
-  "type": "object"
+  "additionalProperties": false
 }
