@@ -138,22 +138,22 @@ class LatexBuildHandler(APIHandler):
 
     def filter_output(self, latex_output):
         """Filters latex output for "interesting" messages
-<<<<<<< HEAD
-=======
 
->>>>>>> upstream/ux-improvements
         Parameters
         ----------
         latex_output: string
             This is the output of the executed latex command from,
             run_command in run_latex.
+
         returns:
             A string representing the filtered output.
+            
         Notes
         -----
         - Based on the public domain perl script texfot v 1.43 written by
           Karl Berry in 2014. It has no home page beyond the package on
           CTAN: <https://ctan.org/pkg/texfot>.
+          
         """
         ignore = re.compile(r'''^(
             LaTeX\ Warning:\ You\ have\ requested\ package
