@@ -14,14 +14,55 @@
 
 A JupyterLab extension for live-editing of LaTeX documents.
 
-## Usage
-
-To use, right-click on an open `.tex` document within JupyterLab, and select `Show LaTeX Preview`:
-![preview](images/show_preview.png)
-This will compile the `.tex` file and open the rendered PDF document.
-Subsequent saves of the file will automatically update the PDF.
-If the PDF fails to compile (possibly due to a syntax error),
-an error panel will open detailing the LaTeX error.
+# JupyterLab LaTeX  
+A JupyterLab extension for live-editing of LaTeX documents.  
+  
+## Usage  
+  
+### Compilation  
+To compile and preview a LaTeX document:  
+1. Open a `.tex` document within JupyterLab.  
+2. Use one of the following methods to compile and preview the document:  
+   - Right-click on the document and select `Show LaTeX Preview` from the context menu.  
+   - Click the `Preview` button in the toolbar at the top of the document.  
+  
+Both methods will compile the `.tex` file and open the rendered PDF document. Subsequent saves of the file will automatically update the PDF. If the PDF fails to compile (possibly due to a syntax error), an error panel will open detailing the LaTeX error.  
+  
+### Writing Tools  
+A toolbar menu at the top of the document provides shortcuts to common LaTeX editing tasks:  
+  
+#### Text Formatting  
+- **Subscript**: Highlight the text you want to subscript and click the `Xᵧ` button. If no text is highlighted, an input dialog will appear for you to enter the subscript.  
+- **Superscript**: Highlight the text you want to superscript and click the `Xⁿ` button. If no text is highlighted, an input dialog will appear for you to enter the superscript.  
+- **Bold**: Highlight the text you want to format in bold and click the `B` button.  
+- **Italic**: Highlight the text you want to format in italics and click the `I` button.  
+- **Underline**: Highlight the text you want to underline and click the `U` button.  
+  
+#### Text Layout  
+- **Left Align**: Highlight the text you want to align left and click the left alignment button.  
+- **Center Align**: Highlight the text you want to center align and click the center alignment button.  
+- **Right Align**: Highlight the text you want to align right and click the right alignment button.  
+  
+#### Lists  
+- **Bullet List**: Click the bullet list button to insert a bullet list.  
+- **Numbered List**: Click the numbered list button to insert a numbered list.  
+  
+#### Tables and Plots  
+- **Table Creation GUI**: Click the table button to open a dialog for creating a table with a specified number of rows and columns.  
+- **Add Plot**: Click the plot button to select a plot type and insert it into your document. Available plot types include:  
+  - Simple function plot  
+  - Plot from file  
+  - Scatter plot  
+  - Bar graphs  
+  - Contour plot  
+  - Parametric plot  
+  
+### Error Handling  
+- **Error Log Filtering Options**: Enhanced error log filtering options to help you quickly identify and resolve issues.  
+  
+### Main Menu Helpers  
+- **Constant Menu**: Quickly insert common mathematical constants.
+- **Symbol Menu**: Easily insert various mathematical symbols.
 
 For more advanced usage documentation, see [here](docs/advanced.md).
 
