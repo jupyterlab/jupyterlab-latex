@@ -138,6 +138,10 @@ class LatexBuildHandler(APIHandler):
 
     def filter_output(self, latex_output):
         """Filters latex output for "interesting" messages
+<<<<<<< HEAD
+=======
+
+>>>>>>> upstream/ux-improvements
         Parameters
         ----------
         latex_output: string
@@ -204,7 +208,6 @@ class LatexBuildHandler(APIHandler):
             if print_next:
                 filtered_output.append(line)
                 print_next = False
-
             elif ignore.match(line):
                 continue
 

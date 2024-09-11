@@ -264,7 +264,7 @@ function activateLatexPlugin(
 ): void {
   const { commands } = app;
   const id = 'jupyterlab-latex';
-
+  
   const icon = new LabIcon({
     name: 'launcher:latex-icon',
     svgstr: latexIconStr
