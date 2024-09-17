@@ -1,1 +1,1 @@
-texlive-xetex
+tectonic
