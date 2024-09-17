@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 python -m pip install .
-wget https://github.com/tectonic-typesetting/tectonic/releases/download/2024-09-12/tectonic_2024-09-12_amd64.deb
-dpkg -i tectonic_2024-09-12_amd64.deb
-apt-get install -f
+wget https://github.com/tectonic-typesetting/tectonic/releases/download/continuous/tectonic-0.15.0+20240809-x86_64-unknown-linux-gnu.tar.gz
+tar -xzf tectonic-0.15.0+20240809-x86_64-unknown-linux-gnu.tar.gz
+sudo cp tectonic /usr/local/bin/
