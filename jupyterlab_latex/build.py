@@ -97,15 +97,38 @@ class LatexBuildHandler(APIHandler):
         synctex = self.get_query_argument('synctex', default='1')
         synctex = '1' if synctex != '0' else synctex
 
-        full_latex_sequence = (
-            c.latex_command,
-            escape_flag,
-            "-interaction=nonstopmode",
-            "-halt-on-error",
-            "-file-line-error",
-            f"-synctex={synctex}",
-            f"{tex_base_name}",
+        
+        if c.latex_command == 'tectonic':
+            self.log.info("Using Tectonic for LaTeX compilation.")
+            full_latex_sequence = (
+                c.latex_command,
+                f"{tex_base_name}.tex",  # input .tex file
+                "--outfmt=pdf",  # specify the output format (pdf in this case)
+                "--synctex",  # to support SyncTeX for synchronization with the editor
             )
+        else:
+            self.log.info("Using TeX Live (or another distribution) for LaTeX compilation.")
+            full_latex_sequence = (
+                c.latex_command,
+                escape_flag,
+                "-interaction=nonstopmode",
+                "-halt-on-error",
+                "-file-line-error",
+                f"-synctex={synctex}",
+                f"{tex_base_name}",
+            )
+        
+
+
+        # full_latex_sequence = (
+        #     c.latex_command,
+        #     escape_flag,
+        #     "-interaction=nonstopmode",
+        #     "-halt-on-error",
+        #     "-file-line-error",
+        #     f"-synctex={synctex}",
+        #     f"{tex_base_name}",
+        #     )
 
         full_bibtex_sequence = (
             c.bib_command,
@@ -134,6 +157,12 @@ class LatexBuildHandler(APIHandler):
             true if BibTeX should be run.
 
         """
+
+        '''
+        Check for a new flag - use_bibtex
+        If c.LatexConfig.use_bibtex is set to False, BibTeX won't run, even if a .bib file is present.
+        '''
+
         return any([re.match(r'.*\.bib', x) for x in set(glob.glob("*"))])
 
     def filter_output(self, latex_output):
