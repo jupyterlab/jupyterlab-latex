@@ -3,10 +3,5 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - jupyterlab=4.2.5
-  - nb_conda
   - tectonic
-  - pip
-  - pip:
-    - nbgitpuller
-    - jupyter-collaboration==3.0.0b3
+  
