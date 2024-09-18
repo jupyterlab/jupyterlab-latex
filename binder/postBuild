@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-python -m pip install .
-wget https://github.com/tectonic-typesetting/tectonic/releases/download/continuous/tectonic-0.15.0+20240809-x86_64-unknown-linux-gnu.tar.gz
-tar -xzf tectonic-0.15.0+20240809-x86_64-unknown-linux-gnu.tar.gz
-cp tectonic /usr/local/bin/

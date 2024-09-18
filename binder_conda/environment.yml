@@ -1,0 +1,12 @@
+name: binder_conda_env
+channels:
+  - conda-forge
+dependencies:
+  - jupyterlab=4.2.5
+  - jupyter-collaboration=3.0.0b3
+  - nb_conda
+  - tectonic
+  - pip
+  - pip:
+    - nbgitpuller
+    - .
