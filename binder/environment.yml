@@ -9,4 +9,4 @@ dependencies:
   - pip
   - pip:
     - nbgitpuller
-    - jupyter-collaboration=3.0.0b3
+    - jupyter-collaboration==3.0.0b3
