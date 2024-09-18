@@ -4,10 +4,9 @@ channels:
   - defaults
 dependencies:
   - jupyterlab=4.2.5
-  - jupyter-collaboration=3.0.0b3
   - nb_conda
   - tectonic
   - pip
   - pip:
     - nbgitpuller
-    - tectonic
+    - jupyter-collaboration=3.0.0b3
