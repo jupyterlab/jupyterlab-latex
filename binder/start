@@ -3,7 +3,7 @@ import sys
 import shutil
 import os
 
-argv = sys.argv[1:] + ['--config', 'binder_conda/jupyter_notebook_config.py']
+argv = sys.argv[1:] + ['--config', 'binder/jupyter_notebook_config.py']
 print(argv)
 
 with open('startup_args.txt', 'w') as fid:
