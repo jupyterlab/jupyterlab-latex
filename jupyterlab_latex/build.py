@@ -83,6 +83,8 @@ class LatexBuildHandler(APIHandler):
 
         """
         c = LatexConfig(config=self.config)
+        
+        engine_name = c.latex_command
 
         escape_flag = ''
         if c.shell_escape == 'allow':
@@ -98,7 +100,7 @@ class LatexBuildHandler(APIHandler):
         synctex = '1' if synctex != '0' else synctex
 
         
-        if c.latex_command == 'tectonic':
+        if engine_name == 'tectonic':
             self.log.info("Using Tectonic for LaTeX compilation.")
             full_latex_sequence = (
                 c.latex_command,
@@ -106,10 +108,16 @@ class LatexBuildHandler(APIHandler):
                 "--outfmt=pdf",  # specify the output format (pdf in this case)
                 "--synctex",  # to support SyncTeX for synchronization with the editor
             )
+        elif c.manual_cmd_args:
+            # Replace placeholders with actual values
+            full_latex_sequence = [
+                arg.format(engine=engine_name, filename=tex_base_name, synctex="1" if c.synctex else "0")
+                for arg in c.manual_cmd_args
+            ]
         else:
             self.log.info("Using TeX Live (or another distribution) for LaTeX compilation.")
             full_latex_sequence = (
-                c.latex_command,
+                engine_name,
                 escape_flag,
                 "-interaction=nonstopmode",
                 "-halt-on-error",
@@ -118,6 +126,7 @@ class LatexBuildHandler(APIHandler):
                 f"{tex_base_name}",
             )
         
+
 
 
         # full_latex_sequence = (
@@ -160,8 +169,11 @@ class LatexBuildHandler(APIHandler):
 
         '''
         Check for a new flag - use_bibtex
-        If c.LatexConfig.use_bibtex is set to False, BibTeX won't run, even if a .bib file is present.
+        If c.LatexConfig.disable_bibtex is set to False, BibTeX won't run, even if a .bib file is present.
         '''
+        c = LatexConfig(config=self.config)
+        if c.disable_bibtex:
+            return False
 
         return any([re.match(r'.*\.bib', x) for x in set(glob.glob("*"))])
 

@@ -1,6 +1,6 @@
 """ JupyterLab LaTex : live LaTeX editing for JupyterLab """
 
-from traitlets import Unicode, CaselessStrEnum, Integer, Bool
+from traitlets import Unicode, CaselessStrEnum, Integer, Bool, List as TraitletsList
 from traitlets.config import Configurable
 
 class LatexConfig(Configurable):
@@ -25,3 +25,9 @@ class LatexConfig(Configurable):
         help='How many times to compile the ".tex" files.')
     cleanup = Bool(default_value=True, config=True,
         help='Whether to clean up ".out/.aux" files or not.')
+    # Add a new configuration option to hold user-defined commands
+    manual_cmd_args = TraitletsList(Unicode(), default_value=[], config=True,
+        help='A list of user-defined command-line arguments with placeholders for ' +
+             'filename ({filename}), synctex ({synctex}), and engine ({engine}).')
+    disable_bibtex = Bool(default_value=False, config=True,
+        help='Whether to disable the BibTeX command sequence.')
