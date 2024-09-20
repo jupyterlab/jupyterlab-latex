@@ -68,7 +68,7 @@ class LatexBuildHandler(APIHandler):
         self.root_dir = root_dir
 
 
-    def build_tex_cmd_sequence(self, tex_base_name, run_bibtex=False):
+    def build_tex_cmd_sequence(self, tex_base_name):
         """Builds tuples that will be used to call LaTeX shell commands.
 
         Parameters
@@ -96,35 +96,33 @@ class LatexBuildHandler(APIHandler):
 
         # Get the synctex query parameter, defaulting to
         # 1 if it is not set or is invalid.
-        synctex = self.get_query_argument('synctex', default='1')
-        synctex = '1' if synctex != '0' else synctex
-
+        synctex = self.get_query_argument('synctex', default=True)
         
-        if engine_name == 'tectonic':
-            self.log.info("Using Tectonic for LaTeX compilation.")
-            full_latex_sequence = (
-                engine_name,
-                f"{tex_base_name}.tex",  # input .tex file
-                "--outfmt=pdf",  # specify the output format (pdf in this case)
-                "--synctex",  # to support SyncTeX for synchronization with the editor
-            )
-        elif c.manual_cmd_args:
+        if c.manual_cmd_args:
             # Replace placeholders with actual values
             self.log.info("Using the manual command argument and buidling latex sequence.")
             full_latex_sequence = [
                 # replace placeholders using format()
-                arg.format(engine=engine_name, filename=tex_base_name, synctex="1" if c.synctex else "0")
+                arg.format(filename=tex_base_name)
                 for arg in c.manual_cmd_args
-            ]
+            ] 
+        elif engine_name == 'tectonic':
+            self.log.info("Using Tectonic for LaTeX compilation.")
+            full_latex_sequence = (
+                engine_name,
+                f"{tex_base_name}.tex",  # input .tex file
+                "--outfmt=pdf",  # specify output format (pdf in this case)
+                "--synctex" if synctex else "",  # to support SyncTeX (synchronization with the editor)
+            )
         else:
-            self.log.info("Using TeX Live (or another distribution) for LaTeX compilation.")
+            self.log.info("Using TeX Live (or compatible distribution) for LaTeX compilation.")
             full_latex_sequence = (
                 engine_name,
                 escape_flag,
                 "-interaction=nonstopmode",
                 "-halt-on-error",
                 "-file-line-error",
-                f"-synctex={synctex}",
+                f"-synctex={'1' if synctex else '0'}",
                 f"{tex_base_name}",
             )
         
@@ -141,22 +139,27 @@ class LatexBuildHandler(APIHandler):
         #     f"{tex_base_name}",
         #     )
 
-        full_bibtex_sequence = (
-            c.bib_command,
-            f"{tex_base_name}",
-            )
-
         command_sequence = [full_latex_sequence]
 
-        if run_bibtex:
+        # We would skip bibtex compilation if the following conditions are present
+        #   - c.LatexConfig.disable_bibtex is explicitly set to True
+        #   - tectonic engine is used
+        #   - there are no .bib files found in the folder
+        if c.disable_bibtex or engine_name == 'tectonic' or not self.bib_condition():
+            # Repeat LaTeX command run_times times
+            command_sequence = command_sequence * c.run_times
+        else:
+            full_bibtex_sequence = (
+                c.bib_command,
+                f"{tex_base_name}",
+            )
+        
             command_sequence += [
                 full_bibtex_sequence,
                 full_latex_sequence,
                 full_latex_sequence,
-                ]
-        else:
-            command_sequence = command_sequence * c.run_times
-
+            ]
+        
         return command_sequence
 
     def bib_condition(self):
@@ -168,14 +171,6 @@ class LatexBuildHandler(APIHandler):
             true if BibTeX should be run.
 
         """
-
-        '''
-        Check for a new flag - use_bibtex
-        If c.LatexConfig.disable_bibtex is set to False, BibTeX won't run, even if a .bib file is present.
-        '''
-        c = LatexConfig(config=self.config)
-        if c.disable_bibtex:
-            return False
 
         return any([re.match(r'.*\.bib', x) for x in set(glob.glob("*"))])
 
@@ -328,8 +323,6 @@ class LatexBuildHandler(APIHandler):
                 whitelist=[tex_base_name+'.pdf', tex_base_name+'.synctex.gz'],
                 greylist=[tex_base_name+'.aux']
                 ):
-                bibtex = self.bib_condition()
-                cmd_sequence = self.build_tex_cmd_sequence(tex_base_name,
-                                                           run_bibtex=bibtex)
+                cmd_sequence = self.build_tex_cmd_sequence(tex_base_name)
                 out = yield self.run_latex(cmd_sequence)
         self.finish(out)
