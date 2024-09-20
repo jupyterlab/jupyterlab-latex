@@ -103,14 +103,16 @@ class LatexBuildHandler(APIHandler):
         if engine_name == 'tectonic':
             self.log.info("Using Tectonic for LaTeX compilation.")
             full_latex_sequence = (
-                c.latex_command,
+                engine_name,
                 f"{tex_base_name}.tex",  # input .tex file
                 "--outfmt=pdf",  # specify the output format (pdf in this case)
                 "--synctex",  # to support SyncTeX for synchronization with the editor
             )
         elif c.manual_cmd_args:
             # Replace placeholders with actual values
+            self.log.info("Using the manual command argument and buidling latex sequence.")
             full_latex_sequence = [
+                # replace placeholders using format()
                 arg.format(engine=engine_name, filename=tex_base_name, synctex="1" if c.synctex else "0")
                 for arg in c.manual_cmd_args
             ]

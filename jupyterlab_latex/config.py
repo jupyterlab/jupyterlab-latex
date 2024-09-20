@@ -31,3 +31,5 @@ class LatexConfig(Configurable):
              'filename ({filename}), synctex ({synctex}), and engine ({engine}).')
     disable_bibtex = Bool(default_value=False, config=True,
         help='Whether to disable the BibTeX command sequence.')
+    synctex = Bool(default_value=True, config=True,
+        help='Whether to enable Synctex support.')
