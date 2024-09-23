@@ -88,7 +88,8 @@ your `jupyter_notebook_config.py` file:
 ```python
 c.LatexConfig.latex_command = 'pdflatex'
 ```
-The above configuration will compile a LaTeX document using the common predefined flags and options such as `-interaction` `-halt-on-error`, `-file-line-error`, `-synctex`. For more control over the command sequence, check the Manual Command Arguments configuration. 
+
+The above configuration will compile a LaTeX document using the common predefined flags and options such as `-interaction` `-halt-on-error`, `-file-line-error`, `-synctex`. For more control over the command sequence, check the Manual Command Arguments configuration.
 
 The extension defaults to running `bibtex` for generating a bibliography
 if a `.bib` file is found. You can also configure the bibliography command
@@ -99,6 +100,7 @@ c.LatexConfig.bib_command = '<custom_bib_command>'
 ```
 
 New: `BibTeX` compilation is skipped if the following conditions are present:
+
 - `c.LatexConfig.disable_bibtex` is explicitly set to `True` in the `jupyter_notebook_config.py` file
 - There are no .bib files found in the folder
 
@@ -123,6 +125,7 @@ c.LatexConfig.manual_cmd_args = [
     '{filename}.tex'  # Placeholder for the input file name
 ]
 ```
+
 The `{filename}` placeholder will be replaced by the name of the LaTeX file during compilation.
 
 Additional tags and options can also be added to edit configuration values.
@@ -133,9 +136,10 @@ The extension now also supports the Tectonic engine for compiling LaTeX files. T
 ```python
 c.LatexConfig.latex_command = 'tectonic'
 ```
-The default command sequence for `Tectonic` generates the output file in `pdf` format and uses the available `SyncTeX` flag. 
 
-For [advanced control](https://tectonic-typesetting.github.io/book/latest/v2cli/compile.html) over [Tectonic](https://github.com/tectonic-typesetting/tectonic), specify options in the manual_cmd_args setting: 
+The default command sequence for `Tectonic` generates the output file in `pdf` format and uses the available `SyncTeX` flag.
+
+For [advanced control](https://tectonic-typesetting.github.io/book/latest/v2cli/compile.html) over [Tectonic](https://github.com/tectonic-typesetting/tectonic), specify options in the manual_cmd_args setting:
 
 ```python
 c.LatexConfig.manual_cmd_args = [
