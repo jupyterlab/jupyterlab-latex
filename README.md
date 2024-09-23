@@ -81,13 +81,14 @@ and see the block like this in the output
 
 ## Customization
 
-The extension defaults to running `xelatex` on the server.
+The extension defaults to running the `xelatex` engine on the server.
 This command may be customized (e.g., to use `pdflatex` instead) by customizing
 your `jupyter_notebook_config.py` file:
 
 ```python
 c.LatexConfig.latex_command = 'pdflatex'
 ```
+The above configuration will compile a LaTeX document using the common predefined flags and options such as `-interaction` `-halt-on-error`, `-file-line-error`, `-synctex`. For more control over the command sequence, check the Manual Command Arguments configuration. 
 
 The extension defaults to running `bibtex` for generating a bibliography
 if a `.bib` file is found. You can also configure the bibliography command
@@ -97,11 +98,54 @@ by setting
 c.LatexConfig.bib_command = '<custom_bib_command>'
 ```
 
+New: `BibTeX` compilation is skipped if the following conditions are present:
+- `c.LatexConfig.disable_bibtex` is explicitly set to `True` in the `jupyter_notebook_config.py` file
+- There are no .bib files found in the folder
+
 To render references (`\ref{...}`), such as equation or chapter numbers, you would
 need to compile in multiple passes by setting
 
 ```python
 c.LatexConfig.run_times = 2
+```
+
+New: `Manual Command Arguments`
+For more advanced customizations, a complete command sequence can be specified using the `manual_cmd_args` configuration in the `jupyter_notebook_config.py` file. This allows to define the exact command and use options the extension will finally execute:
+
+```python
+c.LatexConfig.manual_cmd_args = [
+    'lualatex',  # Specify the LaTeX engine (e.g., lualatex, pdflatex)
+    '-interaction=nonstopmode',  # Continue compilation without stopping for errors
+    '-halt-on-error',  # Stop compilation at the first error
+    '-file-line-error',  # Print file and line number for errors
+    '-shell-escape',  # Enable shell escape
+    '-synctex=1',  # Enable SyncTeX for editor synchronization
+    '{filename}.tex'  # Placeholder for the input file name
+]
+```
+The `{filename}` placeholder will be replaced by the name of the LaTeX file during compilation.
+
+Additional tags and options can also be added to edit configuration values.
+
+New: `Tectonic Engine Support`
+The extension now also supports the Tectonic engine for compiling LaTeX files. To use Tectonic as the default LaTeX engine cutomize the `jupyter_notebook_config.py file`:
+
+```python
+c.LatexConfig.latex_command = 'tectonic'
+```
+The default command sequence for `Tectonic` generates the output file in `pdf` format and uses the available `SyncTeX` flag. 
+
+For [advanced control](https://tectonic-typesetting.github.io/book/latest/v2cli/compile.html) over [Tectonic](https://github.com/tectonic-typesetting/tectonic), specify options in the manual_cmd_args setting: 
+
+```python
+c.LatexConfig.manual_cmd_args = [
+    'tectonic',
+    '--outfmt=pdf',  # Output format as PDF
+    '--synctex=1',  # Enable SyncTeX for editor synchronization
+    '--outdir',  # The directory in which to place output files
+    '--keep-logs',  # Keep the log files generated during processing
+    '{filename}.tex'  # Input .tex file
+]
 ```
 
 ### Security and customizing shell escapes

@@ -104,7 +104,7 @@ class LatexBuildHandler(APIHandler):
             full_latex_sequence = [
                 # replace placeholders using format()
                 arg.format(filename=tex_base_name)
-                for arg in c.manual_cmd_args
+                for arg in c.manual_cmd_args  
             ] 
         elif engine_name == 'tectonic':
             self.log.info("Using Tectonic for LaTeX compilation.")
@@ -112,7 +112,7 @@ class LatexBuildHandler(APIHandler):
                 engine_name,
                 f"{tex_base_name}.tex",  # input .tex file
                 "--outfmt=pdf",  # specify output format (pdf in this case)
-                "--synctex" if synctex else "",  # to support SyncTeX (synchronization with the editor)
+                f"--synctex={'1' if synctex else '0'}" # to support SyncTeX (synchronization with the editor)
             )
         else:
             self.log.info("Using TeX Live (or compatible distribution) for LaTeX compilation.")
@@ -126,22 +126,9 @@ class LatexBuildHandler(APIHandler):
                 f"{tex_base_name}",
             )
         
-
-
-
-        # full_latex_sequence = (
-        #     c.latex_command,
-        #     escape_flag,
-        #     "-interaction=nonstopmode",
-        #     "-halt-on-error",
-        #     "-file-line-error",
-        #     f"-synctex={synctex}",
-        #     f"{tex_base_name}",
-        #     )
-
         command_sequence = [full_latex_sequence]
 
-        # We would skip bibtex compilation if the following conditions are present
+        # Skip bibtex compilation if the following conditions are present
         #   - c.LatexConfig.disable_bibtex is explicitly set to True
         #   - tectonic engine is used
         #   - there are no .bib files found in the folder
