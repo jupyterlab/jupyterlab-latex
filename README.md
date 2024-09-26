@@ -99,7 +99,7 @@ by setting
 c.LatexConfig.bib_command = '<custom_bib_command>'
 ```
 
-New: `BibTeX` compilation is skipped if the following conditions are present:
+_New in 4.2.0_: `BibTeX` compilation is skipped if the following conditions are present:
 
 - `c.LatexConfig.disable_bibtex` is explicitly set to `True` in the `jupyter_notebook_config.py` file
 - There are no .bib files found in the folder
@@ -111,7 +111,7 @@ need to compile in multiple passes by setting
 c.LatexConfig.run_times = 2
 ```
 
-New: `Manual Command Arguments`
+_New in 4.2.0_: Manual Compile Command
 For more advanced customizations, a complete command sequence can be specified using the `manual_cmd_args` configuration in the `jupyter_notebook_config.py` file. This allows to define the exact command and use options the extension will finally execute:
 
 ```python
@@ -126,18 +126,18 @@ c.LatexConfig.manual_cmd_args = [
 ]
 ```
 
-The `{filename}` placeholder will be replaced by the name of the LaTeX file during compilation.
+The only supported placeholder in the manual compile command is `{filename}`. It will be replaced by the name of the LaTeX file during compilation.
 
 Additional tags and options can also be added to edit configuration values.
 
-New: `Tectonic Engine Support`
+_New in 4.2.0_: Tectonic Engine Support
 The extension now also supports the Tectonic engine for compiling LaTeX files. To use Tectonic as the default LaTeX engine cutomize the `jupyter_notebook_config.py file`:
 
 ```python
 c.LatexConfig.latex_command = 'tectonic'
 ```
 
-The default command sequence for `Tectonic` generates the output file in `pdf` format and uses the available `SyncTeX` flag.
+The default command sequence for Tectonic generates the output file in `pdf` format and uses the available `SyncTeX` flag.
 
 For [advanced control](https://tectonic-typesetting.github.io/book/latest/v2cli/compile.html) over [Tectonic](https://github.com/tectonic-typesetting/tectonic), specify options in the manual_cmd_args setting:
 
