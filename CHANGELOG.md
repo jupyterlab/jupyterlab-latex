@@ -2,6 +2,22 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.3.0
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab-latex/compare/v4.2.0...9043f3015e334c5647c5fa27d6eba34744bacaa2))
+
+### Enhancements made
+
+- UX improvements [#243](https://github.com/jupyterlab/jupyterlab-latex/pull/243) ([@ktaletsk](https://github.com/ktaletsk))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-latex/graphs/contributors?from=2024-09-27&to=2024-09-27&type=c))
+
+[@ktaletsk](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-latex+involves%3Aktaletsk+updated%3A2024-09-27..2024-09-27&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.2.0
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab-latex/compare/v4.1.4...47eae1d1ee0e1ac16d23709b4f5b1653e5249f83))
@@ -16,8 +32,6 @@
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-latex/graphs/contributors?from=2024-09-10&to=2024-09-27&type=c))
 
 [@akisaini](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-latex+involves%3Aakisaini+updated%3A2024-09-10..2024-09-27&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-latex+involves%3Agithub-actions+updated%3A2024-09-10..2024-09-27&type=Issues) | [@ktaletsk](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-latex+involves%3Aktaletsk+updated%3A2024-09-10..2024-09-27&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.1.4
 
