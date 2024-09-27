@@ -226,9 +226,7 @@ class LatexBuildHandler(APIHandler):
                 whitelist=[tex_base_name+'.pdf', tex_base_name+'.synctex.gz'],
                 greylist=[tex_base_name+'.aux']
                 ):
-                bibtex = self.bib_condition()
-                cmd_sequence = self.build_tex_cmd_sequence(tex_base_name,
-                                                           run_bibtex=bibtex)
+                cmd_sequence = self.build_tex_cmd_sequence(tex_base_name)
                 out = yield self.run_latex(cmd_sequence)
         self.finish(out)
 
