@@ -2,6 +2,23 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.2.0
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab-latex/compare/v4.1.4...47eae1d1ee0e1ac16d23709b4f5b1653e5249f83))
+
+### Enhancements made
+
+- Support Tectonic engine and execute user-customizable command sequence [#245](https://github.com/jupyterlab/jupyterlab-latex/pull/245) ([@akisaini](https://github.com/akisaini))
+- Add jupyter-collaboration to Binder link [#239](https://github.com/jupyterlab/jupyterlab-latex/pull/239) ([@ktaletsk](https://github.com/ktaletsk))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-latex/graphs/contributors?from=2024-09-10&to=2024-09-27&type=c))
+
+[@akisaini](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-latex+involves%3Aakisaini+updated%3A2024-09-10..2024-09-27&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-latex+involves%3Agithub-actions+updated%3A2024-09-10..2024-09-27&type=Issues) | [@ktaletsk](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-latex+involves%3Aktaletsk+updated%3A2024-09-10..2024-09-27&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.1.4
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab-latex/compare/v4.1.3...c3d3d8e0ed1c8c69105a8bbc0d48858c6203af67))
@@ -21,8 +38,6 @@
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-latex/graphs/contributors?from=2024-09-05&to=2024-09-09&type=c))
 
 [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-latex+involves%3Agithub-actions+updated%3A2024-09-05..2024-09-09&type=Issues) | [@ktaletsk](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-latex+involves%3Aktaletsk+updated%3A2024-09-05..2024-09-09&type=Issues) | [@naoh16](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-latex+involves%3Anaoh16+updated%3A2024-09-05..2024-09-09&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.1.3
 
