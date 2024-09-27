@@ -25,6 +25,8 @@ To compile and preview a LaTeX document:
    - Right-click on the document and select `Show LaTeX Preview` from the context menu.
    - Click the `Preview` button in the toolbar at the top of the document.
 
+![preview](images/show_preview.png)
+
 Both methods will compile the `.tex` file and open the rendered PDF document. Subsequent saves of the file will automatically update the PDF. If the PDF fails to compile (possibly due to a syntax error), an error panel will open detailing the LaTeX error.
 
 ### Writing Tools
