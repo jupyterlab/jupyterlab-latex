@@ -14,10 +14,6 @@
 
 A JupyterLab extension for live-editing of LaTeX documents.
 
-# JupyterLab LaTeX
-
-A JupyterLab extension for live-editing of LaTeX documents.
-
 ## Usage
 
 ### Compilation
