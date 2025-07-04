@@ -12,7 +12,7 @@ from .config import LatexConfig
 from .util import run_command
 
 @contextmanager
-def latex_cleanup(cleanup=True, workdir='.', whitelist=None, greylist=None):
+def latex_cleanup(cleanup=False, workdir='.', whitelist=None, greylist=None):
     """Context manager for changing directory and removing files when done.
 
     By default it works in the current directory, and removes all files that
