@@ -16,7 +16,7 @@ class LatexConfig(Configurable):
         help='The BibTeX command to use when compiling ".tex" files.' +\
              'Only used if disable_bibtex is not set to True')
     synctex_command = Unicode('synctex', config=True,
-        help='Whether to use the synctex command when syncronizing between .tex and .pdf files.')
+        help='The synctex command to use when syncronizing between .tex and .pdf files.')
     shell_escape = CaselessStrEnum(['restricted', 'allow', 'disallow'],
         default_value='restricted', config=True,
         help='Whether to allow shell escapes '+\
