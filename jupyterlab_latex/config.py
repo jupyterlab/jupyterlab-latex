@@ -26,8 +26,8 @@ class LatexConfig(Configurable):
         'to disallow all shell escapes')
     run_times = Integer(default_value=1, config=True,
         help='How many times to compile the ".tex" files.')
-    cleanup = Bool(default_value=True, config=True,
-        help='Whether to clean up ".out/.aux" files or not.')
+    cleanup = Bool(default_value=False, config=True,
+        help='Whether to clean up files that were not in the working directory or not.')
     # Add a new configuration option to hold user-defined commands
     manual_cmd_args = TraitletsList(Unicode(), default_value=[], config=True,
         help='A list of user-defined command-line arguments with placeholders for ' +

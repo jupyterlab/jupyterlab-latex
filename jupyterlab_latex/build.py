@@ -21,6 +21,9 @@ def latex_cleanup(cleanup=False, workdir='.', whitelist=None, greylist=None):
     Parameters
     ----------
 
+    cleanup = bool, default=False
+        Whether to clean up files that were not in the working directory
+        or not.
     workdir = string, optional
         This represents a path to the working directory for running LaTeX (the
         default is '.').
