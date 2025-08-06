@@ -1,7 +1,6 @@
 """ JupyterLab LaTex : live LaTeX editing for JupyterLab """
 
 import glob, json, re, os
-from contextlib import contextmanager
 import shutil
 
 from tornado import gen, web
@@ -10,53 +9,6 @@ from jupyter_server.base.handlers import APIHandler
 
 from .config import LatexConfig
 from .util import run_command
-
-@contextmanager
-def latex_cleanup(cleanup=True, workdir='.', whitelist=None, greylist=None):
-    """Context manager for changing directory and removing files when done.
-
-    By default it works in the current directory, and removes all files that
-    were not present in the working directory.
-
-    Parameters
-    ----------
-
-    workdir = string, optional
-        This represents a path to the working directory for running LaTeX (the
-        default is '.').
-    whitelist = list or None, optional
-        This is the set of files not present before running the LaTeX commands
-        that are not to be removed when cleaning up. Defaults to None.
-    greylist = list or None, optional
-        This is the set of files that need to be removed before running LaTeX
-        commands but which, if present, will not by removed when cleaning up.
-        Defaults to None.
-    """
-    orig_work_dir = os.getcwd()
-    os.chdir(os.path.abspath(workdir))
-
-    keep_files = set()
-    for fp in greylist:
-        try:
-            os.remove(fp)
-            keep_files.add(fp)
-        except FileNotFoundError:
-            pass
-
-    before = set(glob.glob("*"))
-    keep_files = keep_files.union(before,
-                                  set(whitelist if whitelist else [])
-                                  )
-    yield
-    if cleanup:
-        after = set(glob.glob("*"))
-        for fn in set(after-keep_files):
-            if not os.path.isdir(fn):
-                os.remove(fn)
-            else:
-                shutil.rmtree(fn)
-    os.chdir(orig_work_dir)
-
 
 
 class LatexBuildHandler(APIHandler):
@@ -245,7 +197,7 @@ class LatexBuildHandler(APIHandler):
         return '\n'.join(filtered_output)
 
     @gen.coroutine
-    def run_latex(self, command_sequence):
+    def run_latex(self, command_sequence, working_directory):
         """Run commands sequentially, returning a 500 code on an error.
 
         Parameters
@@ -269,9 +221,9 @@ class LatexBuildHandler(APIHandler):
         """
 
         for cmd in command_sequence:
-            self.log.debug(f'jupyterlab-latex: run: {" ".join(cmd)} (CWD: {os.getcwd()})')
+            self.log.debug(f'jupyterlab-latex: run: {" ".join(cmd)} (CWD: {working_directory})')
 
-            code, output = yield run_command(cmd)
+            code, output = yield run_command(cmd, working_directory)
             if code != 0:
                 self.set_status(500)
                 self.log.error((f'LaTeX command `{" ".join(cmd)}` '
@@ -290,6 +242,7 @@ class LatexBuildHandler(APIHandler):
         # Parse the path into the base name and extension of the file
         tex_file_path = os.path.join(self.root_dir, path.strip('/'))
         tex_base_name, ext = os.path.splitext(os.path.basename(tex_file_path))
+        working_directory = os.path.abspath(os.path.dirname(tex_file_path))
         c = LatexConfig(config=self.config)
 
         self.log.debug((f"jupyterlab-latex: get: path=({path}), "
@@ -303,12 +256,33 @@ class LatexBuildHandler(APIHandler):
             out = (f"The file at `{tex_file_path}` does not end with .tex. "
                     "You can only run LaTeX on a file ending with .tex.")
         else:
-            with latex_cleanup(
-                cleanup=c.cleanup,
-                workdir=os.path.dirname(tex_file_path),
-                whitelist=[tex_base_name+'.pdf', tex_base_name+'.synctex.gz'],
-                greylist=[tex_base_name+'.aux']
-                ):
-                cmd_sequence = self.build_tex_cmd_sequence(tex_base_name)
-                out = yield self.run_latex(cmd_sequence)
+            whitelist = [tex_base_name+'.pdf', tex_base_name+'.synctex.gz']
+            greylist = [tex_base_name+'.aux']
+
+            keep_files = set()
+            for fp in greylist:
+                try:
+                    os.remove(os.path.join(working_directory, fp))
+                    keep_files.add(fp)
+                except FileNotFoundError:
+                    pass
+
+            before = set(glob.glob("*", root_dir=working_directory))
+            keep_files = keep_files.union(before,
+                                        set(whitelist if whitelist else [])
+                                        )
+            
+
+            cmd_sequence = self.build_tex_cmd_sequence(tex_base_name)
+            out = yield self.run_latex(cmd_sequence, working_directory)
+
+            if c.cleanup:
+                after = set(glob.glob("*", root_dir=working_directory))
+                for fn in set(after-keep_files):
+                    abs_fn = os.path.join(working_directory, fn)
+                    if not os.path.isdir(abs_fn):
+                        os.remove(abs_fn)
+                    else:
+                        shutil.rmtree(abs_fn)
+
         self.finish(out)
