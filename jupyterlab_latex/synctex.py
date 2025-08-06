@@ -123,7 +123,7 @@ class LatexSynctexHandler(APIHandler):
 
 
     @gen.coroutine
-    def run_synctex(self, cmd):
+    def run_synctex(self, cmd, working_directory):
         """Run commands sequentially, returning a 500 code on an error.
 
         Parameters
@@ -145,8 +145,8 @@ class LatexSynctexHandler(APIHandler):
           there.
 
         """
-        self.log.debug(f'jupyterlab-latex: run: {" ".join(cmd)} (CWD: {os.getcwd()})')
-        code, output = yield run_command(cmd)
+        self.log.debug(f'jupyterlab-latex: run: {" ".join(cmd)} (CWD: {working_directory})')
+        code, output = yield run_command(cmd, working_directory)
         if code != 0:
             self.set_status(500)
             self.log.error((f'SyncTex command `{" ".join(cmd)}` '
@@ -194,7 +194,7 @@ class LatexSynctexHandler(APIHandler):
         else:
             cmd, pos = self.build_synctex_cmd(relative_base_path, ext)
 
-            out = yield self.run_synctex(cmd)
+            out = yield self.run_synctex(cmd, workdir)
             out = json.dumps(parse_synctex_response(out, pos))
         self.finish(out)
 
