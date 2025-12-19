@@ -6,7 +6,7 @@ from tornado import gen
 from tornado.process import Subprocess, CalledProcessError
 
 @gen.coroutine
-def run_command_sync(cmd):
+def run_command_sync(cmd, cwd=None):
     """
     Run a command using the synchronous `subprocess.run`.
     The asynchronous `run_command_async` should be preferred,
@@ -16,13 +16,15 @@ def run_command_sync(cmd):
     ----------
     iterable
         An iterable of command-line arguments to run in the subprocess.
+    cwd : string or Path or None
+        Directory to run the command in. Defaults to the current working directory.
 
     Returns
     -------
     A tuple containing the (return code, stdout)
     """
     try:
-        process = subprocess.run(cmd, stdout=subprocess.PIPE)
+        process = subprocess.run(cmd, stdout=subprocess.PIPE, cwd=cwd)
     except subprocess.CalledProcessError as err:
         pass
     code = process.returncode
@@ -30,7 +32,7 @@ def run_command_sync(cmd):
     return (code, out)
 
 @gen.coroutine
-def run_command_async(cmd):
+def run_command_async(cmd, cwd=None):
     """
     Run a command using the asynchronous `tornado.process.Subprocess`.
 
@@ -38,6 +40,8 @@ def run_command_async(cmd):
     ----------
     iterable
         An iterable of command-line arguments to run in the subprocess.
+    cwd : string or Path or None
+        Directory to run the command in. Defaults to the current working directory.
 
     Returns
     -------
@@ -45,7 +49,8 @@ def run_command_async(cmd):
     """
     process = Subprocess(cmd,
                          stdout=Subprocess.STREAM,
-                         stderr=Subprocess.STREAM)
+                         stderr=Subprocess.STREAM,
+                         cwd=cwd)
     try:
         yield process.wait_for_exit()
     except CalledProcessError as err:

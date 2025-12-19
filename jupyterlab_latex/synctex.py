@@ -123,16 +123,18 @@ class LatexSynctexHandler(APIHandler):
 
 
     @gen.coroutine
-    def run_synctex(self, cmd):
+    def run_synctex(self, cmd, workdir):
         """Run commands sequentially, returning a 500 code on an error.
 
         Parameters
         ----------
-        command_sequence : list of tuples of strings
-            This is a sequence of tuples of strings to be passed to
-            `tornado.process.Subprocess`, which are to be run sequentially.
-            On Windows, `tornado.process.Subprocess` is unavailable, so
-            we use the synchronous `subprocess.run`.
+        cmd : tuple of strings
+            A tuple of command-line arguments to be passed to
+            `tornado.process.Subprocess`. On Windows,
+            `tornado.process.Subprocess` is unavailable, so we use the
+            synchronous `subprocess.run`.
+        workdir : string or Path
+            Absolute directory that contains the SyncTeX inputs and outputs.
 
         Returns
         -------
@@ -145,8 +147,11 @@ class LatexSynctexHandler(APIHandler):
           there.
 
         """
-        self.log.debug(f'jupyterlab-latex: run: {" ".join(cmd)} (CWD: {os.getcwd()})')
-        code, output = yield run_command(cmd)
+        normalized_workdir = str(workdir)
+        self.log.debug(
+            f'jupyterlab-latex: run: {" ".join(cmd)} (CWD: {normalized_workdir})'
+        )
+        code, output = yield run_command(cmd, cwd=normalized_workdir)
         if code != 0:
             self.set_status(500)
             self.log.error((f'SyncTex command `{" ".join(cmd)}` '
@@ -194,7 +199,7 @@ class LatexSynctexHandler(APIHandler):
         else:
             cmd, pos = self.build_synctex_cmd(relative_base_path, ext)
 
-            out = yield self.run_synctex(cmd)
+            out = yield self.run_synctex(cmd, workdir=workdir)
             out = json.dumps(parse_synctex_response(out, pos))
         self.finish(out)
 
